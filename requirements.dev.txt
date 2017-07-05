@@ -1,0 +1,3 @@
+debug==0.3.2
+git-pylint-commit-hook==2.2.2
+jupyter==1.0.0
