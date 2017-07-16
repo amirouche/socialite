@@ -21,11 +21,18 @@ Socialite is:
 ## Quick Links
 
 - [socialite homepage](https://github.com/amirouche/socialite)
+
+Backend:
+
 - [python 3.5](https://docs.python.org/3.5/)
 - [aiohttp](http://aiohttp.readthedocs.io/en/stable/)
 - [psycopg2](initd.org/psycopg/docs/)
 - [yoyo migrations](https://pypi.org/project/yoyo-migrations/)
 
+Frontend:
+
+- [ReactJS](https://facebook.github.io/react/)
+- [ImmutableJS](https://facebook.github.io/immutable-js/docs/)
 
 ## Getting started
 
@@ -63,3 +70,11 @@ Also don't forget to install developement dependencies:
 pip install -r requirements.dev.txt
 ```
 
+You prolly also want install [nvm](https://github.com/creationix/nvm) to have
+the correct nodejs version:
+
+```sh
+wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
+```
+
+Currently the project is tested with nodejs v6.7.0.
