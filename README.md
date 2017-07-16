@@ -17,7 +17,33 @@ Socialite is:
 
 - Yet another free software project
 
+
+## Quick Links
+
+- [socialite homepage](https://github.com/amirouche/socialite)
+- [python 3.5](https://docs.python.org/3.5/)
+- [aiohttp](http://aiohttp.readthedocs.io/en/stable/)
+- [psycopg2](initd.org/psycopg/docs/)
+- [yoyo migrations](https://pypi.org/project/yoyo-migrations/)
+
+
 ## Getting started
+
+Install postgresql and rabbitmq using your system package
+manager. Create a `socialite` user with `socialite` password and
+`socialite` database. `socialite` must have all rights over
+`socialite` database:
+
+```sh
+createdb socialite
+psql -c "CREATE USER socialite WITH PASSWORD 'socialite';"
+```
+
+Then install python dependencies:
+
+```sh
+pip install requirements.txt
+```
 
 ## Contributing
 
