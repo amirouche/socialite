@@ -159,6 +159,7 @@ var linkClicked = function(href) {
       window.history.pushState({}, "", href);
       var router = model.get('%router');
       model = router.resolve({model: model, spawn: spawn});
+      window.scrollTo(0, 0);
       return model;
     }
   }
@@ -168,6 +169,7 @@ var redirect = function(model, spawn, href) {
   window.history.pushState({}, "", href);
   var router = model.get('%router');
   model = router.resolve({model: model, spawn: spawn});
+  window.scrollTo(0, 0);
   return model;
 }
 
