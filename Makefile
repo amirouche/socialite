@@ -2,7 +2,7 @@ all:
 	@echo "Héllo, World!"
 
 backend:
-	./socialite/socialite.py web
+	python -m socialite.socialite web
 
 lint:
 	@pylint socialite

@@ -42,3 +42,7 @@ def main():
         loop.run_until_complete(server.wait_closed())
         loop.run_until_complete(handler.finish_connections(1.0))
         loop.close()
+
+
+if __name__ == '__main__':
+    main()
