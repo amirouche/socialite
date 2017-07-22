@@ -10,6 +10,7 @@ def status(request):
     """Check that the app is properly working"""
     return web.json_response('OK')
 
+
 def create_app(loop):
     """Starts the aiohttp process to serve the REST API"""
     setproctitle('socialite-web')
