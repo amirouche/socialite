@@ -77,7 +77,6 @@ var Router = class {
   }
 
   async resolve({model, spawn}) {
-    console.log('resolving...');
     var path = document.location.pathname.split('/');
     var match, params;
 
