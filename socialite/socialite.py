@@ -8,7 +8,7 @@ Options:
 from docopt import docopt
 from setproctitle import setproctitle  # pylint: disable=no-name-in-module
 
-from web import main as web
+from .web import main as web
 
 
 def main():
