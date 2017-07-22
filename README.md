@@ -9,6 +9,7 @@ Socialite is:
     - Forum
     - Messaging
     - Search engine
+    - Webmail
     - Wiki
     
 - A test bed for my experiments with aiohttp
@@ -33,6 +34,9 @@ Frontend:
 
 - [ReactJS](https://facebook.github.io/react/)
 - [ImmutableJS](https://facebook.github.io/immutable-js/docs/)
+- [flat ui colors](http://flatuicolors.com/)
+- [flexbox guide](https://css-tricks.com/snippets/css/a-guide-to-flexbox/)
+- [css architecture](http://fixme)
 
 ## Getting started
 
