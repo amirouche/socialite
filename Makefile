@@ -2,7 +2,7 @@ all:
 	@echo "Héllo, World!"
 
 backend:
-	adev runserver socialite/web.py --no-debug-toolbar
+	adev runserver socialite/web.py --no-debug-toolbar > /dev/null
 
 lint:
 	@pylint socialite

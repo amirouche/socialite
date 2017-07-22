@@ -1,9 +1,17 @@
 """Module defining the REST API"""
+import os
 import asyncio
+import logging
 
 import asyncpg
+import daiquiri
+
 from aiohttp import web
 from setproctitle import setproctitle  # pylint: disable=no-name-in-module
+
+
+# setup logging
+logger = daiquiri.getLogger(__name__)
 
 
 async def status(request):
@@ -15,12 +23,13 @@ async def status(request):
         WHERE table_type = 'BASE TABLE' AND table_schema = 'public'"""
         records = await cnx.fetch(query)
         for record in records:
-            print(record)
+            logger.info(record)
     return web.json_response('OK!')
 
 
 async def init_pg(app):
     """Init asyncpg pool"""
+    logger.debug("setup asyncpg")
     dsn = 'postgres://socialite:socialite@localhost:5432/socialite'
     engine = await asyncpg.create_pool(dsn)
     app['postgresql'] = engine
@@ -30,6 +39,12 @@ async def init_pg(app):
 def create_app(loop):
     """Starts the aiohttp process to serve the REST API"""
     setproctitle('socialite-web')
+    level_name = os.environ.get('DEBUG', 'INFO')
+    level = getattr(logging, level_name)
+    daiquiri.setup(level=level, outputs=('stderr',))
+
+    logger.debug("boot")
+
     app = web.Application()  # pylint: disable=invalid-name
     app.on_startup.append(init_pg)
     #  routes
