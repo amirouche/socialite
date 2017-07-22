@@ -27,7 +27,9 @@ Socialite is:
 Backend:
 
 - [python 3.5](https://docs.python.org/3.5/)
-- [aiohttp](http://aiohttp.readthedocs.io/en/stable/)
+- [asyncio](https://docs.python.org/3.5/library/asyncio.html)
+  - [aiohttp](http://aiohttp.readthedocs.io/en/stable/)
+  - [asyncpg](https://github.com/MagicStack/asyncpg)
 - [psycopg2](initd.org/psycopg/docs/)
 - [yoyo migrations](https://pypi.org/project/yoyo-migrations/)
 
