@@ -11,7 +11,7 @@ import './App.css';
  * test().then(function(body) { console.log(arguments); });
  * */
 
-/* 
+/*
  * var Child = function({children, model, mc}) {
  *   return <div>{children}</div>
  * }
@@ -26,7 +26,7 @@ var App = function({model, mc}) {
                 <li>Forum</li>
                 <li>Messaging</li>
                 <li>Search</li>
-                <li>Wiki</li>                
+                <li>Wiki</li>
             </ul>
         </div>
         <div id="header">
