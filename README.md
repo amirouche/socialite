@@ -5,6 +5,7 @@ Socialite is:
 - A social network kind of app that default to be private, that wants
   to have:
 
+    - Blog
     - Bookmarks
     - Forum
     - Messaging
