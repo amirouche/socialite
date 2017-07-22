@@ -125,6 +125,16 @@ var Router = class {
   }
 }
 
+/**
+ * Create the app environment, run the app and return a function that allows
+ * to sneak into it.
+ *
+ * @param {container_id} the html identifier of the dom element where to
+ *        render the application.
+ * @param {router} a {Router} instance.
+ * @returns {Function} a function that allows to sneak into the app closure
+ *          from the outside world.
+ */
 var createApp = function(container_id, router) {
   // prepare createAppBase arguments
   var root = document.getElementById(container_id);

@@ -5,5 +5,4 @@ daiquiri==1.2.1
 docopt==0.6.2
 psycopg2==2.7.1
 setproctitle==1.1.10
-sphinx==1.6.2
 yoyo-migrations==5.0.5
