@@ -12,7 +12,7 @@ from web import main as web
 
 
 def main():
-    """entry point of the whole application, equivalent to django's manage.pyx"""
+    """entry point of the whole application, equivalent to django's manage.py"""
     args = docopt(__doc__)
     setproctitle('socialite.py')
     if args.get('web'):
