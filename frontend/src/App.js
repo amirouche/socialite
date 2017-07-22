@@ -1,30 +1,30 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
+import React from 'react';
 import './App.css';
 
-var test = async function() {
-  var response = await fetch('/api/status');
-  var body = await response.json();
-  return body;
+/* 
+ * var test = async function() {
+ *   var response = await fetch('/api/status');
+ *   var body = await response.json();
+ *   return body;
+ * }
+ * 
+ * test().then(function(body) { console.log(arguments); });
+ * */
+
+var Child = function({children, model, mc}) {
+  return <div>{children}</div>
 }
 
-test().then(function(body) { console.log(arguments); });
-
-
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
+var App = function({model, mc}) {
+  return (
+    <div id="shell">
+        <div id="header">
+            <Child model={model} mc={mc}>
+                some text as child
+            </Child>
         </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-      </div>
-    );
-  }
+    </div>
+  );
 }
 
 export default App;

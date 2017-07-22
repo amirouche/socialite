@@ -1,8 +1,14 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import registerServiceWorker from './registerServiceWorker';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+import { createApp, Router, identityController } from './forward.js';
+
+
+var router = new Router();
+router.append('/', identityController, App);
+
+
+createApp('root', router);
+
 registerServiceWorker();
