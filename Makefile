@@ -6,3 +6,7 @@ backend:
 
 lint:
 	@pylint socialite
+
+database-repl:
+	sudo -u postgres psql socialite
+
