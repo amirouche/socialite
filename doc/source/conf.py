@@ -36,7 +36,7 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
-#    'sphinx_js',
+    'sphinx_js',
 ]
 
 # sphinx-js configuration

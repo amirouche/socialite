@@ -2,5 +2,5 @@ aiohttp-devtools==0.5
 debug==0.3.2
 git-pylint-commit-hook==2.2.2
 jupyter==1.0.0
-sphinx-js==2.0.1
+sphinx-js==2.0.0
 sphinx==1.6.2
