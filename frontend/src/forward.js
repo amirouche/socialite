@@ -44,7 +44,7 @@ var createAppBase = function(root, init, view) {
 
   /* Render the application */
   render = function() {
-    var html = view({model: model, c: createController});
+    var html = view({model: model, mc: createController});
     ReactDOM.render(html, root);
   };
 
@@ -171,8 +171,8 @@ var redirect = function(model, spawn, href) {
   return model;
 }
 
-var Link = function({c, href, children}) {
-  return <a href={href} onClick={c(linkClicked(href))}>{children}</a>;
+var Link = function({mc, href, children}) {
+  return <a href={href} onClick={mc(linkClicked(href))}>{children}</a>;
 }
 
 var identityController = async function({model}) {
@@ -194,13 +194,33 @@ var saveValueAs = function(name) {
   }
 }
 
+class Title extends React.Component {
+  constructor(props) {
+    super(props);
+    this.title = props.title;
+  }
+
+  componentDidMount() {
+    document.title = this.props.title;
+  }
+
+  componentDidUpdate() {
+    document.title = this.props.title;
+  }
+
+  render() {
+    return <div/>;
+  }
+}
+
 
 export {
-  createApp,
-  Router,
   Link,
+  Router,
+  Title,
+  clean,
+  createApp,
   identityController,
   redirect,
-  clean,
-  saveValueAs
+  saveValueAs,
 };

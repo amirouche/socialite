@@ -1,6 +1,9 @@
 import React from 'react';
 import './App.css';
 
+import { Link, Title } from './forward.js';
+
+
 /*
  * var test = async function() {
  *   var response = await fetch('/api/status');
@@ -20,10 +23,11 @@ import './App.css';
 var App = function({model, mc}) {
   return (
     <div id="shell">
+        <Title title={model.getIn(['%location', 'pattern'])} />
         <div id="menu">
             <ul>
-                <li>Bookmarks</li>
-                <li>Forum</li>
+                <li><Link mc={mc} href="/foo">Bookmarks</Link></li>
+                <li><Link mc={mc} href="/bar">Forum</Link></li>
                 <li>Messaging</li>
                 <li>Search</li>
                 <li>Wiki</li>
