@@ -1,0 +1,52 @@
+#menu ul {
+    background: #2980b9;
+    display: flex;
+    justify-content: space-around;
+    list-style: none;
+    margin: 0px;
+    padding: 15px 0px;
+}
+
+#header {
+    background: #3498db;
+    margin-bottom: 15px;
+}
+
+#header h1 {
+    margin: 0px;
+    padding: 15px;
+}
+
+#login {
+    border-radius: 3px;
+    border: 1px solid #AAA;
+    box-shadow: 0px 0px 5px #FFF;
+    margin: 100px auto;
+    padding: 15px;
+    width: 500px;
+}
+
+#login:hover {
+    box-shadow: 0px 0px 5px #999;
+}
+
+#login-input {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #DDD;
+}
+
+#login-input input {
+    margin-bottom: 5px;
+}
+
+#login-extra {
+    display: flex;
+    justify-content: space-around;
+}
+
+#login-extra p {
+    margin: 0px;
+}
