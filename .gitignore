@@ -1,3 +1,4 @@
+upstream
 doc/build
 __pycache__
 *~

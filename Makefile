@@ -17,3 +17,9 @@ database-reset:
 build-doc:
 	cd doc && make html
 	firefox doc/build/html/index.html
+
+upstream:
+	mkdir upstream
+	git clone https://github.com/MagicStack/asyncpg upstream/asyncpg
+	git clone https://github.com/aio-libs/aiohttp upstream/aiohttp
+	hg clone https://bitbucket.org/ollyc/yoyo upstream/yoyo
