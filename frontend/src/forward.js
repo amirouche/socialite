@@ -112,8 +112,8 @@ var Router = class {
     var params = {};
     for (var index=0; index < pattern.length; index++) {
       var component = pattern[index];
-      if (component.startsWith(':')) {
-        params[component.slice(1)] = path[index];
+      if (component.startsWith('{') && component.endsWith('}')) {
+        params[component.slice(1, -1)] = path[index];
       } else if (component !== path[index]) {
         return [false, {}]
       } else {
