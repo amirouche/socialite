@@ -10,6 +10,10 @@ lint:
 database-repl:
 	sudo -u postgres psql socialite
 
+database-reset:
+	sudo -u postgres dropdb socialite
+	sudo -u postgres createdb socialite
+
 build-doc:
 	cd doc && make html
 	firefox doc/build/html/index.html
