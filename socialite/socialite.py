@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Usage:
   socialite web
-  socialite migration apply
+  socialite database migrate
 
 Options:
   -h --help     Show this screen.
@@ -26,7 +26,7 @@ def main():
         loop = asyncio.get_event_loop()
         app = create_app(loop)
         web.run_app(app, host='127.0.0.1', port=8000)
-    elif args.get('migration') and args.get('apply'):
+    elif args.get('database') and args.get('migrate'):
         directory = Path(__file__) / '..' / 'migrations'
         directory = directory.resolve()
         directory = str(directory)
