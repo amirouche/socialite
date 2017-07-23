@@ -19,9 +19,7 @@ async def status(request):
     """Check that the app is properly working"""
     pg = request.app['postgresql']
     async with pg.acquire() as cnx:
-        query = """SELECT table_schema, table_name
-        FROM information_schema.tables
-        WHERE table_type = 'BASE TABLE' AND table_schema = 'public'"""
+        query = """SELECT c.relname FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'public' AND c.relkind = 'r'"""
         records = await cnx.fetch(query)
         for record in records:
             logger.info(record)
