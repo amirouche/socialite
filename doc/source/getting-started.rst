@@ -2,8 +2,10 @@
  Getting started
 =================
 
-Install postgresql and rabbitmq using your system package
-manager. Create a ``socialite`` user with ``socialite`` password and
+Install ``postgresql``, ``graphviz`` and ``rabbitmq-server`` using
+your system package manager.
+
+Create a ``socialite`` user with ``socialite`` password and
 ``socialite`` database. ``socialite`` must have all rights over
 ``socialite`` database::
 

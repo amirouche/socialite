@@ -1,5 +1,6 @@
 upstream
 doc/build
+socialite-diagram.png
 
 # javascript specific
 node_modules

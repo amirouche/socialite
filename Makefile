@@ -14,6 +14,10 @@ database-reset:
 	sudo -u postgres dropdb socialite
 	sudo -u postgres createdb socialite
 
+database-diagram:
+	python -m socialite.socialite database diagram
+	eog socialite-diagram.png
+
 database-schema:
 	sudo -u postgres pg_dump -s socialite
 

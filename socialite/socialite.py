@@ -2,6 +2,7 @@
 """Usage:
   socialite web
   socialite database migrate
+  socialite database diagram
 
 Options:
   -h --help     Show this screen.
@@ -13,6 +14,7 @@ from aiohttp import web
 from docopt import docopt
 from setproctitle import setproctitle  # pylint: disable=no-name-in-module
 from yoyo.scripts.main import main as yoyo
+from eralchemy import render_er  # FIXME: this is dev tool, remove it from prod dependency
 
 from . import settings
 from .api import create_app
@@ -38,6 +40,8 @@ def main():
             settings.DSN,
             directory,
         ])
+    elif args.get('database') and args.get('diagram'):
+        render_er(settings.DSN, 'socialite-diagram.png')
     else:
         print('Use --help to know more')
 
