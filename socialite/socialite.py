@@ -15,7 +15,7 @@ from setproctitle import setproctitle  # pylint: disable=no-name-in-module
 from yoyo.scripts.main import main as yoyo
 
 from . import settings
-from .web import create_app
+from .api import create_app
 
 
 def main():
