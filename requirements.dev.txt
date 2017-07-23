@@ -4,3 +4,4 @@ git-pylint-commit-hook==2.2.2
 jupyter==1.0.0
 sphinx-js==2.0.0
 sphinx==1.6.2
+pgcli==1.7.0
