@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 """Usage:
-  socialite.py web
+  socialite web
+  socialite migration apply
 
 Options:
   -h --help     Show this screen.
 """
 import asyncio
+from pathlib import Path
 
 from aiohttp import web
 from docopt import docopt
 from setproctitle import setproctitle  # pylint: disable=no-name-in-module
+from yoyo.scripts.main import main as yoyo
 
+from . import settings
 from .web import create_app
 
 
@@ -22,6 +26,18 @@ def main():
         loop = asyncio.get_event_loop()
         app = create_app(loop)
         web.run_app(app, host='127.0.0.1', port=8000)
+    elif args.get('migration') and args.get('apply'):
+        directory = Path(__file__) / '..' / 'migrations'
+        directory = directory.resolve()
+        directory = str(directory)
+        yoyo([
+            '--no-config-file',
+            '-b',
+            'apply',
+            '--database',
+            settings.DSN,
+            directory,
+        ])
     else:
         print('Use --help to know more')
 

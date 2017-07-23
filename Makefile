@@ -14,6 +14,9 @@ database-reset:
 	sudo -u postgres dropdb socialite
 	sudo -u postgres createdb socialite
 
+database-schema:
+	sudo -u postgres pg_dump -s socialite
+
 build-doc:
 	cd doc && make html
 	firefox doc/build/html/index.html
