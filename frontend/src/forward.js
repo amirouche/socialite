@@ -28,7 +28,7 @@ var createAppBase = function(root, init, view) {
      The returned function will update the current application model
      with the one returned by the event handler and trigger a render.
    */
-  var createController = function(controller) {
+  var makeController = function(controller) {
     return function(event) {
       var promise = controller({model, spawn})(event);
       promise.then(function(newModel) {
@@ -44,7 +44,7 @@ var createAppBase = function(root, init, view) {
 
   /* Render the application */
   render = function() {
-    var html = view({model: model, mc: createController});
+    var html = view({model: model, mc: makeController});
     ReactDOM.render(html, root);
   };
 
