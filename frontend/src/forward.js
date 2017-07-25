@@ -8,37 +8,26 @@ var createAppBase = function(root, init, view) {
 
   var render;
 
-  /* Allow to create a "greenthread" while staying in the app environment */
-  var spawn = function(onTimeout, timeout=0) {
-    var f = function() {
-      var promise = onTimeout({model, spawn});
-      promise.then(function(newModel) {
-        if(newModel) {
-          model = newModel;
-          render();
-        }
-      });
-      render();
-    };
-    return setTimeout(f, timeout);
-  };
-
   /* wraps event handlers to create controllers.
 
-     The returned function will update the current application model
-     with the one returned by the event handler and trigger a render.
+     The returned function will use the function returned
+     by the controller to update the model and trigger a render
+     if needed.
    */
   var makeController = function(controller) {
     return function(event) {
       // XXX: This might be performance bottleneck
       // https://fb.me/react-event-pooling
       event.persist()
-      var promise = controller({spawn})(event);
-      promise.then(function(transformation) {
-        if(transformation) {
-          // XXX: side effect
-          model = transformation(model);
-          render();
+      var promise = controller(model)(event);
+      promise.then(function(transformer) {
+        if(transformer) {
+          var newModel = transformer(model);
+          if (newModel !== model) {
+            // XXX: side effect
+            model = newModel;
+            render();
+          }
         }
       });
     }
@@ -52,12 +41,15 @@ var createAppBase = function(root, init, view) {
 
   // sneak into an application from the outside.
   return function(change) {
-    var promise = change({model: model, spawn: spawn});
-    promise.then(function(newModel) {
-      if(newModel) {
-        // XXX: side effect
-        model = newModel;
-        render();
+    var promise = change(model);
+    promise.then(function(transformer) {
+      if(transformer) {
+        var newModel = transformer(model);
+        if (newModel !== model) {
+          // XXX: side effect
+          model = newModel;
+          render();
+        }
       }
     });
   };
@@ -78,22 +70,28 @@ var Router = class {
     this.routes.push({pattern: pattern, init:init, view: view});
   }
 
-  async resolve({model, spawn}) {
+  async resolve(model) {
     var path = document.location.pathname.split('/');
     var match, params;
 
     for(var index=0; index<this.routes.length; index++) {
       var route = this.routes[index];
       [match, params] = this.match(route, path);
+
       if (match) {
         var location = fromJS({
           pattern: route.pattern,
           view: route.view,
           params: params
         });
+
+        // pass a transient model to route init.
         model = model.set('%location', location);
-        model = await route.init({model, spawn});
-        return model;
+        var transformer = await route.init(model);
+
+        // always keep the location in the final model
+        // eslint-disable-next-line
+        return (model) => transformer(model).set('%location', location);
       }
     }
 
@@ -155,43 +153,38 @@ var createApp = function(container_id, router) {
 }
 
 var linkClicked = function(href) {
-  return function({model, spawn}) {
+  return function(model) {
     return async function(event) {
       event.preventDefault();
       window.history.pushState({}, "", href);
       var router = model.get('%router');
-      model = router.resolve({model: model, spawn: spawn});
+      var transformer = router.resolve(model);
       window.scrollTo(0, 0);
-      return model;
+      return transformer;
     }
   }
 }
 
-var redirect = function(model, spawn, href) {
+var redirect = async function(model, href) {
   window.history.pushState({}, "", href);
   var router = model.get('%router');
-  model = router.resolve({model: model, spawn: spawn});
+  var transformer = await router.resolve(model);
   window.scrollTo(0, 0);
-  return model;
+  return transformer;
 }
 
 var Link = function({mc, href, children}) {
   return <a href={href} onClick={mc(linkClicked(href))}>{children}</a>;
 }
 
-var identityController = async function({model}) {
-  return model;
-}
-
-var clean = function(model) {
-  var newModel = fromJS({});
-  newModel = newModel.set('%location', model.get('%location'));
-  newModel = newModel.set('%router', model.get('%router'));
-  return newModel;
+var clean = async function(model) {
+  var location = model.get('%location');
+  var router = model.get('%router');
+  return (model) => fromJS({'%location': location, '%router': router});
 }
 
 var saveAs = function(name) {
-  return function({model}) {
+  return function(model) {
     return async function (event) {
       return (model) => model.set(name, event.target.value);
     }
@@ -224,7 +217,6 @@ export {
   Title,
   clean,
   createApp,
-  identityController,
   redirect,
   saveAs,
 };

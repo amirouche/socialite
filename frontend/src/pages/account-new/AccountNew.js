@@ -1,9 +1,18 @@
 import React from 'react';
 
 import Shell from '../../components/shell/Shell.js';
-import { Link, Title, saveAs } from '../../forward.js';
+import { Link, Title, saveAs, redirect } from '../../forward.js';
 
 import './AccountNew.css';
+
+
+var onClick = function(model) {
+  return async function(event) {
+    var response = await fetch('/api/status');
+    console.log(response);
+    return await redirect(model, '/');
+  }
+}
 
 
 var AccountNew = function({model, mc}) {
@@ -25,7 +34,7 @@ var AccountNew = function({model, mc}) {
                 <input type="password"
                        placeholder="password validation"
                        onChange={mc(saveAs('validation'))} />
-                <button>Submit</button>
+                <button onClick={mc(onClick)}>Submit</button>
             </div>
         </div>
     </Shell>
