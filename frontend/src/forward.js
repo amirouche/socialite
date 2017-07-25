@@ -30,12 +30,14 @@ var createAppBase = function(root, init, view) {
    */
   var makeController = function(controller) {
     return function(event) {
-      var promise = controller({model, spawn})(event);
-      promise.then(function(newModel) {
-        if(newModel) {
-          // XXX: side effect, set model to the model returned by the
-          // controller
-          model = newModel;
+      // XXX: This might be performance bottleneck
+      // https://fb.me/react-event-pooling
+      event.persist()
+      var promise = controller({spawn})(event);
+      promise.then(function(transformation) {
+        if(transformation) {
+          // XXX: side effect
+          model = transformation(model);
           render();
         }
       });
@@ -191,8 +193,7 @@ var clean = function(model) {
 var saveAs = function(name) {
   return function({model}) {
     return async function (event) {
-      console.log('saveAs', name, model.toJS(), event);
-      return model.set(name, event.target.value);
+      return (model) => model.set(name, event.target.value);
     }
   }
 }
