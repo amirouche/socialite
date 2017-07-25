@@ -1,0 +1,8 @@
+#account-new-form {
+    display: flex;
+    flex-direction: column;
+}
+
+#account-new-form input {
+    margin-bottom: 5px;
+}

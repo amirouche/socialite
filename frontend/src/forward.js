@@ -188,9 +188,10 @@ var clean = function(model) {
   return newModel;
 }
 
-var saveValueAs = function(name) {
+var saveAs = function(name) {
   return function({model}) {
     return async function (event) {
+      console.log('saveAs', name, model.toJS(), event);
       return model.set(name, event.target.value);
     }
   }
@@ -224,5 +225,5 @@ export {
   createApp,
   identityController,
   redirect,
-  saveValueAs,
+  saveAs,
 };

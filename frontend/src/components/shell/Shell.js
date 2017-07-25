@@ -8,7 +8,7 @@ var Shell = function({ children, mc}) {
   return (
     <div id="shell">
         <div id="shell-header">
-            <h1>Socialite</h1>
+            <h1><Link mc={mc} href="/">Socialite</Link></h1>
             <ul id="shell-header-menu">
                 <li><Link mc={mc} href="/bookmarks">Bookmarks</Link></li>
                 <li><Link mc={mc} href="/forum">Forum</Link></li>

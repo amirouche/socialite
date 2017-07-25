@@ -25,15 +25,18 @@ import './Home.css';
 var Home = function({model, mc}) {
   return (
     <Shell mc={mc}>
-        <div id="login">
+        <Title title="Welcome to socialite" />
+        <div id="login" className="box">
             <div id="login-input">
-                <input type="text" placeholder="login" />
+                <input type="text" placeholder="username" />
                 <input type="password" placeholder="password" />
                 <button>Submit</button>
             </div>
             <div id="login-extra">
-                <p><a href="/">Forgot your password</a></p>
-                <p><a href="/">Create an account</a></p>
+                <p>
+                    <Link mc={mc} href="/account/password-reset">Forgot your password</Link>
+                </p>
+                <p><Link mc={mc} href="/account/new">Create an account</Link></p>
             </div>
         </div>
     </Shell>

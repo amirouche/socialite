@@ -1,16 +1,3 @@
-#login {
-    border-radius: 3px;
-    border: 1px solid #AAA;
-    box-shadow: 0px 0px 5px #FFF;
-    margin: 100px auto;
-    padding: 15px;
-    width: 500px;
-}
-
-#login:hover {
-    box-shadow: 0px 0px 5px #999;
-}
-
 #login-input {
     display: flex;
     flex-direction: column;
