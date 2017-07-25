@@ -1,22 +1,3 @@
-#menu ul {
-    background: #2980b9;
-    display: flex;
-    justify-content: space-around;
-    list-style: none;
-    margin: 0px;
-    padding: 15px 0px;
-}
-
-#header {
-    background: #3498db;
-    margin-bottom: 15px;
-}
-
-#header h1 {
-    margin: 0px;
-    padding: 15px;
-}
-
 #login {
     border-radius: 3px;
     border: 1px solid #AAA;
