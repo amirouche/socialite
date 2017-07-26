@@ -18,6 +18,7 @@ var createAppBase = function(root, init, view) {
     return function(event) {
       // XXX: This might be performance bottleneck
       // https://fb.me/react-event-pooling
+      // XXX: it's possible to avoid this but it will lead to more confusing code
       event.persist()
       var promise = controller(model)(event);
       promise.then(function(transformer) {
