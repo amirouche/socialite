@@ -58,6 +58,9 @@ var createAppBase = function(root, init, view) {
 
 /* URL Router */
 
+/* FIXME: there is no need to export the router,
+ instead use an Array of Array of arguments to pass
+ to Router.append */
 var Router = class {
   constructor() {
     this.routes = [];
