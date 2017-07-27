@@ -1,6 +1,6 @@
-CREATE TABLE user (
-       id SERIAL PRIMARY KEY NOT NULL,
-       username TEXT UNIQUE NOT NULL,
-       password TEXT NOT NULL
+CREATE TABLE users (
+       uid SERIAL PRIMARY KEY NOT NULL,
+       username TEXT UNIQUE NOT NULL,  -- maybe index this
+       password TEXT NOT NULL,
+       bio TEXT NOT NULL
 );
-       

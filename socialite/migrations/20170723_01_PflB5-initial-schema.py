@@ -16,5 +16,5 @@ directory = (Path(migrations.__file__) / '..').resolve()
 __depends__ = {}
 
 steps = [
-    step((directory / 'initial.sql').read_text())
+    step((directory / '20170723_01_PflB5-initial-schema.sql').read_text())
 ]

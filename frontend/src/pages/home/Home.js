@@ -1,7 +1,7 @@
 import React from 'react';
 
 import Shell from '../../components/shell/Shell.js';
-import { Link, Title } from '../../forward.js';
+import fw from '../../forward.js';
 
 import './Home.css';
 
@@ -25,7 +25,7 @@ import './Home.css';
 var Home = function({model, mc}) {
   return (
     <Shell mc={mc}>
-        <Title title="Welcome to socialite" />
+        <fw.Title title="Welcome to socialite" />
         <div id="login" className="box">
             <div id="login-input">
                 <input type="text" placeholder="username" />
@@ -34,9 +34,9 @@ var Home = function({model, mc}) {
             </div>
             <div id="login-extra">
                 <p>
-                    <Link mc={mc} href="/account/password-reset">Forgot your password</Link>
+                    <fw.Link mc={mc} href="/account/password-reset">Forgot your password</fw.Link>
                 </p>
-                <p><Link mc={mc} href="/account/new">Create an account</Link></p>
+                <p><fw.Link mc={mc} href="/account/new">Create an account</fw.Link></p>
             </div>
         </div>
     </Shell>

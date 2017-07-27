@@ -12,7 +12,9 @@ Backend
   - `asyncpg <https://github.com/MagicStack/asyncpg>`_
 - `psycopg2 <initd.org/psycopg/docs/>`_
 - `yoyo migrations <https://pypi.org/project/yoyo-migrations/>`_
+- `trafaret <http://trafaret.readthedocs.io/>`_
 
+  
 Frontend
 ========
 

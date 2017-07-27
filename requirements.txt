@@ -8,4 +8,5 @@ eralchemy==1.1.0
 itsdangerous==0.24
 psycopg2==2.7.1
 setproctitle==1.1.10
+trafaret==0.10.4
 yoyo-migrations==5.0.5

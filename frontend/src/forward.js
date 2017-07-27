@@ -215,7 +215,7 @@ class Title extends React.Component {
 }
 
 
-export {
+export default {
   Link,
   Router,
   Title,
@@ -223,4 +223,5 @@ export {
   createApp,
   redirect,
   saveAs,
+  fromJS,
 };

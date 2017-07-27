@@ -6,3 +6,8 @@
 #account-new-form input {
     margin-bottom: 5px;
 }
+
+#account-new-form textarea {
+    margin-bottom: 5px;
+    padding: 5px;
+}

@@ -12,9 +12,9 @@ from pathlib import Path
 
 from aiohttp import web
 from docopt import docopt
+from eralchemy import render_er
 from setproctitle import setproctitle  # pylint: disable=no-name-in-module
 from yoyo.scripts.main import main as yoyo
-from eralchemy import render_er  # FIXME: this is dev tool, remove it from prod dependency
 
 from . import settings
 from .api import create_app
