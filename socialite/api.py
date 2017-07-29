@@ -62,6 +62,7 @@ async def account_new(request):
         errors = dict()
         # check that the user is not already taken
         async with request.app['asyncpg'].acquire() as cnx:
+            # FIXME: try/except UniqueViolationError will be more ideomatic
             query = 'SELECT COUNT(uid) FROM users WHERE username = $1;'
             count = await cnx.fetchval(query, data['username'])
             if count != 0:
