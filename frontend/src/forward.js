@@ -184,9 +184,17 @@ var Link = function({mc, href, children}) {
 }
 
 var clean = async function(model) {
-  var location = model.get('%location');
-  var router = model.get('%router');
-  return (model) => fromJS({'%location': location, '%router': router});
+  return function(model) {
+    var newModel = fromJS({});
+    // only keep things that start with %
+    model.keySeq()
+         .filter((x) => x.startsWith('%'))
+         .forEach(function(key) {
+           newModel = newModel.set(key, model.get(key));
+         });
+    console.log(newModel.toJS())
+    return newModel;
+  }
 }
 
 var saveAs = function(name) {
