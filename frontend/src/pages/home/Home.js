@@ -5,7 +5,6 @@ import fw from '../../forward.js';
 
 import './Home.css';
 
-
 /*
  * var test = async function() {
  *   var response = await fetch('/api/status');

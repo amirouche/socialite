@@ -1,4 +1,5 @@
-import 'normalize.css'
+import 'normalize.css';
+import 'bootstrap/dist/css/bootstrap.css';
 
 import registerServiceWorker from './registerServiceWorker';
 import fw from './forward.js';

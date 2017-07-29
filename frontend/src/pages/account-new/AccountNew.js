@@ -34,16 +34,25 @@ var AccountNew = function({model, mc}) {
         <div id="account-new" className="box">
             <h2>Create an account</h2>
             <div id="account-new-form">
-                <input type="text"
-                       placeholder="username"
-                       onChange={mc(fw.saveAs('username'))}/>
-                <input type="password"
-                       placeholder="password"
-                       onChange={mc(fw.saveAs('password'))} />
-                <input type="password"
-                       placeholder="password validation"
-                       onChange={mc(fw.saveAs('validation'))} />
-                <textarea placeholder="bio"
+                <fw.Input type="text"
+                          label="username"
+                          text="It must be neat!"
+                          error={model.getIn(['errors', 'username'])}
+                          onChange={mc(fw.saveAs('username'))} />
+                <fw.Input type="password"
+                          label="password"
+                          text="It must strong."
+                          error={model.getIn(['errors', 'password'])}
+                          onChange={mc(fw.saveAs('password'))} />
+                <fw.Input type="password"
+                          label="validation"
+                          text="Re-type your password to be sure."
+                          error={model.getIn(['errors', 'validation'])}
+                          onChange={mc(fw.saveAs('validation'))} />
+                <fw.Input type="textarea"
+                          label="bio"
+                          text="Filler text..."
+                          error={model.getIn(['errors', 'bio'])}
                           onChange={mc(fw.saveAs('bio'))} />
                 <button onClick={mc(onClick)}>Submit</button>
             </div>

@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { fromJS } from 'immutable';
 
+import { FormGroup, Input, FormFeedback, FormText } from 'reactstrap';
+
 
 var createAppBase = function(root, init, view) {
   var model = init();
@@ -214,8 +216,10 @@ class Title extends React.Component {
   }
 }
 
-
-export default {
+// FIXME: workaround the fact that Input is already defined in the module
+// once that issue https://github.com/reactstrap/reactstrap/issues/517
+// is fixed it will not be necessary to do that.
+var out = {
   Link,
   Router,
   Title,
@@ -225,3 +229,25 @@ export default {
   saveAs,
   fromJS,
 };
+
+
+out.Input = function({label, text, error, onChange, type}) {
+  var state, feedback;
+  if (error) {
+    state = "danger";
+    feedback = <FormFeedback>{error}</FormFeedback>;
+  } else {
+    state = undefined;
+    feedback = '';
+  }
+  text = text ? <FormText color="muted">{text}</FormText> : "";
+  return (
+    <FormGroup color={state}>
+        <Input type={type} state={state} onChange={onChange} placeholder={label}/>
+        {feedback}
+        {text}
+    </FormGroup>
+  );
+}
+
+export default out;
