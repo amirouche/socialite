@@ -1,3 +1,8 @@
+#login {
+    margin: 200px auto;
+    max-width: 500px;
+}
+
 #login-input {
     display: flex;
     flex-direction: column;

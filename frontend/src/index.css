@@ -16,9 +16,7 @@ div.box {
     border-radius: 3px;
     border: 1px solid #AAA;
     box-shadow: 0px 0px 5px #FFF;
-    margin: 100px auto;
     padding: 15px;
-    max-width: 500px;
 }
 
 div.box:hover {

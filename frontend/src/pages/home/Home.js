@@ -5,31 +5,41 @@ import fw from '../../forward.js';
 
 import './Home.css';
 
-/*
- * var test = async function() {
- *   var response = await fetch('/api/status');
- *   var body = await response.json();
- *   return body;
- * }
- *
- * test().then(function(body) { console.log(arguments); });
- * */
 
-/*
- * var Child = function({children, model, mc}) {
- *   return <div>{children}</div>
- * }
- * */
+var onSubmit = function(model) {
+  return async function(event) {
+    var data = {
+      username: model.get('username'),
+      password: model.get('password'),
+    }
+    var response = await fw.post('/api/account/login', data);
+    if (response.ok) {
+      var json = await response.json();
+      var token = json.token;
+      var newModel = model.set('%token', token);
+      return await fw.redirect(newModel, '/dashboard');
+    } else {
+      console.log('login failed', model.toJS());
+    }
+  }
+}
+
 
 var Home = function({model, mc}) {
+  console.log('Home', model.toJS());
   return (
     <Shell mc={mc}>
         <fw.Title title="Welcome to socialite" />
         <div id="login" className="box">
             <div id="login-input">
-                <input type="text" placeholder="username" />
-                <input type="password" placeholder="password" />
-                <button>Submit</button>
+                <h1>Socialite</h1>
+                <fw.Input type="text"
+                          label="username"
+                          onChange={mc(fw.saveAs('username'))} />
+                <fw.Input type="password"
+                          label="password"
+                          onChange={mc(fw.saveAs('password'))} />
+                <button onClick={mc(onSubmit)}>Submit</button>
             </div>
             <div id="login-extra">
                 <p>

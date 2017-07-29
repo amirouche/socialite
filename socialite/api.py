@@ -1,5 +1,4 @@
 """Module defining the REST API"""
-import asyncio
 import logging
 import os
 
@@ -7,11 +6,13 @@ from string import punctuation
 
 import asyncpg
 import daiquiri
+import trafaret as t
 
 from aiohttp import web
 from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
 from setproctitle import setproctitle  # pylint: disable=no-name-in-module
-import trafaret as t
+from itsdangerous import TimestampSigner
 
 from . import settings
 
@@ -32,6 +33,7 @@ async def status(request):
             logger.info(record)
     return web.json_response('OK!')
 
+# account
 
 def strong_password(string):
     if (any(char.isdigit() for char in string)
@@ -70,14 +72,37 @@ async def account_new(request):
             # check that the passwords are the same
             if data['password'] != data['validation']:
                 errors['validation'] = 'Does not match password'
+            # if there is an error return it otherwise, say it's ok
+            # FIXME: use proper http status code
             if errors:
                 return web.json_response(errors, status=400)
-            else:
-                password = request.app['hasher'].hash(data['password'])
-                query = 'INSERT INTO users (username, password, bio) VALUES ($1, $2, $3)'
-                await cnx.execute(query, data['username'], password, data['bio'])
-        return web.json_response({})
 
+            password = request.app['hasher'].hash(data['password'])
+            query = 'INSERT INTO users (username, password, bio) VALUES ($1, $2, $3)'
+            await cnx.execute(query, data['username'], password, data['bio'])
+            return web.json_response({})
+
+
+async def account_login(request):
+    """Try to login an user, return token if successful"""
+    data = await request.json()
+    # FIXME: validate and always report to the user that the login failed
+    async with request.app['asyncpg'].acquire() as cnx:
+        username = data['username']
+        query = 'SELECT password FROM users WHERE username = $1'
+        password = await cnx.fetchval(query, username)
+        if password is None:
+            return web.Response(status=401)
+        else:
+            try:
+                request.app['hasher'].verify(password, data['password'])
+            except VerifyMismatchError:
+                return web.Response(status=401)
+            else:
+                token = request.app['signer'].sign(username)
+                token = token.decode('utf-8')
+                out = dict(token=token)
+                return web.json_response(out)
 
 # boot the app
 
@@ -103,7 +128,9 @@ def create_app(loop):
     app.on_startup.append(init_pg)
     app['settings'] = settings
     app['hasher'] = PasswordHasher()
+    app['signer'] = TimestampSigner(settings.SECRET)
     #  routes
     app.router.add_route('GET', '/api/status', status)
     app.router.add_route('POST', '/api/account/new', account_new)
+    app.router.add_route('POST', '/api/account/login', account_login)
     return app

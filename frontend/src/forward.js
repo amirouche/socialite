@@ -223,6 +223,23 @@ class Title extends React.Component {
   }
 }
 
+var get = function(path, token) {
+  var request = new Request(path);
+  if (token) {
+    request.headers.set('X-AUTH-TOKEN', token)
+  }
+  return fetch(request);
+}
+
+var post = function(path, data, token) {
+  var request = new Request(path, {method: 'POST', body: JSON.stringify(data)});
+  if (token) {
+    request.headers.set('X-AUTH-TOKEN', token);
+  }
+  return fetch(request);
+}
+
+
 // FIXME: workaround the fact that Input is already defined in the module
 // once that issue https://github.com/reactstrap/reactstrap/issues/517
 // is fixed it will not be necessary to do that.
@@ -235,6 +252,8 @@ var out = {
   redirect,
   saveAs,
   fromJS,
+  get,
+  post,
 };
 
 

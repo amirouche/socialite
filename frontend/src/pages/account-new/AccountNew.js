@@ -2,7 +2,6 @@ import React from 'react';
 
 import Shell from '../../components/shell/Shell.js';
 import fw from '../../forward.js';
-import api from '../../api.js';
 
 import './AccountNew.css';
 
@@ -15,7 +14,7 @@ var onClick = function(model) {
       validation: model.get('validation'),
       bio: model.get('bio', ''),
     };
-    var response = await api.post('/api/account/new', data);
+    var response = await fw.post('/api/account/new', data);
     if(response.ok) {
       return await fw.redirect(model, '/');
     } else if (response.status === 400) {
