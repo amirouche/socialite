@@ -192,7 +192,6 @@ var clean = async function(model) {
          .forEach(function(key) {
            newModel = newModel.set(key, model.get(key));
          });
-    console.log(newModel.toJS())
     return newModel;
   }
 }
