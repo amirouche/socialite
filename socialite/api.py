@@ -11,17 +11,60 @@ import trafaret as t
 from aiohttp import web
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-from setproctitle import setproctitle  # pylint: disable=no-name-in-module
+from itsdangerous import SignatureExpired
 from itsdangerous import TimestampSigner
+from setproctitle import setproctitle  # pylint: disable=no-name-in-module
 
 from . import settings
 
 # setup logging
 logger = daiquiri.getLogger(__name__)
 
+# middleware
+
+def no_auth(handler):
+    """Decorator to tell the ``middleware_check_auth`` middleware to not check for
+    the token
+
+    """
+    handler.no_auth = True
+    return handler
+
+
+async def middleware_check_auth(app, handler):
+    """Check that the request has a valid token.
+
+    Redirect the user to the login page if it fails validation.
+
+    `handler` can be marked to ignore token. This is useful for pages like
+    account login, account creation and password retrieval
+
+    """
+    async def middleware_handler(request):
+        if getattr(handler, 'no_auth', False):
+            response = await handler(request)
+            return response
+        else:
+            try:
+                token = request.headers['X-AUTH-TOKEN']
+            except KeyError:
+                raise web.HTTPForbidden(reason='auth token required')
+            else:
+                max_age = app['settings'].TOKEN_MAX_AGE
+                try:
+                    username = app['signer'].unsign(token, max_age=max_age)
+                except SignatureExpired:
+                    raise web.HTTPForbidden(reason='auth token expired')
+                else:
+                    request.username = username
+                    response = await handler(request)
+                    return response
+
+    return middleware_handler
 
 # api
 
+@no_auth
 async def status(request):
     """Check that the app is properly working"""
     async with request.app['asyncpg'].acquire() as cnx:
@@ -53,6 +96,7 @@ account_new_validate = t.Dict(
 )
 
 
+@no_auth
 async def account_new(request):
     """Create a new account raise bad request in case of error"""
     data = await request.json()
@@ -83,6 +127,7 @@ async def account_new(request):
             return web.json_response({})
 
 
+@no_auth
 async def account_login(request):
     """Try to login an user, return token if successful"""
     data = await request.json()
@@ -104,6 +149,11 @@ async def account_login(request):
                 out = dict(token=token)
                 return web.json_response(out)
 
+
+async def check_auth(request):
+    return web.json_response('OK')
+
+
 # boot the app
 
 async def init_pg(app):
@@ -124,13 +174,18 @@ def create_app(loop):
 
     logger.debug("boot")
 
+    # init app
     app = web.Application()  # pylint: disable=invalid-name
     app.on_startup.append(init_pg)
+    app.middlewares.append(middleware_check_auth)
     app['settings'] = settings
     app['hasher'] = PasswordHasher()
     app['signer'] = TimestampSigner(settings.SECRET)
+
     #  routes
     app.router.add_route('GET', '/api/status', status)
     app.router.add_route('POST', '/api/account/new', account_new)
     app.router.add_route('POST', '/api/account/login', account_login)
+    app.router.add_route('POST', '/api/check_auth', check_auth)
+    
     return app

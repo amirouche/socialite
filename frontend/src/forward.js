@@ -94,10 +94,16 @@ var Router = class {
         // pass a transient model to route init.
         model = model.set('%location', location);
         var transformer = await route.init(model);
-
-        // always keep the location in the final model
+        if (!transformer) {
+          throw new Error('route initialisation must return a transformer');
+        }
+        
+        // 1) always keep the location in the final model
+        // 2) Use the model passed to resolve, so that code up
+        //    the stack has a chance to change the model before
+        //    a redirect.
         // eslint-disable-next-line
-        return (model) => transformer(model).set('%location', location);
+        return _ => transformer(model).set('%location', location);
       }
     }
 
@@ -179,8 +185,8 @@ var redirect = async function(model, href) {
   return transformer;
 }
 
-var Link = function({mc, href, children}) {
-  return <a href={href} onClick={mc(linkClicked(href))}>{children}</a>;
+var Link = function({mc, href, children, className}) {
+  return <a href={href} onClick={mc(linkClicked(href))} className={className}>{children}</a>;
 }
 
 var clean = async function(model) {
@@ -240,6 +246,13 @@ var post = function(path, data, token) {
 }
 
 
+/**
+ *  Get the auth token from the model or localStorage
+ */
+var getToken = function(model) {
+  return model.get('%token') || window.localStorage.getItem('%token');
+}
+
 // FIXME: workaround the fact that Input is already defined in the module
 // once that issue https://github.com/reactstrap/reactstrap/issues/517
 // is fixed it will not be necessary to do that.
@@ -254,6 +267,7 @@ var out = {
   fromJS,
   get,
   post,
+  getToken,
 };
 
 
