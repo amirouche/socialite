@@ -79,6 +79,7 @@ async def status(request):
 # account
 
 def strong_password(string):
+    """Check that ``string`` is strong enough password"""
     if (any(char.isdigit() for char in string)
             and any(char.islower() for char in string)
             and any(char.isupper() for char in string)
