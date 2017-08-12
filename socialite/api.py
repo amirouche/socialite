@@ -23,8 +23,7 @@ logger = daiquiri.getLogger(__name__)
 # middleware
 
 def no_auth(handler):
-    """Decorator to tell the ``middleware_check_auth`` middleware to not check for
-    the token
+    """Decorator to tell the ``middleware_check_auth`` to not check for the token
 
     """
     handler.no_auth = True
@@ -34,7 +33,7 @@ def no_auth(handler):
 async def middleware_check_auth(app, handler):
     """Check that the request has a valid token.
 
-    Redirect the user to the login page if it fails validation.
+    Raise HTTPForbidden when the token is not valid.
 
     `handler` can be marked to ignore token. This is useful for pages like
     account login, account creation and password retrieval
