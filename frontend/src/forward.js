@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { fromJS } from 'immutable';
 
-import { FormGroup, Input, FormFeedback, FormText } from 'reactstrap';
+import * as rs from 'reactstrap';
 
 
 var createAppBase = function(root, init, view) {
@@ -253,10 +253,27 @@ var getToken = function(model) {
   return model.get('%token') || window.localStorage.getItem('%token');
 }
 
-// FIXME: workaround the fact that Input is already defined in the module
-// once that issue https://github.com/reactstrap/reactstrap/issues/517
-// is fixed it will not be necessary to do that.
-var out = {
+var Input = function({label, text, error, onChange, type}) {
+  var state, feedback;
+  if (error) {
+    state = "danger";
+    feedback = <rs.FormFeedback>{error}</rs.FormFeedback>;
+  } else {
+    state = undefined;
+    feedback = '';
+  }
+  text = text ? <rs.FormText color="muted">{text}</rs.FormText> : "";
+  return (
+    <rs.FormGroup color={state}>
+      <rs.Input type={type} state={state} onChange={onChange} placeholder={label}/>
+      {feedback}
+      {text}
+    </rs.FormGroup>
+  );
+}
+
+
+export default {
   Link,
   Router,
   Title,
@@ -268,26 +285,5 @@ var out = {
   get,
   post,
   getToken,
+  Input,
 };
-
-
-out.Input = function({label, text, error, onChange, type}) {
-  var state, feedback;
-  if (error) {
-    state = "danger";
-    feedback = <FormFeedback>{error}</FormFeedback>;
-  } else {
-    state = undefined;
-    feedback = '';
-  }
-  text = text ? <FormText color="muted">{text}</FormText> : "";
-  return (
-    <FormGroup color={state}>
-        <Input type={type} state={state} onChange={onChange} placeholder={label}/>
-        {feedback}
-        {text}
-    </FormGroup>
-  );
-}
-
-export default out;
