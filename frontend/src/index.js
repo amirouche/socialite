@@ -6,7 +6,7 @@ import fw from './forward.js';
 
 import Home from './pages/home/Home.js';
 import AccountNew from './pages/account-new/AccountNew.js';
-import dashboard from './pages/dashboard/view.js';
+import dashboard from './pages/dashboard/Dashboard.js';
 
 import './index.css';
 
