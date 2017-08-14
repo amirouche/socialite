@@ -70,6 +70,7 @@ async def middleware_check_auth(app, handler):
 async def status(request):
     """Check that the app is properly working"""
     async with request.app['asyncpg'].acquire() as cnx:
+        # introspect database
         query = """SELECT c.relname
         FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
         WHERE n.nspname = 'public' AND c.relkind = 'r'"""
