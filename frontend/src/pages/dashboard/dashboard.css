@@ -1,0 +1,17 @@
+#dashboard {
+    margin-top: 15px;
+}
+
+#dashboard > a {
+    margin-right: 15px;
+    width: 300px;
+}
+
+#dashboard > a > h2 {
+    float: left;
+    margin-right: 15px;
+}
+
+#dashboard > a > p {
+    text-align: justify;
+}

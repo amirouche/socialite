@@ -12,6 +12,7 @@
     "normalize.css": "^7.0.0",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
+    "react-markdown": "^2.5.0",
     "react-transition-group": "^1.2.0",
     "reactstrap": "^4.8.0"
   },

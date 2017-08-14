@@ -21,6 +21,7 @@ var createAppBase = function(root, init, view) {
       // XXX: This might be performance bottleneck
       // https://fb.me/react-event-pooling
       // XXX: it's possible to avoid this but it will lead to more confusing code
+      // XXX: Actually it's buggy
       event.persist()
       var promise = controller(model)(event);
       promise.then(function(transformer) {
@@ -62,7 +63,7 @@ var createAppBase = function(root, init, view) {
 
 /* FIXME: there is no need to export the router,
  instead use an Array of Array of arguments to pass
- to Router.append */
+ to Router.append and validate them */
 var Router = class {
   constructor() {
     this.routes = [];
@@ -205,7 +206,9 @@ var clean = async function(model) {
 var saveAs = function(name) {
   return function(model) {
     return async function (event) {
-      return (model) => model.set(name, event.target.value);
+      let value = event.target.value;
+      // FIXME: pass name as an array and use model.setIn
+      return model => model.set(name, value);
     }
   }
 }

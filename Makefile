@@ -9,7 +9,11 @@ run-front: ## Run the frontend server
 	cd frontend && npm start
 
 run-api: ## Run the backend api server
-	adev runserver socialite/api.py --no-debug-toolbar > /dev/null
+	DEBUG=DEBUG adev runserver socialite/api.py --no-debug-toolbar
+
+run-init: ## Run initialisation
+	DEBUG=DEBUG python -m socialite.socialite init
+
 
 lint: ## lint the code
 	@pylint socialite

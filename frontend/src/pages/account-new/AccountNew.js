@@ -1,4 +1,6 @@
 import React from 'react';
+import { Button } from 'reactstrap';
+
 
 import Shell from '../../components/shell/Shell.js';
 import fw from '../../forward.js';
@@ -53,7 +55,7 @@ var AccountNew = function({model, mc}) {
                           text="Filler text..."
                           error={model.getIn(['errors', 'bio'])}
                           onChange={mc(fw.saveAs('bio'))} />
-                <button onClick={mc(onClick)}>Submit</button>
+                <Button onClick={mc(onClick)}>Submit</Button>
             </div>
         </div>
     </Shell>

@@ -154,6 +154,41 @@ async def account_login(request):
                 return web.json_response(out)
 
 
+# wiki
+
+async def wiki_latest(request):
+    """Return the information wiki page found at ``/api/wiki/{title}``"""
+    title = request.match_info['title']
+    async with request.app['asyncpg'].acquire() as cnx:
+        sql = """SELECT body, created_at
+        FROM wiki
+        WHERE title = $1
+        ORDER BY created_at DESC
+        LIMIT 1"""
+        record = await cnx.fetchrow(sql, title)
+        if record is None:
+            return web.HTTPNotFound()
+        else:
+            out = dict(
+                body=record['body'],
+                created_at=record['created_at'].isoformat(),
+            )
+            return web.json_response(out)
+
+
+async def wiki_edit(request):
+    """Create a new revision for wiki page."""
+    # FIXME: validate
+    title = request.match_info['title']
+    data = await request.json()
+    body = data['body']
+    async with request.app['asyncpg'].acquire() as cnx:
+        sql = 'INSERT INTO wiki (title, body, created_at) VALUES ($1, $2, now())'
+        await cnx.execute(sql, title, body)
+    raise web.HTTPCreated()
+
+# others
+
 async def check_auth(request):
     return web.json_response('OK')
 
@@ -171,10 +206,6 @@ async def init_pg(app):
 def create_app(loop):
     """Starts the aiohttp process to serve the REST API"""
     setproctitle('socialite-api')
-    # setup logging
-    level_name = os.environ.get('DEBUG', 'INFO')
-    level = getattr(logging, level_name)
-    daiquiri.setup(level=level, outputs=('stderr',))
 
     logger.debug("boot")
 
@@ -186,10 +217,14 @@ def create_app(loop):
     app['hasher'] = PasswordHasher()
     app['signer'] = TimestampSigner(settings.SECRET)
 
-    #  routes
+    # routes
     app.router.add_route('GET', '/api/status', status)
+    app.router.add_route('POST', '/api/check_auth', check_auth)
+    # routes for account
     app.router.add_route('POST', '/api/account/new', account_new)
     app.router.add_route('POST', '/api/account/login', account_login)
-    app.router.add_route('POST', '/api/check_auth', check_auth)
+    # routes for wiki
+    app.router.add_route('GET', '/api/wiki/{title}/latest', wiki_latest)
+    app.router.add_route('POST', '/api/wiki/{title}/edit', wiki_edit)
 
     return app

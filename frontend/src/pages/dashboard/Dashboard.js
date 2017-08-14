@@ -23,7 +23,7 @@ var Dashboard = function({mc, model}) {
           <h2>Chat</h2>
           <p>Discuss live important and less important matters</p>
         </fw.Link>
-        <fw.Link mc={mc} href="/wiki" className="box">
+        <fw.Link mc={mc} href="/wiki/home" className="box">
           <h2>Wiki</h2>
           <p>Collaboratively modify content and structure it directly from the web browser.</p>
         </fw.Link>
