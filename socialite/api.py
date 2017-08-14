@@ -11,6 +11,7 @@ import trafaret as t
 from aiohttp import web
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
+from itsdangerous import BadSignature
 from itsdangerous import SignatureExpired
 from itsdangerous import TimestampSigner
 from setproctitle import setproctitle  # pylint: disable=no-name-in-module
@@ -54,6 +55,8 @@ async def middleware_check_auth(app, handler):
                     username = app['signer'].unsign(token, max_age=max_age)
                 except SignatureExpired:
                     raise web.HTTPForbidden(reason='auth token expired')
+                except BadSignature:
+                    raise web.HTTPForbidden(reason='bad signature')
                 else:
                     request.username = username
                     response = await handler(request)
@@ -187,5 +190,5 @@ def create_app(loop):
     app.router.add_route('POST', '/api/account/new', account_new)
     app.router.add_route('POST', '/api/account/login', account_login)
     app.router.add_route('POST', '/api/check_auth', check_auth)
-    
+
     return app
