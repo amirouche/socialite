@@ -39,6 +39,7 @@ var createAppBase = function(root, init, view) {
 
   /* Render the application */
   render = function() {
+    // FIXME: view doesn't need to take a JSObject as argument.
     var html = view({model: model, mc: makeController});
     ReactDOM.render(html, root);
   };
