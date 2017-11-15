@@ -5,10 +5,10 @@ import { fromJS } from 'immutable';
 import * as rs from 'reactstrap';
 
 
-var createAppBase = function(root, init, view) {
-  var model = init();
+let createAppBase = function(root, init, view) {
+  let model = init();
 
-  var render;
+  let render;
 
   /* wraps event handlers to create controllers.
 
@@ -16,22 +16,20 @@ var createAppBase = function(root, init, view) {
      by the controller to update the model and trigger a render
      if needed.
    */
-  var makeController = function(controller) {
+  let makeController = function(controller) {
     return function(event) {
       // XXX: This might be performance bottleneck
       // https://fb.me/react-event-pooling
-      // XXX: it's possible to avoid this but it will lead to more confusing code
-      // XXX: Actually it's buggy
       event.persist()
-      var promise = controller(model)(event);
+      let promise = controller(model)(event);
       promise.then(function(transformer) {
-        if(transformer) {
-          var newModel = transformer(model);
-          if (newModel !== model) {
-            // XXX: side effect
-            model = newModel;
-            render();
-          }
+        // XXX: if the controller returns nothing
+        // this will lead to an 'undefined' error
+        // which is not very friendly.
+        let newModel = transformer(model);
+        if (newModel !== model) {
+          model = newModel;  // XXX: side effect
+          render();
         }
       });
     }
@@ -39,20 +37,18 @@ var createAppBase = function(root, init, view) {
 
   /* Render the application */
   render = function() {
-    // FIXME: view doesn't need to take a JSObject as argument.
-    var html = view({model: model, mc: makeController});
+    let html = view(model, makeController);
     ReactDOM.render(html, root);
   };
 
   // sneak into an application from the outside.
   return function(change) {
-    var promise = change(model);
+    let promise = change(model);
     promise.then(function(transformer) {
       if(transformer) {
-        var newModel = transformer(model);
+        let newModel = transformer(model);
         if (newModel !== model) {
-          // XXX: side effect
-          model = newModel;
+          model = newModel;  // XXX: side effect
           render();
         }
       }
@@ -62,10 +58,7 @@ var createAppBase = function(root, init, view) {
 
 /* URL Router */
 
-/* FIXME: there is no need to export the router,
- instead use an Array of Array of arguments to pass
- to Router.append and validate them */
-var Router = class {
+let Router = class {
   constructor() {
     this.routes = [];
   }
@@ -79,15 +72,15 @@ var Router = class {
   }
 
   async resolve(model) {
-    var path = document.location.pathname.split('/');
-    var match, params;
+    let path = document.location.pathname.split('/');
+    let match, params;
 
-    for(var index=0; index<this.routes.length; index++) {
-      var route = this.routes[index];
+    for(let index=0; index<this.routes.length; index++) {
+      let route = this.routes[index];
       [match, params] = this.match(route, path);
 
       if (match) {
-        var location = fromJS({
+        let location = fromJS({
           pattern: route.pattern,
           view: route.view,
           params: params
@@ -95,17 +88,13 @@ var Router = class {
 
         // pass a transient model to route init.
         model = model.set('%location', location);
-        var transformer = await route.init(model);
-        if (!transformer) {
-          throw new Error('route initialisation must return a transformer');
-        }
+        let transformer = await route.init(model);
         
-        // 1) always keep the location in the final model
-        // 2) Use the model passed to resolve, so that code up
-        //    the stack has a chance to change the model before
-        //    a redirect.
+        // Use the model passed to resolve, so that code up
+        // the stack has a chance to change the model before
+        // a redirect.
         // eslint-disable-next-line
-        return _ => transformer(model).set('%location', location);
+        return _ => transformer(model);
       }
     }
 
@@ -114,7 +103,8 @@ var Router = class {
   }
 
   match(route, path) {
-    var pattern = route.pattern.split("/");
+    // FIXME: do that at init time
+    let pattern = route.pattern.split("/");
 
     // if pattern and path are not the same length
     // they can not match
@@ -123,9 +113,9 @@ var Router = class {
     }
 
     // try to match
-    var params = {};
+    let params = {};
     for (var index=0; index < pattern.length; index++) {
-      var component = pattern[index];
+      let component = pattern[index];
       if (component.startsWith('{') && component.endsWith('}')) {
         params[component.slice(1, -1)] = path[index];
       } else if (component !== path[index]) {
@@ -149,15 +139,15 @@ var Router = class {
  * @returns {Function} a function that allows to sneak into the app closure
  *          from the outside world.
  */
-var createApp = function(container_id, router) {
+let createApp = function(container_id, router) {
   // prepare createAppBase arguments
-  var root = document.getElementById(container_id);
-  var init = function() { return fromJS({'%router': router}) };
-  var view = function({model, mc}) {
+  let root = document.getElementById(container_id);
+  let init = function() { return fromJS({'%router': router}) };
+  let view = function({model, mc}) {
     return model.getIn(['%location', 'view'])({model, mc});
   }
 
-  var change = createAppBase(root, init, view);
+  let change = createAppBase(root, init, view);
 
   window.onpopstate = function(event) { return change(router.resolve.bind(router)); };
 
@@ -166,45 +156,45 @@ var createApp = function(container_id, router) {
   return change;
 }
 
-var linkClicked = function(href) {
+let linkClicked = function(href) {
   return function(model) {
     return async function(event) {
       event.preventDefault();
       window.history.pushState({}, "", href);
-      var router = model.get('%router');
-      var transformer = router.resolve(model);
+      let router = model.get('%router');
+      let transformer = router.resolve(model);
       window.scrollTo(0, 0);
       return transformer;
     }
   }
 }
 
-var redirect = async function(model, href) {
+let redirect = async function(model, href) {
   window.history.pushState({}, "", href);
-  var router = model.get('%router');
-  var transformer = await router.resolve(model);
+  let router = model.get('%router');
+  let transformer = await router.resolve(model);
   window.scrollTo(0, 0);
   return transformer;
 }
 
-var Link = function({mc, href, children, className}) {
+let Link = function({mc, href, children, className}) {
   return <a href={href} onClick={mc(linkClicked(href))} className={className}>{children}</a>;
 }
 
-var clean = async function(model) {
+let clean = async function(model) {
   return function(model) {
-    var newModel = fromJS({});
+    let newModel = fromJS({});
     // only keep things that start with %
     model.keySeq()
          .filter((x) => x.startsWith('%'))
          .forEach(function(key) {
-           newModel = newModel.set(key, model.get(key));
+           newModel = newModel.set(key, model.get(key));  // XXX: side-effect
          });
     return newModel;
   }
 }
 
-var saveAs = function(name) {
+let saveAs = function(name) {
   return function(model) {
     return async function (event) {
       let value = event.target.value;
@@ -229,20 +219,21 @@ class Title extends React.Component {
   }
 
   render() {
+    // FIXME: with react 16 is not required to return something
     return <div/>;
   }
 }
 
-var get = function(path, token) {
-  var request = new Request(path);
+let get = function(path, token) {
+  let request = new Request(path);
   if (token) {
     request.headers.set('X-AUTH-TOKEN', token)
   }
   return fetch(request);
 }
 
-var post = function(path, data, token) {
-  var request = new Request(path, {method: 'POST', body: JSON.stringify(data)});
+let post = function(path, data, token) {
+  let request = new Request(path, {method: 'POST', body: JSON.stringify(data)});
   if (token) {
     request.headers.set('X-AUTH-TOKEN', token);
   }
@@ -253,12 +244,12 @@ var post = function(path, data, token) {
 /**
  *  Get the auth token from the model or localStorage
  */
-var getToken = function(model) {
+let getToken = function(model) {
   return model.get('%token') || window.localStorage.getItem('%token');
 }
 
-var Input = function({label, text, error, onChange, type}) {
-  var state, feedback;
+let Input = function({label, text, error, onChange, type}) {
+  let state, feedback;
   if (error) {
     state = "danger";
     feedback = <rs.FormFeedback>{error}</rs.FormFeedback>;
