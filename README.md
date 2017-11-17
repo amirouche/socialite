@@ -12,7 +12,8 @@ Socialite is:
     - Search engine
     - Webmail
     - Wiki
-    
+    - QA
+
 - A test bed for my experiments with aiohttp
 
 - A test bed for my experiments with reactjs

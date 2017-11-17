@@ -44,3 +44,6 @@ upstream:  ## Clone the most important third-party libraries
 	git clone https://github.com/aio-libs/aiohttp upstream/aiohttp
 	hg clone https://bitbucket.org/ollyc/yoyo upstream/yoyo
 	git clone https://github.com/Deepwalker/trafaret upstream/trafaret
+
+check:
+	py.test tests.py

@@ -93,9 +93,9 @@ def strong_password(string):
 
 
 account_new_validate = t.Dict(
-    username=t.String(min_length=1, max_length=255, regex=r'^[\w-]+$'),
+    username=t.String(min_length=1, max_length=255) & t.Regexp(r'^[\w-]+$'),
+    password=t.String(min_length=10, max_length=255) & strong_password,
     validation=t.String(),
-    password=t.String(t.String(min_length=10, max_length=255) & strong_password),
     bio=t.String(allow_blank=True, max_length=1024),
 )
 
@@ -112,7 +112,8 @@ async def account_new(request):
         errors = dict()
         # check that the user is not already taken
         async with request.app['asyncpg'].acquire() as cnx:
-            # FIXME: try/except UniqueViolationError will be more ideomatic
+            # FIXME: try/except postgresql UniqueViolationError will be more
+            # ideomatic
             query = 'SELECT COUNT(uid) FROM users WHERE username = $1;'
             count = await cnx.fetchval(query, data['username'])
             if count != 0:
@@ -121,7 +122,6 @@ async def account_new(request):
             if data['password'] != data['validation']:
                 errors['validation'] = 'Does not match password'
             # if there is an error return it otherwise, say it's ok
-            # FIXME: use proper http status code
             if errors:
                 return web.json_response(errors, status=400)
 

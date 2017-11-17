@@ -1,6 +1,4 @@
 import React from 'react';
-import { Button } from 'reactstrap';
-
 
 import Shell from '../../components/shell/Shell.js';
 import fw from '../../forward.js';
@@ -18,7 +16,7 @@ var onClick = function(app, model) {
     };
     var response = await fw.post('/api/account/new', data);
     if(response.ok) {
-      return await fw.redirect(model, '/');
+      return await fw.redirect(app, model, '/');
     } else if (response.status === 400) {
       var errors = await response.json();
       return (app, model) => model.set('errors', fw.fromJS(errors));
@@ -55,7 +53,7 @@ var AccountNew = function(model, mc) {
                           text="Filler text..."
                           error={model.getIn(['errors', 'bio'])}
                           onChange={mc(fw.set('bio'))} />
-                <Button onClick={mc(onClick)}>Submit</Button>
+                <fw.Button onClick={mc(onClick)}>Submit</fw.Button>
             </div>
         </div>
     </Shell>

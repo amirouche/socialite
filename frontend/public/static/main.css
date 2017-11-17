@@ -1,0 +1,121 @@
+@import url(https://fonts.googleapis.com/css?family=Orbitron);
+
+/* BASICS */
+
+body {
+    font-family: sans;
+    font-size: 18px;
+    color: white;
+}
+
+h1 {
+    font-family: 'League Gothic', sans;
+    font-weight: normal;
+    color: white;
+    text-align: left;
+}
+
+h2, h3, h4, h5, h6 {
+    font-family: sans;
+    font-weight: normal;
+}
+
+code {
+    background: hsla(0,0%,100%,0.1);
+    font-size: 0.8em;
+    padding: 3px;
+    border-radius: 3px;
+}
+
+a:link,
+a:hover,
+a:visited,
+a:active {
+    color: white;
+}
+
+/* BACKGROUND */
+
+#background video {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: -100;
+    transform: translateX(-50%) translateY(-50%);
+    background: url(/static/video/poster.jpeg) no-repeat;
+    background-size: cover;
+}
+
+@media screen and (max-device-width: 800px) {
+    body { background: url(/static/video/poster.jpeg) #000 no-repeat center center fixed;}
+    #background { display: none; }
+}
+
+/* OVERLAY */
+
+#overlay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: -99;
+    transform: translateX(-50%) translateY(-50%);
+    background: url(/static/video/overlay.png);
+}
+
+/* HEADER */
+
+#header {
+    padding: 15px;
+    text-align: right;
+}
+
+#header h1 {
+    display: inline-block;
+    margin: 0px;
+    line-height: 1em;
+    padding: 15px;
+    color: hsla(0, 0%, 100%, 0.3);
+}
+
+#header h1:hover {
+    color: white;
+}
+
+
+/* SHELL */
+
+#shell {
+    margin: auto;
+    paddding: 15px;
+    max-width: 666px;
+    display: flex;
+    flex-direction: column;
+}
+
+#shell input[type="text"] {
+    border: 0px;
+    border: 1px solid hsla(0, 0%, 100%, 0.3);
+    background: transparent;
+    margin-bottom: 15px;
+    padding: 15px;
+}
+
+#shell input[type="submit"] {
+    background: hsla(0, 0%, 100%, 0.1);
+    border: 1px solid hsla(0, 0%, 100%, 0.3);
+    box-shadow: 1px 1px 2px black;
+    margin-bottom: 15px;
+    padding: 15px;
+}
+
+#shell input[type="submit"]:hover {
+    background: hsla(0, 0%, 100%, 0.3);
+}
