@@ -16,12 +16,11 @@ var onSubmit = function(app, model) {
         if (response.ok) {
             var json = await response.json();
             var token = json.token;
-            var newModel = model.set('%token', token);
             // Save the token inside localStorage for future use,
             // it replace the use of a cookie
             window.localStorage.setItem('%token', token)
             // goto the dashboard now
-            return await fw.redirect(app, newModel, '/dashboard');
+            return await fw.redirect(app, model, '/dashboard');
         } else {
             console.log('login failed', model.toJS());
         }
