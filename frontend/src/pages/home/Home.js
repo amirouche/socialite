@@ -29,8 +29,8 @@ var onSubmit = function(model) {
 }
 
 
-var Home = function({model, mc}) {
-  console.log('Home', model.toJS());
+var Home = function(model, mc) {
+  fw.log('Home', model.toJS());
   return (
     <Shell mc={mc}>
         <fw.Title title="Welcome to socialite" />
@@ -39,10 +39,10 @@ var Home = function({model, mc}) {
                 <h1>Socialite</h1>
                 <fw.Input type="text"
                           label="username"
-                          onChange={mc(fw.saveAs('username'))} />
+                          onChange={mc(fw.set('username'))} />
                 <fw.Input type="password"
                           label="password"
-                          onChange={mc(fw.saveAs('password'))} />
+                          onChange={mc(fw.set('password'))} />
                 <button onClick={mc(onSubmit)}>Submit</button>
             </div>
             <div id="login-extra">

@@ -8,7 +8,7 @@ import fw from '../../forward.js';
 import './AccountNew.css';
 
 
-var onClick = function(model) {
+var onClick = function(app, model) {
   return async function(event) {
     var data = {
       username: model.get('username'),
@@ -21,14 +21,14 @@ var onClick = function(model) {
       return await fw.redirect(model, '/');
     } else if (response.status === 400) {
       var errors = await response.json();
-      return (model) => model.set('errors', fw.fromJS(errors));
+      return (app, model) => model.set('errors', fw.fromJS(errors));
     }
   }
 }
 
 
-var AccountNew = function({model, mc}) {
-  console.log(model.toJS());
+var AccountNew = function(model, mc) {
+  fw.log('AccountNew', model.toJS());
   return (
     <Shell mc={mc}>
         <fw.Title title="Create an account − socialite" />
@@ -39,22 +39,22 @@ var AccountNew = function({model, mc}) {
                           label="username"
                           text="It must be neat!"
                           error={model.getIn(['errors', 'username'])}
-                          onChange={mc(fw.saveAs('username'))} />
+                          onChange={mc(fw.set('username'))} />
                 <fw.Input type="password"
                           label="password"
                           text="It must strong."
                           error={model.getIn(['errors', 'password'])}
-                          onChange={mc(fw.saveAs('password'))} />
+                          onChange={mc(fw.set('password'))} />
                 <fw.Input type="password"
                           label="validation"
                           text="Re-type your password to be sure."
                           error={model.getIn(['errors', 'validation'])}
-                          onChange={mc(fw.saveAs('validation'))} />
+                          onChange={mc(fw.set('validation'))} />
                 <fw.Input type="textarea"
                           label="bio"
                           text="Filler text..."
                           error={model.getIn(['errors', 'bio'])}
-                          onChange={mc(fw.saveAs('bio'))} />
+                          onChange={mc(fw.set('bio'))} />
                 <Button onClick={mc(onClick)}>Submit</Button>
             </div>
         </div>

@@ -4,8 +4,38 @@ import { fromJS } from 'immutable';
 
 import * as rs from 'reactstrap';
 
+/**
+ * Neat debug function
+ */
+var log = function() {
+  if (process.env.NODE_ENV !== 'production') {
+    let args = Array.prototype.slice.call(arguments);
+    console.log.apply(console, args);
+    return args[args.length - 1];
+  }
+}
 
-let createAppBase = function(root, init, view) {
+/**
+ * Create base app environment
+ *
+ * This is useful in context where you don't plan to have
+ * a router or websockets
+ *
+ * @param {app} can be any JavaScript Object it's passed around
+ *              the environment. Things that can not be serialized.
+ *              It's not required to be immutable.
+ * @param {root} is DOM node that is used to render the graphical
+ *               part of the application
+ * @param {init} is function that must return the seed model.
+ *               It usually return an immutable object.
+ * @param {view} is a function that takes as argument `app` and
+ *               the current `model` and `makeController` usually
+ *               simply called `mc`.
+ * @returns {Function} called `change` that allows to sneak into
+ *                     the application environment from the outside.
+ *                     It's useful to extend the behavior of forward.
+ */
+let createAppBase = function(app, root, init, view) {
   let model = init();
 
   let render;
@@ -21,36 +51,33 @@ let createAppBase = function(root, init, view) {
       // XXX: This might be performance bottleneck
       // https://fb.me/react-event-pooling
       event.persist()
-      let promise = controller(model)(event);
+      let promise = controller(app, model)(event);
       promise.then(function(transformer) {
         // XXX: if the controller returns nothing
         // this will lead to an 'undefined' error
         // which is not very friendly.
-        let newModel = transformer(model);
-        if (newModel !== model) {
-          model = newModel;  // XXX: side effect
-          render();
-        }
+        let newModel = transformer(app, model);
+        model = newModel;  // XXX: side effect
+        render();
       });
     }
   };
 
   /* Render the application */
   render = function() {
+    log('rendering');
     let html = view(model, makeController);
     ReactDOM.render(html, root);
   };
 
   // sneak into an application from the outside.
   return function(change) {
-    let promise = change(model);
+    let promise = change(app, model);
     promise.then(function(transformer) {
       if(transformer) {
-        let newModel = transformer(model);
-        if (newModel !== model) {
-          model = newModel;  // XXX: side effect
-          render();
-        }
+        let newModel = transformer(app, model);
+        model = newModel;  // XXX: side effect
+        render();
       }
     });
   };
@@ -61,6 +88,7 @@ let createAppBase = function(root, init, view) {
 let Router = class {
   constructor() {
     this.routes = [];
+    this.route = undefined;
   }
 
   append(pattern, init, view) {
@@ -71,7 +99,8 @@ let Router = class {
     this.routes.push({pattern: pattern, init:init, view: view});
   }
 
-  async resolve(model) {
+  async resolve(app, model) {
+    log('resolving route...');
     let path = document.location.pathname.split('/');
     let match, params;
 
@@ -80,21 +109,11 @@ let Router = class {
       [match, params] = this.match(route, path);
 
       if (match) {
-        let location = fromJS({
-          pattern: route.pattern,
-          view: route.view,
-          params: params
-        });
-
-        // pass a transient model to route init.
-        model = model.set('%location', location);
-        let transformer = await route.init(model);
-        
-        // Use the model passed to resolve, so that code up
-        // the stack has a chance to change the model before
-        // a redirect.
+        this.route = route;
+        log('router matched route', route)
+        let transformer = await route.init(model, params);
         // eslint-disable-next-line
-        return _ => transformer(model);
+        return _ => transformer(app, model);
       }
     }
 
@@ -106,7 +125,7 @@ let Router = class {
     // FIXME: do that at init time
     let pattern = route.pattern.split("/");
 
-    // if pattern and path are not the same length
+    // fast path: if pattern and path are not the same length
     // they can not match
     if (pattern.length !== path.length) {
       return [false, {}];
@@ -135,44 +154,48 @@ let Router = class {
  *
  * @param {container_id} the html identifier of the dom element where to
  *        render the application.
- * @param {router} a {Router} instance.
+ * @param {router} a Router instance.
  * @returns {Function} a function that allows to sneak into the app closure
  *          from the outside world.
  */
-let createApp = function(container_id, router) {
+let createApp = function(router) {
+  let app = {router: router};
+
   // prepare createAppBase arguments
-  let root = document.getElementById(container_id);
-  let init = function() { return fromJS({'%router': router}) };
-  let view = function({model, mc}) {
-    return model.getIn(['%location', 'view'])({model, mc});
-  }
+  let root = document.getElementById("root");
+  let init = function() { return fromJS({}); };
+  let view = function(app, model, mc) {
+    return router.route.view(app, model, mc);
+  };
+  
+  let change = createAppBase(app, root, init, view);
 
-  let change = createAppBase(root, init, view);
+  window.onpopstate = function(event) {
+    return change(router.resolve.bind(router));
+  };
 
-  window.onpopstate = function(event) { return change(router.resolve.bind(router)); };
-
+  log('initial rendering');
   change(router.resolve.bind(router)); // trigger a render
 
   return change;
 }
 
 let linkClicked = function(href) {
-  return function(model) {
+  return function(app, model) {
     return async function(event) {
       event.preventDefault();
       window.history.pushState({}, "", href);
-      let router = model.get('%router');
-      let transformer = router.resolve(model);
+      let transformer = app.router.resolve(app, model);
       window.scrollTo(0, 0);
       return transformer;
     }
   }
 }
 
-let redirect = async function(model, href) {
+let redirect = async function(app, model, href) {
   window.history.pushState({}, "", href);
   let router = model.get('%router');
-  let transformer = await router.resolve(model);
+  let transformer = await router.resolve(app, model);
   window.scrollTo(0, 0);
   return transformer;
 }
@@ -181,8 +204,8 @@ let Link = function({mc, href, children, className}) {
   return <a href={href} onClick={mc(linkClicked(href))} className={className}>{children}</a>;
 }
 
-let clean = async function(model) {
-  return function(model) {
+let clean = async function(app, model) {
+  return function(app, model) {
     let newModel = fromJS({});
     // only keep things that start with %
     model.keySeq()
@@ -194,12 +217,11 @@ let clean = async function(model) {
   }
 }
 
-let saveAs = function(name) {
-  return function(model) {
+let set = function(name) {
+  return function(app, model) {
     return async function (event) {
       let value = event.target.value;
-      // FIXME: pass name as an array and use model.setIn
-      return model => model.set(name, value);
+      return (app, model) => model.set(name, value);
     }
   }
 }
@@ -240,7 +262,6 @@ let post = function(path, data, token) {
   return fetch(request);
 }
 
-
 /**
  *  Get the auth token from the model or localStorage
  */
@@ -269,16 +290,17 @@ let Input = function({label, text, error, onChange, type}) {
 
 
 export default {
+  Input,
   Link,
   Router,
   Title,
   clean,
   createApp,
-  redirect,
-  saveAs,
   fromJS,
   get,
-  post,
   getToken,
-  Input,
+  log,
+  post,
+  redirect,
+  set,
 };

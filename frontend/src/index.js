@@ -12,6 +12,7 @@ import wikiEdit from './pages/wiki_edit/wiki_edit.js';
 
 import './index.css';
 
+fw.log('application is starting');
 
 var router = new fw.Router();
 router.append('/', fw.clean, Home);
@@ -20,6 +21,6 @@ router.append('/dashboard', dashboard.init, dashboard.Dashboard);
 router.append('/wiki/{title}', wiki.init, wiki.Wiki);
 router.append('/wiki/{title}/edit', wikiEdit.init, wikiEdit.WikiEdit);
 
-fw.createApp('root', router);
+fw.createApp(router);
 
 registerServiceWorker();
