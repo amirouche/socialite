@@ -2,17 +2,7 @@
 
 Socialite is:
 
-- A social network kind of app that default to be private, that wants
-  to have:
-
-    - Blog
-    - Bookmarks
-    - Forum
-    - Messaging
-    - Search engine
-    - Webmail
-    - Wiki
-    - QA
+- A socialite kind of app
 
 - A test bed for my experiments with aiohttp
 
