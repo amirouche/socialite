@@ -6,11 +6,11 @@ import './dashboard.css';
 
 
 var init = async function(app, model) {
-    var response = await fw.post('/api/check_auth', {}, fw.getToken(model))
-    if (!response.ok) {
-        return fw.redirect(model, '/');
+    var response = await fw.post('/api/check_auth', {}, fw.getToken(model));
+    if (response.ok) {
+        return await fw.clean(app, model);
     } else {
-        return (app, model) => model;
+        return fw.redirect(model, '/');
     }
 }
 
