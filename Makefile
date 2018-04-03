@@ -23,7 +23,7 @@ database-repl: ## start a repl for the database
 
 database-reset: ## Kill any (known) processus using the database, drop and recreate the database and run migrations
 	killall socialite-api || true
-	sudo -u postgres dropdb socialite
+	sudo -u postgres dropdb socialite || true
 	sudo -u postgres createdb socialite
 	python -m socialite.socialite database migrate
 
