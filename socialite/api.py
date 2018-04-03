@@ -1,7 +1,4 @@
 """Module defining the REST API"""
-import logging
-import os
-
 from string import punctuation
 
 import asyncpg
@@ -21,7 +18,9 @@ from . import settings
 # setup logging
 logger = daiquiri.getLogger(__name__)
 
+
 # middleware
+
 
 def no_auth(handler):
     """Decorator to tell the ``middleware_check_auth`` to not check for the token
@@ -66,6 +65,7 @@ async def middleware_check_auth(app, handler):
 
 # api
 
+
 @no_auth
 async def status(request):
     """Check that the app is properly working"""
@@ -79,7 +79,9 @@ async def status(request):
             logger.info(record)
     return web.json_response('OK!')
 
+
 # account
+
 
 def strong_password(string):
     """Check that ``string`` is strong enough password"""
@@ -112,8 +114,9 @@ async def account_new(request):
         errors = dict()
         # check that the user is not already taken
         async with request.app['asyncpg'].acquire() as cnx:
-            # FIXME: try/except postgresql UniqueViolationError will be more
-            # ideomatic
+            # TODO: try/except postgresql UniqueViolationError will be more
+            # idiomatic
+            # TODO: do that in transaction!
             query = 'SELECT COUNT(uid) FROM users WHERE username = $1;'
             count = await cnx.fetchval(query, data['username'])
             if count != 0:
@@ -153,39 +156,6 @@ async def account_login(request):
                 out = dict(token=token)
                 return web.json_response(out)
 
-
-# wiki
-
-async def wiki_latest(request):
-    """Return the information wiki page found at ``/api/wiki/{title}``"""
-    title = request.match_info['title']
-    async with request.app['asyncpg'].acquire() as cnx:
-        sql = """SELECT body, created_at
-        FROM wiki
-        WHERE title = $1
-        ORDER BY created_at DESC
-        LIMIT 1"""
-        record = await cnx.fetchrow(sql, title)
-        if record is None:
-            return web.HTTPNotFound()
-        else:
-            out = dict(
-                body=record['body'],
-                created_at=record['created_at'].isoformat(),
-            )
-            return web.json_response(out)
-
-
-async def wiki_edit(request):
-    """Create a new revision for wiki page."""
-    # FIXME: validate
-    title = request.match_info['title']
-    data = await request.json()
-    body = data['body']
-    async with request.app['asyncpg'].acquire() as cnx:
-        sql = 'INSERT INTO wiki (title, body, created_at) VALUES ($1, $2, now())'
-        await cnx.execute(sql, title, body)
-    raise web.HTTPCreated()
 
 # others
 
