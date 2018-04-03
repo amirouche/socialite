@@ -21,8 +21,9 @@ from pathlib import Path
 from setproctitle import setproctitle  # pylint: disable=no-name-in-module
 from yoyo.scripts.main import main as yoyo
 
+from . import api
 from . import settings
-from .api import create_app
+
 
 
 log = daiquiri.getLogger(__name__)
