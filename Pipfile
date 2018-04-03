@@ -15,7 +15,7 @@ jupyter = "*"
 pgcli = "*"
 sphinx-js = "*"
 sphinx = "*"
-
+pytest = "*"
 
 [packages]
 
@@ -29,4 +29,3 @@ itsdangerous = "*"
 setproctitle = "*"
 trafaret = "*"
 yoyo-migrations = "*"
-pytest = "*"
