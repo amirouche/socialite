@@ -3,7 +3,7 @@
   socialite database diagram
   socialite database migrate
   socialite init
-  socialite web
+  socialite api
 
 Options:
   -h --help     Show this screen.
@@ -46,9 +46,9 @@ def main():
     level = getattr(logging, level_name)
     daiquiri.setup(level=level, outputs=('stderr',))
 
-    if args.get('web'):
+    if args.get('api'):
         loop = asyncio.get_event_loop()
-        app = create_app(loop)
+        app = api.create_app(loop)
         web.run_app(app, host='127.0.0.1', port=8000)
     elif args.get('init'):
         loop = asyncio.get_event_loop()

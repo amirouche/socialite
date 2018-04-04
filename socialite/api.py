@@ -98,7 +98,6 @@ account_new_validate = t.Dict(
     username=t.String(min_length=1, max_length=255) & t.Regexp(r'^[\w-]+$'),
     password=t.String(min_length=10, max_length=255) & strong_password,
     validation=t.String(),
-    bio=t.String(allow_blank=True, max_length=1024),
 )
 
 
@@ -129,8 +128,8 @@ async def account_new(request):
                 return web.json_response(errors, status=400)
 
             password = request.app['hasher'].hash(data['password'])
-            query = 'INSERT INTO users (username, password, bio) VALUES ($1, $2, $3)'
-            await cnx.execute(query, data['username'], password, data['bio'])
+            query = 'INSERT INTO users (username, password) VALUES ($1, $2)'
+            await cnx.execute(query, data['username'], password)
             return web.json_response({})
 
 
@@ -193,8 +192,5 @@ def create_app(loop):
     # routes for account
     app.router.add_route('POST', '/api/account/new', account_new)
     app.router.add_route('POST', '/api/account/login', account_login)
-    # routes for wiki
-    app.router.add_route('GET', '/api/wiki/{title}/latest', wiki_latest)
-    app.router.add_route('POST', '/api/wiki/{title}/edit', wiki_edit)
 
     return app

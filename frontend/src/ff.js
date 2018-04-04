@@ -207,12 +207,11 @@ let clean = async function(app, model) {
     return function(app, model) {
         let newModel = Immutable({});
         // only keep things that start with %
-        log('TODO: implement ff.clean');
-        /* model.keySeq()
-         *      .filter((x) => x.startsWith('%'))
-         *      .forEach(function(key) {
-         *          newModel = newModel.set(key, model.get(key));  // XXX: side-effect
-         *      });*/
+        Object.keys(model)
+              .filter((x) => x.startsWith('%'))
+              .forEach(function(key) {
+                  newModel = newModel.set(key, model[key]);  // XXX: side-effect
+              });
         return newModel;
     }
 }
@@ -281,6 +280,7 @@ let Logout = function({mc}) {
 }
 
 export default {
+    Immutable,
     Link,
     Logout,
     Router,
