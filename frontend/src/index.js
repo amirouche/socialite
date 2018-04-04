@@ -48,7 +48,16 @@ let Home = function(model) {
 let onSignIn = function(app, model) {
     return async function(event) {
         event.preventDefault();
-        return (app, model) => model;
+        let data = {
+            username: model['signin-username'],
+            password: model['signin-password'],
+        };
+        let response = await ff.post('/api/account/login', data);
+        if(response.status === 200) {
+            let token = await response.json();
+            return await ff.redirect(app, model.set('%token', token['token']), '/home')
+        }
+        return await ff.redirect(app, model, '/');
     }
 }
 
@@ -97,14 +106,14 @@ let Index = function(model, mc) {
                               placeholder="username"
                               value={model['signin-username'] || ""}
                               onChange={mc(ff.set('signin-username'))}/></p>
-                    {getErrorMessage('sigin-username', model)}
+                    {getErrorMessage('signin-username', model)}
                     <p><input type="password"
                               placeholder="password"
                               value={model['signin-password'] || ""}
-                              onChange={mc(ff.set('sigin-password'))}/></p>
-                    {getErrorMessage('sigin-password', model)}
+                              onChange={mc(ff.set('signin-password'))}/></p>
+                    {getErrorMessage('signin-password', model)}
                     <p><input type="submit" value="submit" onClick={mc(onSignIn)}/></p>
-                    {getErrorMessage('sigin-form', model)}
+                    {getErrorMessage('signin-form', model)}
                 </form>
                 <h2>Sign Up</h2>
                 <form onSubmit={mc(onSignUp)}>
