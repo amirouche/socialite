@@ -32,6 +32,10 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: normal;
 }
 
+input {
+    padding: 5px 10px;
+}
+
 a:link,
 a:hover,
 a:visited,
@@ -105,6 +109,7 @@ a:active {
     font-size: 2em;
     background: white;
     border: 0px;
+    border-radius: 0px 3px 3px 0px;
 }
 
 
@@ -204,4 +209,23 @@ a:active {
     margin-bottom: 10px;
     line-height: 1.6em;
     text-align: justify;
+}
+
+/* #enter */
+
+#enter {
+    background: white;
+    color: #222;
+    width: 500px;
+    margin: auto;
+    margin-top: 100px;
+    padding: 15px;
+    text-align: center;
+    border-radius: 3px;
+    box-shadow: 0px 0px 7px white;
+}
+
+#enter p {
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
