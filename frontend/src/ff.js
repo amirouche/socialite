@@ -265,7 +265,7 @@ let post = function(path, data, token) {
  *  Get the auth token from the model or localStorage
  */
 let getToken = function(model) {
-    return model.get('%token') || window.localStorage.getItem('%token');
+    return model['%token'] || window.localStorage.getItem('%token');
 }
 
 let LogoutClicked = function(app, model) {

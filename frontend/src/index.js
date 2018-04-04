@@ -4,6 +4,20 @@ import registerServiceWorker from './registerServiceWorker';
 import ff from './ff.js';
 
 
+let check = async function(app, model) {
+    let token = model['%token'];
+    if (token !== undefined) {
+        let response = await ff.post('/api/check_auth', {}, ff.getToken(model));
+        if (response.status === 200) {
+            return (app, model) => model;
+        } else {
+            return await ff.redirect(app, model, '/');
+        }
+    } else {
+        return await ff.redirect(app, model, '/');
+    }
+}
+
 let Home = function(model) {
     return [
         <div id="header" key="header">
@@ -144,7 +158,7 @@ let Index = function(model, mc) {
 
 let router = new ff.Router();
 router.append('/', ff.clean, Index);
-router.append('/home', ff.clean, Home);
+router.append('/home', check, Home);
 
 
 
