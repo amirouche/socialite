@@ -116,7 +116,7 @@ a:active {
 /* #container */
 
 #container {
-    width: 1000px;
+    max-width: 1000px;
     margin: auto;
 }
 
@@ -216,7 +216,7 @@ a:active {
 #enter {
     background: white;
     color: #222;
-    width: 500px;
+    max-width: 500px;
     margin: auto;
     margin-top: 100px;
     padding: 15px;
