@@ -78,16 +78,33 @@ a:active {
     width: 1000px;
     margin: auto;
     display: flex;
-    justify-content: space-between;
-    padding: 15px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    opacity: 0.3;
+    transition: 0.5s;
 }
 
-#header > p, #header h1 {
-    margin: 0px;
+#header:focus, #header:hover {
+    opacity: 1;
 }
 
-#header > p {
-    font-size: 3em;
+#header > input {
+    font-size: 2em;
+    background: #0003;
+    border: 1px solid white;
+    box-shadow: 0px 0px 2px white;
+    padding: 5px 10px;
+    color: white;
+    border-radius: 3px 0px 0px 3px;
+    flex: 2;
+    box-shadow: 0px 0px 3px white;
+}
+
+#header > button {
+    font-size: 2em;
+    background: white;
+    border: 0px;
 }
 
 
