@@ -40,7 +40,13 @@ a:link,
 a:hover,
 a:visited,
 a:active {
-    color: white;
+    color: black;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+    color: rgba(41, 128, 185,1.0);
 }
 
 /* BACKGROUND */
@@ -81,7 +87,6 @@ a:active {
 #header {
     width: 1000px;
     margin: auto;
-    display: flex;
     margin-top: 15px;
     margin-bottom: 15px;
     padding-bottom: 15px;
@@ -93,7 +98,12 @@ a:active {
     opacity: 1;
 }
 
-#header > input {
+#header > form {
+    box-shadow: 0px 0px 3px white;
+    display: flex;
+}
+
+#header > form > input[type="text"] {
     font-size: 2em;
     background: #0003;
     border: 1px solid white;
@@ -102,10 +112,9 @@ a:active {
     color: white;
     border-radius: 3px 0px 0px 3px;
     flex: 1;
-    box-shadow: 0px 0px 3px white;
 }
 
-#header > button {
+#header > form > input[type="submit"] {
     font-size: 2em;
     background: white;
     border: 0px;
@@ -118,6 +127,21 @@ a:active {
 #container {
     max-width: 1000px;
     margin: auto;
+}
+
+#container > div.info {
+    align-items: center;
+    color: white;
+    background: #34495e;
+    padding: 15px;
+    border-radius: 3px;
+    margin-bottom: 15px;
+    border: 1px solid #2c3e50;
+}
+
+#container > div.info > p > code {
+    border: 1px solid #2c3e50;
+    padding: 5px 10px;
 }
 
 #container > div.directory {

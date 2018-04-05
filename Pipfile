@@ -17,6 +17,7 @@ sphinx-js = "*"
 sphinx = "*"
 pytest = "*"
 
+
 [packages]
 
 aiohttp = "*"
@@ -29,3 +30,7 @@ itsdangerous = "*"
 setproctitle = "*"
 trafaret = "*"
 yoyo-migrations = "*"
+aiodns = "*"
+yarl = "*"
+async-timeout = "*"
+feedparser = "*"

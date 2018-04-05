@@ -5,11 +5,13 @@ import ff from './ff.js';
 
 
 let check = async function(app, model) {
-    let token = model['%token'];
+    let token = ff.getToken(model);
     if (token !== undefined) {
         let response = await ff.post('/api/check_auth', {}, ff.getToken(model));
         if (response.status === 200) {
-            return (app, model) => model;
+            let response = await ff.post('/api/home', '', ff.getToken(model));
+            let output = await response.json();
+            return (app, model) => model.set('output', output);
         } else {
             return await ff.redirect(app, model, '/');
         }
@@ -18,17 +20,23 @@ let check = async function(app, model) {
     }
 }
 
-let Home = function(model) {
-    return [
-        <div id="header" key="header">
-            <input type="text" placeholder="incoming!" />
-            <button><span role="img" aria-label="submit">🚀</span></button>
-        </div>,
+let onSubmit = function(app, model) {
+    return async function(event) {
+        event.preventDefault();
+        let response = await ff.post('/api/home', model['input'], ff.getToken(model));
+        let out = await response.json();
+        return (app, model) => model.set('kind', out['kind'])
+                                    .set('output', out['output']);
+    }
+}
+
+
+let defaultHome = function(model, mc) {
+    return (
         <div id="container" key="container">
             <div className="directory">
                 <p className="name">Programming</p>
                 <p className="updates">linux.org, hackernews, journal du hacker</p>
-                <p className="toolbox"><span rol="img">✓</span></p>
             </div>
             <div className="directory open">
                 <h2 className="name">Programming</h2>
@@ -47,14 +55,57 @@ let Home = function(model) {
             <div className="directory">
                 <p className="name">Programming</p>
                 <p className="updates">linux.org, hackernews, journal du hacker</p>
-                <p className="toolbox"><span rol="img">✓</span></p>
             </div>
             <div className="directory">
                 <p className="name">Programming</p>
                 <p className="updates">linux.org, hackernews, journal du hacker</p>
-                <p className="toolbox"><span rol="img">✓</span></p>
             </div>
         </div>
+    );
+}
+
+let feedViewEntry = function(entry) {
+    return <li><a href={entry['link']} target="_blank">{entry['title']}</a></li>;
+}
+
+let feedView = function(output, mc) {
+    let key = 'feed-' + output['title'];
+    return (
+        <div id="container" key={key}>
+            <div className="info">
+                <p>Use <code>/add FEED CATEGORY</code> to add <code>FEED</code> to <code>CATEGORY</code></p>
+            </div>
+            <div className="directory open">
+                <h2 className="name">{output['title']}</h2>
+                <ul>
+                    {output['entries'].map(feedViewEntry)}
+                </ul>
+            </div>
+        </div>
+    );
+}
+
+let kindToView = {
+    feed: feedView,
+};
+
+let Home = function(model, mc) {
+    ff.log('model', model);
+    let view = kindToView[model['kind']];
+    if (view === undefined) {
+        view = defaultHome;
+    }
+    return [
+        <div id="header" key="header">
+            <form onSubmit={mc(onSubmit)}>
+                <input type="text"
+                       placeholder="incoming!"
+                       value={model['input'] || ""}
+                       onChange={mc(ff.set('input'))} />
+                <input type="submit" value="🚀" />
+            </form>
+        </div>,
+        view(model['output'], mc)
     ];
 }
 

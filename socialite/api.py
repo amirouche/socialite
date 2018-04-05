@@ -4,14 +4,18 @@ from string import punctuation
 import asyncpg
 import daiquiri
 import trafaret as t
+import async_timeout
 
+from aiohttp import ClientSession
 from aiohttp import web
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
+from feedparser import parse as feedparser
 from itsdangerous import BadSignature
 from itsdangerous import SignatureExpired
 from itsdangerous import TimestampSigner
 from setproctitle import setproctitle  # pylint: disable=no-name-in-module
+from trafaret import DataError
 
 from . import settings
 
@@ -162,6 +166,53 @@ async def check_auth(request):
     return web.json_response('OK')
 
 
+# home
+
+async def fetch(session, url):
+    async with async_timeout.timeout(60):
+        async with session.get(url) as response:
+            return await response.text()
+
+
+def get_entry_link(feed, link):
+    try:
+        t.URL(link)
+    except DataError:
+        return feed.feed.link + '/' + link
+    else:
+        return link
+
+
+async def output_feed(request, url):
+    try:
+        body = await fetch(request.app['session'], url)
+    except Exception as exc:  # noqa
+        return web.json_response({'kind': 'invalid url'})
+    else:
+        feed = feedparser(body)
+        output = dict(title=feed.feed.title, entries=list())
+        for entry in feed.entries:
+            output['entries'].append(dict(
+                title=entry.title,
+                link=get_entry_link(feed, entry.link),
+            ))
+        return web.json_response(dict(kind='feed', output=output))
+
+
+async def home(request):
+    input = await request.json()
+    if not input:  # retrieve summary
+        return web.json_response({})
+    else:  # otherwise, handle command
+        try:
+            t.URL(input)
+        except DataError:
+            return web.json_response({'kind': 'unknown'})
+        else:
+            out = await output_feed(request, input)
+            return out
+
+
 # boot the app
 
 async def init_pg(app):
@@ -185,12 +236,14 @@ def create_app(loop):
     app['settings'] = settings
     app['hasher'] = PasswordHasher()
     app['signer'] = TimestampSigner(settings.SECRET)
-
+    app['session'] = ClientSession()
     # routes
     app.router.add_route('GET', '/api/status', status)
     app.router.add_route('POST', '/api/check_auth', check_auth)
     # routes for account
     app.router.add_route('POST', '/api/account/new', account_new)
     app.router.add_route('POST', '/api/account/login', account_login)
+    # route for home
+    app.router.add_route('POST', '/api/home', home)
 
     return app
