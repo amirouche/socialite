@@ -183,7 +183,7 @@ def get_entry_link(feed, link):
         return link
 
 
-async def output_feed(request, url):
+async def handle_show_feed(request, url):
     try:
         body = await fetch(request.app['session'], url)
     except Exception as exc:  # noqa
@@ -199,18 +199,30 @@ async def output_feed(request, url):
         return web.json_response(dict(kind='feed', output=output))
 
 
+async def show_feed(request, input):
+    try:
+        t.URL(input)
+    except DataError:
+        return False, None
+    else:
+        return True, await handle_show_feed(request, input)
+
+
+HANDLERS = [
+    show_feed,
+]
+
+
 async def home(request):
     input = await request.json()
     if not input:  # retrieve summary
         return web.json_response({})
     else:  # otherwise, handle command
-        try:
-            t.URL(input)
-        except DataError:
-            return web.json_response({'kind': 'unknown'})
-        else:
-            out = await output_feed(request, input)
-            return out
+        for handler in HANDLERS:
+            valid, output = await handler(request, input)
+            if valid:
+                return output
+        return web.json_response({'kind': 'unknown'})
 
 
 # boot the app
