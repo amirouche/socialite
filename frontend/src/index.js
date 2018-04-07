@@ -65,7 +65,7 @@ let defaultHome = function(model, mc) {
 }
 
 let feedViewEntry = function(entry) {
-    return <li><a href={entry['link']} target="_blank">{entry['title']}</a></li>;
+    return <li key={entry['link']}><a href={entry['link']} target="_blank">{entry['title']}</a></li>;
 }
 
 let feedView = function(output, mc) {
