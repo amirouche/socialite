@@ -19,7 +19,7 @@ lint: ## lint the code
 	@pylint socialite
 
 database-repl: ## start a repl for the database
-	pgcli socialite socialite -h localhost --less-chatty
+	pgcli --less-chatty postgres://socialite:socialite@localhost:5432/socialite
 
 database-reset: ## Kill any (known) processus using the database, drop and recreate the database and run migrations
 	killall socialite-api || true
