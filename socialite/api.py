@@ -20,7 +20,7 @@ from trafaret import DataError
 from . import settings
 
 # setup logging
-logger = daiquiri.getLogger(__name__)
+log = daiquiri.getLogger(__name__)
 
 
 # middleware
@@ -55,13 +55,16 @@ async def middleware_check_auth(app, handler):
             else:
                 max_age = app['settings'].TOKEN_MAX_AGE
                 try:
-                    username = app['signer'].unsign(token, max_age=max_age)
+                    user_uid = app['signer'].unsign(token, max_age=max_age)
                 except SignatureExpired:
+                    log.debug('Token expired')
                     raise web.HTTPForbidden(reason='auth token expired')
                 except BadSignature:
+                    log.debug('Bad signature')
                     raise web.HTTPForbidden(reason='bad signature')
                 else:
-                    request.username = username
+                    log.debug('User authenticated as {}'.format(user_uid))
+                    request.user_uid = user_uid
                     response = await handler(request)
                     return response
 
@@ -80,7 +83,7 @@ async def status(request):
         WHERE n.nspname = 'public' AND c.relkind = 'r'"""
         records = await cnx.fetch(query)
         for record in records:
-            logger.info(record)
+            log.info(record)
     return web.json_response('OK!')
 
 
@@ -144,20 +147,20 @@ async def account_login(request):
     # FIXME: validate and always report to the user that the login failed
     async with request.app['asyncpg'].acquire() as cnx:
         username = data['username']
-        query = 'SELECT password FROM users WHERE username = $1'
-        password = await cnx.fetchval(query, username)
-        if password is None:
+        query = 'SELECT uid, password FROM users WHERE username = $1'
+        row = await cnx.fetchrow(query, username)
+        if row is None:
             return web.Response(status=401)
         else:
             try:
-                request.app['hasher'].verify(password, data['password'])
+                request.app['hasher'].verify(row['password'], data['password'])
             except VerifyMismatchError:
                 return web.Response(status=401)
             else:
-                token = request.app['signer'].sign(username)
+                token = request.app['signer'].sign(str(row['uid']))
                 token = token.decode('utf-8')
                 out = dict(token=token)
-                return web.json_response(out)
+            return web.json_response(out)
 
 
 # others
@@ -229,7 +232,7 @@ async def home(request):
 
 async def init_pg(app):
     """Init asyncpg pool"""
-    logger.debug("setup asyncpg, using %s", app['settings'].DSN)
+    log.debug("setup asyncpg, using %s", app['settings'].DSN)
     engine = await asyncpg.create_pool(app['settings'].DSN)
     app['asyncpg'] = engine
     return app
@@ -239,7 +242,7 @@ def create_app(loop):
     """Starts the aiohttp process to serve the REST API"""
     setproctitle('socialite-api')
 
-    logger.debug("boot")
+    log.debug("boot")
 
     # init app
     app = web.Application()  # pylint: disable=invalid-name
