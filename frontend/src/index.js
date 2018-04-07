@@ -119,8 +119,9 @@ let onSignIn = function(app, model) {
         };
         let response = await ff.post('/api/account/login', data);
         if(response.status === 200) {
-            let token = await response.json();
-            return await ff.redirect(app, model.set('%token', token['token']), '/home')
+            let token = (await response.json())['token'];
+            ff.setToken(token);
+            return await ff.redirect(app, model.set('%token', token), '/home')
         }
         return await ff.redirect(app, model, '/');
     }

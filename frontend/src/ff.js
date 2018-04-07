@@ -268,6 +268,10 @@ let getToken = function(model) {
     return model['%token'] || window.localStorage.getItem('%token');
 }
 
+let setToken = function(token) {
+    window.localStorage.setItem('%token', token);
+}
+
 let LogoutClicked = function(app, model) {
     return async function(event) {
         window.localStorage.removeItem('%token');
@@ -289,6 +293,7 @@ export default {
     createApp,
     get,
     getToken,
+    setToken,
     log,
     post,
     redirect,
