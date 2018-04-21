@@ -5,13 +5,14 @@ import ff from './ff.js';
 
 
 let check = async function(app, model) {
+    model = (await ff.clean(model));
     let token = ff.getToken(model);
     if (token !== undefined) {
         let response = await ff.post('/api/check_auth', {}, ff.getToken(model));
         if (response.status === 200) {
             let response = await ff.post('/api/home', '', ff.getToken(model));
             let output = await response.json();
-            return (app, model) => model.set('output', output);
+            return (app, _) => model.set('output', output);
         } else {
             return await ff.redirect(app, model, '/');
         }
@@ -98,11 +99,11 @@ let Home = function(model, mc) {
     return [
         <div id="header" key="header">
             <form onSubmit={mc(onSubmit)}>
-                <input type="text"
+                <Input type="text"
                        placeholder="incoming!"
                        value={model['input'] || ""}
                        onChange={mc(ff.set('input'))} />
-                <input type="submit" value="🚀" />
+                <Input type="submit" value="🚀" />
             </form>
         </div>,
         view(model['output'], mc)
@@ -161,6 +162,28 @@ let getErrorMessage = function(name, model) {
     }
 }
 
+class Input extends React.Component {
+    constructor(props, ...args) {
+        super(props, ...args);
+        this.state = { value: props.value };
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (this.state.value !== nextProps.value) {
+            this.setState({ value: nextProps.value });
+        }
+    }
+
+    onChange(event) {
+        event.persist();
+        this.setState({ value: event.target.value }, () => this.props.onChange(event));
+    }
+
+    render() {
+        return (<input {...this.props} {...this.state} onChange={this.onChange.bind(this)} />);
+    }
+}
+
 let Index = function(model, mc) {
     ff.log('model', model);
     return (
@@ -168,37 +191,37 @@ let Index = function(model, mc) {
             <div id="enter">
                 <h2>Sign In</h2>
                 <form onSubmit={mc(onSignIn)}>
-                    <p><input type="text"
+                    <p><Input type="text"
                               placeholder="username"
                               value={model['signin-username'] || ""}
                               onChange={mc(ff.set('signin-username'))}/></p>
                     {getErrorMessage('signin-username', model)}
-                    <p><input type="password"
+                    <p><Input type="password"
                               placeholder="password"
                               value={model['signin-password'] || ""}
                               onChange={mc(ff.set('signin-password'))}/></p>
                     {getErrorMessage('signin-password', model)}
-                    <p><input type="submit" value="submit" onClick={mc(onSignIn)}/></p>
+                    <p><Input type="submit" value="submit" onClick={mc(onSignIn)}/></p>
                     {getErrorMessage('signin-form', model)}
                 </form>
                 <h2>Sign Up</h2>
                 <form onSubmit={mc(onSignUp)}>
-                    <p><input type="text"
+                    <p><Input type="text"
                               placeholder="username"
                               value={model['signup-username'] || ""}
                               onChange={mc(ff.set('signup-username'))}/></p>
                     {getErrorMessage('signup-username', model)}
-                    <p><input type="password"
+                    <p><Input type="password"
                               placeholder="password"
                               value={model['signup-password'] || ""}
                               onChange={mc(ff.set('signup-password'))}/></p>
                     {getErrorMessage('signup-password', model)}
-                    <p><input type="password"
+                    <p><Input type="password"
                               placeholder="validation"
                               value={model['signup-validation'] || ""}
                               onChange={mc(ff.set('signup-validation'))}/></p>
                     {getErrorMessage('signup-validation', model)}
-                    <p><input type="submit" value="submit" onSubmit={mc(onSignUp)}/></p>
+                    <p><Input type="submit" value="submit" onSubmit={mc(onSignUp)}/></p>
                     {getErrorMessage('signup-form', model)}
                 </form>
             </div>
@@ -209,7 +232,7 @@ let Index = function(model, mc) {
 
 
 let router = new ff.Router();
-router.append('/', ff.clean, Index);
+router.append('/', ff.routeClean, Index);
 router.append('/home', check, Home);
 
 
