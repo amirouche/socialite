@@ -203,17 +203,20 @@ let Link = function({mc, href, children, className}) {
     return <a href={href} onClick={mc(linkClicked(href))} className={className}>{children}</a>;
 }
 
-let clean = async function(app, model) {
-    return function(app, model) {
-        let newModel = Immutable({});
-        // only keep things that start with %
-        Object.keys(model)
-              .filter((x) => x.startsWith('%'))
-              .forEach(function(key) {
-                  newModel = newModel.set(key, model[key]);  // XXX: side-effect
-              });
-        return newModel;
-    }
+let clean = function(model) {
+    let newModel = Immutable({});
+    // only keep things that start with %
+    Object.keys(model)
+          .filter((x) => x.startsWith('%'))
+          .forEach(function(key) {
+              newModel = newModel.set(key, model[key]);  // XXX: side-effect
+          });
+    return newModel;
+}
+
+
+let routeClean = async function(app, model) {
+    return (app, model) => clean(model);
 }
 
 let set = function(name) {
@@ -298,4 +301,5 @@ export default {
     post,
     redirect,
     set,
+    routeClean,
 };
