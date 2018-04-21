@@ -1,12 +1,12 @@
 {
-    "name": "frontend",
-    "version": "0.1.0",
-    "private": true,
-    "proxy": "http://localhost:8000",
-    "dependencies": {
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "proxy": "http://localhost:8000",
+  "dependencies": {
     "normalize.css": "^8.0.0",
-    "react": "^16.3.0",
-    "react-dom": "^16.3.0",
+    "react": "^16.3.2",
+    "react-dom": "^16.3.2",
     "react-scripts": "1.1.2",
     "seamless-immutable": "^7.1.3"
   },

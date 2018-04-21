@@ -211,8 +211,31 @@ async def show_feed(request, input):
         return True, await handle_show_feed(request, input)
 
 
+async def handle_add_feed(request, url, directory):
+    try:
+        body = await fetch(request.app['session'], url)
+    except Exception as exc:  # noqa
+        return web.json_response({'kind': 'invalid url'})
+    else:
+        with request.app['asyncpg'].cnx() as cnx:
+            query = 'INSERT INTO subscriptions (username, password) VALUES ($1, $2)'
+            await cnx.execute(query, data['username'], password)
+
+
+async def add_feed(request, input):
+    try:
+        command, url, directory = input.split()
+    except ValueError:
+        return False, None
+    else:
+        if command != '/add':
+            return False, None
+        return True, handle_add_feed(request, url, directory)
+
+
 HANDLERS = [
     show_feed,
+    add_feed,
 ]
 
 
