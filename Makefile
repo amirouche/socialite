@@ -33,5 +33,5 @@ upstream:  ## Clone the most important third-party libraries
 	git clone https://github.com/aio-libs/aiohttp upstream/aiohttp
 	git clone https://github.com/Deepwalker/trafaret upstream/trafaret
 
-clean:  ## Clean things up
-	find . -name '*.~' -exec rm --force {} +
+clean:  ##
+	git clean -fX
