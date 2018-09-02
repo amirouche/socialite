@@ -4,4 +4,6 @@ cache: pip
 python: 3.6
 install: make
 script: make check
-after_success: codecov
+after_success:
+  - make coverage
+  - codecov

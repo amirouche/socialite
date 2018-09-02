@@ -13,7 +13,7 @@ check:
 	pipenv run py.test --capture=no tests.py
 
 coverage:
-	pipenv run py.test --cov-config .coveragerc --verbose --cov-report term --cov-report html --cov=socialite tests.py
+	pipenv run py.test --cov-config .coveragerc --verbose --cov-report term --cov-report html --cov-report xml --cov=socialite tests.py
 
 help: ## This help.
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
