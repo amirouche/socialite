@@ -1,11 +1,9 @@
 upstream
 doc/build
-socialite-diagram.png
+foundationdb-clients_*
+foundationdb-server_*
 
-# javascript specific
-node_modules
-
-# emacs backup files
+# emacs
 *~
 \#*
 \.\#*
