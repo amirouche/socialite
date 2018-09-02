@@ -2,8 +2,8 @@
  backend
 =========
 
-``socialite.api``
-=================
+``socialite.socialite``
+=======================
 
-.. automodule:: socialite.api
+.. automodule:: socialite.socialite
    :members:
