@@ -38,3 +38,6 @@ upstream: ## Clone the most important third-party libraries
 
 clean: ## Clean up
 	git clean -fX
+
+database-clean:  ## remove all data from the database
+	python -c "import fdb; fdb.api_version(520); db = fdb.open(); del db[b'':b'\xFF']"
