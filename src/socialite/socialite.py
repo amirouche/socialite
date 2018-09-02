@@ -10,6 +10,7 @@ import logging
 import os
 
 import daiquiri
+import uvloop
 from aiohttp import ClientSession
 from aiohttp import web
 from aiohttp_jinja2 import setup as setup_jinja2
@@ -172,6 +173,7 @@ def main():
     daiquiri.setup(level=level, outputs=('stderr',))
 
     if args.get('run'):
+        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
         loop = asyncio.get_event_loop()
         app = create_app(loop)
         web.run_app(app, host='127.0.0.1', port=8000)
