@@ -1,6 +1,6 @@
 ((python-mode . ((indent-tabs-mode . nil)
                  (tab-width . 4)
-                 (fill-column . 80)))
+                 (fill-column . 100)))
  (web-mode . ((indent-tabs-mode . nil)
               (tab-width . 4)
               (web-mode-markup-indent-offset . 4)
@@ -12,4 +12,4 @@
               (fill-column . 80)))
  (sql-mode . ((indent-tabs-mode . nil)
               (tab-width . 4)
-              (fill-column . 80))))
+              (fill-column . 100))))
