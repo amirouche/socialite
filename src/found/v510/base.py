@@ -214,15 +214,10 @@ def on_transaction_get(fdb_future, aio_future):
             _loop.call_soon_threadsafe(aio_future.set_result, None)
             lib.fdb_future_destroy(fdb_future)
         else:
-            # TODO: maybe wrap in a factory to keep the closure lightweight
-            def free(_):
-                # XXX: the destruction of the future is delayed until
-                # there is no more references to the value. Hope it works!
-                lib.fdb_future_destroy(fdb_future)
-
-            handle = ffi.gc(value[0], free)
-            out = ffi.buffer(handle, value_length[0])
+            # XXX: https://bitbucket.org/cffi/cffi/issues/380/ffibuffer-position-returns-a-buffer
+            out = bytes(ffi.buffer(value[0], value_length[0]))
             _loop.call_soon_threadsafe(aio_future.set_result, out)
+            lib.fdb_future_destroy(fdb_future)
     else:
         _loop.call_soon_threadsafe(aio_future.set_exception, FoundError(error))
         lib.fdb_future_destroy(fdb_future)

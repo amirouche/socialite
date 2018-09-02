@@ -13,6 +13,7 @@ pytest-cov = "*"
 "flake8" = "*"
 codecov = "*"
 jedi = "*"
+pytest-asyncio = "*"
 
 [packages]
 aiohttp = "*"
