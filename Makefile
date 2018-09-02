@@ -10,6 +10,7 @@ install: ## Prepare the host sytem for development
 	pip install pipenv --upgrade
 	pipenv install --dev --skip-lock
 	cd src && pipenv run python found_build.py
+	# pipenv run pre-commit install
 
 check: ## Run tests
 	pipenv run py.test --capture=no src/tests.py

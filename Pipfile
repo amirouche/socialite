@@ -14,6 +14,7 @@ pytest-cov = "*"
 codecov = "*"
 jedi = "*"
 pytest-asyncio = "*"
+pre-commit = "*"
 
 [packages]
 aiohttp = "*"
