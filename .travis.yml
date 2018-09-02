@@ -1,0 +1,7 @@
+sudo: required
+language: python
+cache: pip
+python: 3.6
+install: make
+script: make check
+after_success: codecov

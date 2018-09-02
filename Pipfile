@@ -1,35 +1,27 @@
 [[source]]
-
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
-
 [dev-packages]
-
-eralchemy = "*"
 aiohttp-devtools = "*"
 debug = "*"
-git-pylint-commit-hook = "*"
-jupyter = "*"
-pgcli = "*"
-sphinx-js = "*"
+ipython = "*"
 sphinx = "*"
 pytest = "*"
-
+pytest-cov = "*"
+"flake8" = "*"
+codecov = "*"
 
 [packages]
-
 aiohttp = "*"
 "argon2-cffi" = "*"
 asyncpg = "*"
-celery = "*"
 daiquiri = "*"
 docopt = "*"
 itsdangerous = "*"
 setproctitle = "*"
 trafaret = "*"
-yoyo-migrations = "*"
 aiodns = "*"
 yarl = "*"
 async-timeout = "*"

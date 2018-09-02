@@ -36,12 +36,8 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
-    'sphinx_js',
 ]
 
-# sphinx-js configuration
-js_source_path = '../frontend/src'
-# jsdoc_config_path = 'jsdoc.conf.json'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -57,7 +53,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'socialite'
-copyright = '2017, socialite'
+copyright = '2017-2018, socialite'
 author = 'socialite'
 
 # The version info for the project you're documenting, acts as replacement for
