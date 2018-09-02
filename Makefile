@@ -11,21 +11,21 @@ install: ## Prepare the host sytem for development
 	pipenv install --dev --skip-lock
 
 check: ## Run tests
-	pipenv run py.test --capture=no tests.py
+	pipenv run py.test --capture=no src/tests.py
 	pipenv check
 	@echo "\033[95m\n\nYou may now run 'make lint' or 'make coverage'.\n\033[0m"
 
 coverage: ## Code coverage
-	pipenv run py.test --cov-config .coveragerc --verbose --cov-report term --cov-report html --cov-report xml --cov=socialite tests.py
+	pipenv run py.test --cov-config .coveragerc --verbose --cov-report term --cov-report html --cov-report xml --cov=socialite src/tests.py
 
 help: ## This help.
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
 
 devrun: ## Run application in development mode
-	DEBUG=DEBUG adev runserver --livereload --static socialite/static/ socialite/socialite.py
+	DEBUG=DEBUG adev runserver --livereload --static src/socialite/static/ src/socialite/socialite.py
 
 lint: ## Lint the code
-	pipenv run pylint socialite
+	pipenv run pylint src/
 
 doc: ## Build the documentation
 	cd doc && make html
