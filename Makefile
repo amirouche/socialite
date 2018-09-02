@@ -12,6 +12,7 @@ install: ## Prepare the host sytem for development
 check: ## Run tests
 	pipenv run py.test --capture=no tests.py
 	pipenv check
+	@echo "\033[95m\n\nYou may now run 'make lint' or 'make coverage'.\n\033[0m"
 
 coverage: ## Code coverage
 	pipenv run py.test --cov-config .coveragerc --verbose --cov-report term --cov-report html --cov-report xml --cov=socialite tests.py
