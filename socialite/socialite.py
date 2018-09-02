@@ -9,6 +9,7 @@ import asyncio
 import logging
 import os
 
+import fdb
 import daiquiri
 from aiohttp import ClientSession
 from aiohttp import web
@@ -29,11 +30,10 @@ from socialite import settings
 from socialite.helpers import no_auth
 
 
+fdb.api_version(520)
+
+
 log = daiquiri.getLogger(__name__)
-
-
-async def init(settings):
-    log.info("init socilite, using %s", settings.DSN)
 
 
 # middleware
@@ -78,12 +78,37 @@ async def middleware_check_auth(app, handler):
 
 # index
 
+
+@fdb.transactional
+def counter_get(tr):
+    counter = tr.get(b'counter')
+    counter = fdb.tuple.unpack(counter)[0]
+    return counter
+
+
 @no_auth
 async def index(request):
     app = request.app
     settings = request.app['settings']
-    context = dict(settings=settings, message='hello world again!')
+    db = request.app['db']
+    counter = await request.app.loop.run_in_executor(None, counter_get, db)
+    context = dict(settings=settings, counter=counter)
     return app.render('index.jinja2', request, context)
+
+
+@fdb.transactional
+def counter_increment(tr):
+    counter = counter_get(tr)
+    counter += 1
+    counter = fdb.tuple.pack((counter,))
+    counter = tr.set(b'counter', counter)
+
+
+@no_auth
+async def increment(request):
+    await request.app.loop.run_in_executor(None, counter_increment, request.app['db'])
+    raise web.HTTPFound(location='/')
+
 
 # api
 
@@ -98,6 +123,7 @@ async def status(request):
 
 async def init_database(app):
     log.debug("init database")
+    await app.loop.run_in_executor(None, app['db'].set, b'counter', fdb.tuple.pack((0,)))
     return app
 
 
@@ -119,12 +145,15 @@ def create_app(loop):
     app.render = render
     app.on_startup.append(init_database)
     app.middlewares.append(middleware_check_auth)
+    app['db'] = fdb.open()  # fdb
     app['settings'] = settings
     app['hasher'] = PasswordHasher()
     app['signer'] = TimestampSigner(settings.SECRET)
     app['session'] = ClientSession()
-    # routes
+    # frontend
     app.router.add_route('GET', '/', index)
+    app.router.add_route('POST', '/', increment)
+    # api
     app.router.add_route('GET', '/api/status', status)
 
     return app
