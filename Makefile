@@ -9,6 +9,7 @@ install: ## Prepare the host sytem for development
 	# Proceed with python dependencies
 	pip install pipenv --upgrade
 	pipenv install --dev --skip-lock
+	cd src && pipenv run python found_build.py
 
 check: ## Run tests
 	pipenv run py.test --capture=no src/tests.py
@@ -22,7 +23,7 @@ help: ## This help.
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
 
 devrun: ## Run application in development mode
-	DEBUG=DEBUG adev runserver --livereload --static src/socialite/static/ src/socialite/socialite.py
+	cd src && DEBUG=DEBUG adev runserver --livereload --static socialite/static/ socialite/socialite.py
 
 lint: ## Lint the code
 	pipenv run pylint src/
@@ -40,4 +41,4 @@ clean: ## Clean up
 	git clean -fX
 
 database-clean:  ## Remove all data from the database
-	python -c "import fdb; fdb.api_version(520); db = fdb.open(); del db[b'':b'\xFF']"
+	fdbcli --exec "writemode on; clearrange '' \xFF; "

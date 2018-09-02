@@ -1,7 +1,12 @@
+
 upstream
 doc/build
 foundationdb-clients_*
 foundationdb-server_*
+
+# found
+src/found/_fdb_c.c
+src/found/_fdb_c.o
 
 # emacs
 *~

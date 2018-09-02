@@ -9,7 +9,6 @@ import asyncio
 import logging
 import os
 
-import fdb
 import daiquiri
 from aiohttp import ClientSession
 from aiohttp import web
@@ -28,9 +27,7 @@ from setproctitle import setproctitle  # pylint: disable=no-name-in-module
 
 from socialite import settings
 from socialite.helpers import no_auth
-
-
-fdb.api_version(520)
+from socialite import fdb
 
 
 log = daiquiri.getLogger(__name__)
@@ -80,9 +77,9 @@ async def middleware_check_auth(app, handler):
 
 
 @fdb.transactional
-def counter_get(tr):
-    counter = tr.get(b'counter')
-    counter = fdb.tuple.unpack(counter)[0]
+async def counter_get(tr):
+    counter = await tr.get(b'counter')
+    counter = fdb.unpack(counter)[0]
     return counter
 
 
@@ -91,22 +88,22 @@ async def index(request):
     app = request.app
     settings = request.app['settings']
     db = request.app['db']
-    counter = await request.app.loop.run_in_executor(None, counter_get, db)
+    counter = await counter_get(db)
     context = dict(settings=settings, counter=counter)
     return app.render('index.jinja2', request, context)
 
 
 @fdb.transactional
-def counter_increment(tr):
-    counter = counter_get(tr)
+async def counter_increment(tr):
+    counter = await counter_get(tr)
     counter += 1
-    counter = fdb.tuple.pack((counter,))
+    counter = fdb.pack((counter,))
     counter = tr.set(b'counter', counter)
 
 
 @no_auth
 async def increment(request):
-    await request.app.loop.run_in_executor(None, counter_increment, request.app['db'])
+    await counter_increment(request.app['db'])
     raise web.HTTPFound(location='/')
 
 
@@ -121,9 +118,15 @@ async def status(request):
 
 # boot the app
 
+@fdb.transactional
+async def counter_init(tr):
+    tr.set(b'counter', fdb.pack((0,)))
+
+
 async def init_database(app):
     log.debug("init database")
-    await app.loop.run_in_executor(None, app['db'].set, b'counter', fdb.tuple.pack((0,)))
+    app['db'] = await fdb.open()
+    await counter_init(app['db'])
     return app
 
 
@@ -145,7 +148,6 @@ def create_app(loop):
     app.render = render
     app.on_startup.append(init_database)
     app.middlewares.append(middleware_check_auth)
-    app['db'] = fdb.open()  # fdb
     app['settings'] = settings
     app['hasher'] = PasswordHasher()
     app['signer'] = TimestampSigner(settings.SECRET)
