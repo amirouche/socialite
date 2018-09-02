@@ -2,7 +2,7 @@ import pytest
 
 import trafaret as t
 
-from socialite.socialite import account_new_validate
+from socialite.user import account_new_validate
 
 
 def test_account_new_validate_empty():

@@ -22,7 +22,7 @@ help: ## This help.
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
 
 devrun: ## Run application in development mode
-	DEBUG=DEBUG adev runserver socialite/socialite.py --no-debug-toolbar
+	DEBUG=DEBUG adev runserver --livereload --static socialite/static/ socialite/socialite.py
 
 lint: ## Lint the code
 	pipenv run pylint socialite

@@ -12,6 +12,7 @@ pytest = "*"
 pytest-cov = "*"
 "flake8" = "*"
 codecov = "*"
+jedi = "*"
 
 [packages]
 aiohttp = "*"
@@ -27,3 +28,4 @@ yarl = "*"
 async-timeout = "*"
 feedparser = "*"
 foundationdb = {file = "https://www.foundationdb.org/downloads/5.2.5/bindings/python/foundationdb-5.2.5.tar.gz"}
+"aiohttp-jinja2" = "*"
