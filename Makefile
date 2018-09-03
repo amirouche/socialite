@@ -7,10 +7,10 @@ install: ## Prepare the host sytem for development
 	wget https://www.foundationdb.org/downloads/5.2.5/ubuntu/installers/foundationdb-server_5.2.5-1_amd64.deb
 	sudo dpkg -i foundationdb-server_5.2.5-1_amd64.deb
 	# Proceed with python dependencies
-	pip install pipenv --upgrade
+	pip3 install pipenv --upgrade
 	pipenv install --dev --skip-lock
 	cd src && pipenv run python found_build.py
-	# pipenv run pre-commit install
+	pipenv run pre-commit install
 
 check: ## Run tests
 	pipenv run py.test --capture=no src/tests.py
