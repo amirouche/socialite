@@ -192,34 +192,34 @@ input[type="submit"]:hover {
 
 /* STREAM */
 
-#root.stream-timeline > form > p > textarea {
+#root.stream > form > p > textarea {
     width: 100%;
 }
 
-#root.stream-timeline > .stream {
+#root.stream > .stream {
     border-top: 1px solid hsla(0, 0%, 100%, 0.3);
     padding-top: 15px;
 }
 
-#root.stream-timeline > .stream > .item {
+#root.stream > .stream > .item {
     border: 1px solid hsla(0, 0%, 100%, 0.3);
     border-radius: 3px;
     padding: 10px;
     margin-bottom: 15px;
 }
 
-#root.stream-timeline > .stream > .item > img {
+#root.stream > .stream > .item > img {
     float: left;
     margin-right: 10px;
     margin-botto: 10px;
 }
 
-#root.stream-timeline > .stream > .item > .html > a.source {
+#root.stream > .stream > .item > .html > a.source {
     font-weight: bolder;
     text-decoration: none;
 }
 
-#root.stream-timeline > .stream > .item > .metadata > a {
+#root.stream > .stream > .item > .metadata > a {
     text-decoration: none;
     opacity: 0.7;
     font-size: 0.8em;
