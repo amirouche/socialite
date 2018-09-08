@@ -1,7 +1,7 @@
 from string import punctuation
 
+from aiohttp import web
 import trafaret as t
-from trafaret import DataError
 from argon2.exceptions import VerifyMismatchError
 
 from socialite.helpers import no_auth
@@ -63,7 +63,7 @@ async def account_new(request):
 async def account_login(request):
     """Try to login an user, return token if successful"""
     data = await request.json()
-    # FIXME: validate and always report to the user that the login failed
+    # TODO: validate and always report to the user that the login failed
     async with request.app['asyncpg'].acquire() as cnx:
         username = data['username']
         query = 'SELECT uid, password FROM users WHERE username = $1'
