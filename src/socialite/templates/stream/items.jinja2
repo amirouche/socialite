@@ -1,0 +1,18 @@
+{% extends "base.jinja2" %}
+
+{% block class %}stream-timeline{% endblock %}
+
+{% block root %}
+    <h1>socialite · @ {{ user["username"] }}</h1>
+    <div class="stream">
+        {% for item in items %}
+            <div class="item">
+                <!-- <img src="https://picsum.photos/48" /> -->
+                <div class="html {{ item['source']['kind'] }}"><a href="/stream/{{ user["username"] }}" class="source">{{ user["username"] }}</a> {{ item['html'] | safe }}</div>
+                <p class="metadata">
+                    <a href="/item/{{ item['uid'].hex }}">{{ item['modified_at'] | epoch2human }} seconds ago...</a>
+                </p>
+            </div>
+            {% endfor %}
+    </div>
+{% endblock %}

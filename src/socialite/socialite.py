@@ -28,10 +28,11 @@ from pathlib import Path
 from setproctitle import setproctitle  # pylint: disable=no-name-in-module
 
 from socialite import settings
-from socialite.helpers import no_auth
-from socialite import filters
 from socialite import fdb
 from socialite import user
+from socialite import stream
+from socialite.filters import FILTERS
+from socialite.helpers import no_auth
 
 
 log = daiquiri.getLogger(__name__)
@@ -122,7 +123,7 @@ def create_app(loop):
     setup_jinja2(
         app,
         loader=FileSystemLoader(str(templates)),
-        filters=vars(filters),  # XXX: improve that stuff
+        filters=FILTERS,  # TODO: improve that stuff
     )
     # others
     app.render = render
@@ -141,6 +142,10 @@ def create_app(loop):
     app.router.add_route('POST', '/user/register', user.register_post)
     # home route
     app.router.add_route('GET', '/home', home)
+    # stream
+    app.router.add_route('GET', '/stream/', stream.timeline_get)
+    app.router.add_route('POST', '/stream/', stream.timeline_post)
+    app.router.add_route('GET', '/stream/{username}', stream.items)
     # api route
     app.router.add_route('GET', '/api/status', status)
 

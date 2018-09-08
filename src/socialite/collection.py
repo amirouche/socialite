@@ -2,6 +2,8 @@ from enum import Enum
 from uuid import uuid4
 from uuid import UUID
 
+import daiquiri
+
 from socialite import fdb
 from socialite.base import SocialiteException
 from socialite.base import SubspacePrefix
@@ -9,8 +11,12 @@ from socialite.base import dumps
 from socialite.base import loads
 
 
+log = daiquiri.getLogger(__name__)
+
+
 class Collection(Enum):
     USERS = b'\x00'
+    STREAM = b'\x01'
 
 
 class CollectionSpace(Enum):
@@ -38,10 +44,12 @@ async def all(tr, collection):
     start = prefix
     end = fdb.strinc(prefix)
     out = []
+    log.debug("fetching everything in collection=%r between start=%r and end=%r", collection.name, start, end)
     items = tr.get_range(start, end)
     async for key, value in items:
         uid = key[len(prefix):]
         uid = UUID(bytes=uid)
+        print(value)
         document = loads(value)
         document['uid'] = uid
         out.append(document)
