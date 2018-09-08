@@ -9,8 +9,12 @@ def test_pack_unpack():
 
 @pytest.mark.asyncio
 async def test_range():
+    # preapre
     db = await fdb.open()
     tr = db._create_transaction()
+    tr.clear_range(b'', b'\xff')
+
+    # exec
     for number in range(10):
         tr.set(fdb.pack((number,)), fdb.pack((str(number),)))
     await tr.commit()
@@ -21,6 +25,7 @@ async def test_range():
         out.append(item)
     await tr.commit()
 
+    # check
     for (key, value), index in zip(out, range(10)[1:-1]):
         assert fdb.unpack(key)[0] == index
         assert fdb.unpack(value)[0] == str(index)

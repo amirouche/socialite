@@ -484,6 +484,24 @@ class Transaction(BaseTransaction):
         value = get_value(value)
         lib.fdb_transaction_set(self._pointer, key, len(key), value, len(value))
 
+    def clear(self, key):
+        if isinstance(key, KeySelector):
+            key = get_key(key)
+        lib.fdb_transaction_clear(self._pointer, key, len(key))
+
+    def clear_range(self, begin, end):
+        if isinstance(begin, KeySelector):
+            begin = get_key(begin)
+        if isinstance(end, KeySelector):
+            end = get_key(end)
+        lib.fdb_transaction_clear_range(
+            self._pointer,
+            begin,
+            len(begin),
+            end,
+            len(end)
+        )
+
     async def commit(self):
         fdb_future = lib.fdb_transaction_commit(self._pointer)
         aio_future = _loop.create_future()
