@@ -1,13 +1,26 @@
 from string import punctuation
 
+import daiquiri
 from aiohttp import web
 import trafaret as t
 from argon2.exceptions import VerifyMismatchError
 
+from socialite import collection
+from socialite import fdb
 from socialite.helpers import no_auth
 
 
-# account
+log = daiquiri.getLogger(__name__)
+
+
+USERS = collection.Collection.USERS
+
+
+@no_auth
+async def register_get(request):
+    context = {'settings': request.app['settings'], 'errors': {}, 'values': {}, }
+    return request.app.render('user/register.jinja2', request, context)
+
 
 def strong_password(string):
     """Check that ``string`` is strong enough password"""
@@ -20,63 +33,98 @@ def strong_password(string):
         raise t.DataError('Password is not strong enough')
 
 
-account_new_validate = t.Dict(
+user_validate = t.Dict(
     username=t.String(min_length=1, max_length=255) & t.Regexp(r'^[\w-]+$'),
     password=t.String(min_length=10, max_length=255) & strong_password,
     validation=t.String(),
 )
 
 
-@no_auth
-async def account_new(request):
-    """Create a new account raise bad request in case of error"""
-    data = await request.json()
+@fdb.transactional
+async def register(tr, username, password):
+    documents = await collection.query(tr, USERS, username=username)
     try:
-        data = account_new_validate(data)
-    except t.DataError as exc:
-        return web.json_response(exc.as_dict(), status=400)
+        documents[0]
+    except IndexError:
+        uid = await collection.insert(tr, USERS, username=username, password=password)
+        return uid
     else:
-        errors = dict()
-        # check that the user is not already taken
-        async with request.app['asyncpg'].acquire() as cnx:
-            # TODO: try/except postgresql UniqueViolationError will be more
-            # idiomatic
-            # TODO: do that in transaction!
-            query = 'SELECT COUNT(uid) FROM users WHERE username = $1;'
-            count = await cnx.fetchval(query, data['username'])
-            if count != 0:
-                errors['username'] = 'There is already an user with that username'
-            # check that the passwords are the same
-            if data['password'] != data['validation']:
-                errors['validation'] = 'Does not match password'
-            # if there is an error return it otherwise, say it's ok
-            if errors:
-                return web.json_response(errors, status=400)
-
-            password = request.app['hasher'].hash(data['password'])
-            query = 'INSERT INTO users (username, password) VALUES ($1, $2)'
-            await cnx.execute(query, data['username'], password)
-            return web.json_response({})
+        # TODO: Replace with DeepValidationException inherit from SocialiteException
+        raise t.DataError()
 
 
 @no_auth
-async def account_login(request):
-    """Try to login an user, return token if successful"""
-    data = await request.json()
-    # TODO: validate and always report to the user that the login failed
-    async with request.app['asyncpg'].acquire() as cnx:
+async def register_post(request):
+    """Create a new user raise bad request in case of error"""
+    context = {
+        'settings': request.app['settings'],
+        'errors': {},
+        'values': {},
+    }
+    data = await request.post()
+    try:
+        data = user_validate(data)
+    except t.DataError as exc:
+        log.debug('shallow validation failed')
+        context['errors'] = exc.as_dict()
+        context['values']["username"] = data.get("username")
+        return request.app.render('user/register.jinja2', request, context)
+    else:
+        log.debug('shallow validation done')
+        # Check that the passwords are the same
+        if data['password'] != data['validation']:
+            log.debug('deep validation failed: passwords do not match')
+            context['values']["username"] = data.get("username")
+            context['errors']['password'] = "Doesn't match validation"
+            return request.app.render('user/register.jinja2', request, context)
+        # Check that the username is not already taken and register the new user
+        password = request.app['hasher'].hash(data['password'])
         username = data['username']
-        query = 'SELECT uid, password FROM users WHERE username = $1'
-        row = await cnx.fetchrow(query, username)
-        if row is None:
-            return web.Response(status=401)
+        try:
+            await register(request.app['db'], username, password)
+        except t.DataError:
+            log.debug('deep validation failed: username taken')
+            context['errors']['username'] = "Username already in use"
+            return request.app.render('user/register.jinja2', request, context)
         else:
-            try:
-                request.app['hasher'].verify(row['password'], data['password'])
-            except VerifyMismatchError:
-                return web.Response(status=401)
-            else:
-                token = request.app['signer'].sign(str(row['uid']))
-                token = token.decode('utf-8')
-                out = dict(token=token)
-            return web.json_response(out)
+            log.debug("accout created with username='%s'", username)
+            return web.HTTPSeeOther(location='/')
+
+
+@fdb.transactional
+async def user_by_username(tr, username):
+    users = await collection.query(tr, USERS, username=username)
+    return users[0]
+
+
+@no_auth
+async def login_post(request):
+    """Try to login an user, return token if successful"""
+    data = await request.post()
+    username = data['username']
+    try:
+        user = await user_by_username(request.app["db"], username)
+    except IndexError:
+        context = {"settings": request.app["settings"], "error": "Wrong credentials"}
+        return request.app.render('user/login.jinja2', request, context)
+    else:
+        password = data["password"]
+        try:
+            request.app['hasher'].verify(user['password'], password)
+        except VerifyMismatchError:
+            context = {"settings": request.app["settings"], "error": "Wrong credentials"}
+            return request.app.render('user/login.jinja2', request, context)
+        else:
+            uid = user['uid'].hex
+            token = request.app['signer'].sign(uid)
+            token = token.decode('utf-8')
+            redirect = web.HTTPSeeOther(location='/home')
+            max_age = request.app['settings'].TOKEN_MAX_AGE
+            redirect.set_cookie('token', token, max_age=max_age)
+            raise redirect
+
+
+@no_auth
+async def login_get(request):
+    context = {'settings': request.app['settings'], 'errors': {}}
+    return request.app.render('user/login.jinja2', request, context)

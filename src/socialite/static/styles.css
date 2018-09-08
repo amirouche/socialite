@@ -1,3 +1,20 @@
+/* flexbox cheatsheet: https://bit.ly/1xEYMhF */
+
+/* universal box sizing with inheritance */
+/* https://css-tricks.com/box-sizing/ */
+
+html {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+*, *:before, *:after {
+  -webkit-box-sizing: inherit;
+  -moz-box-sizing: inherit;
+  box-sizing: inherit;
+}
+
+
 /* BASICS */
 
 body {
@@ -14,8 +31,16 @@ h1 {
 }
 
 h2, h3, h4, h5, h6 {
-    font-family: sans-serif, sans;
+    font-family: 'League Gothic', Impact, sans-serif, sans;
     font-weight: normal;
+    color: white;
+    text-align: left;
+    margin: 0px
+}
+
+p {
+    margin: 0px;
+    line-height: 1.6em;
 }
 
 code {
@@ -26,11 +51,48 @@ code {
 }
 
 a:link,
-a:hover,
 a:visited,
 a:active {
     color: white;
+    text-decoration: none;
+    border-bottom: 1px solid white;
 }
+
+a:hover {
+    color: #3498db;
+    border-bottom: 1px solid #3498db;
+}
+
+
+/* FORM */
+
+form p.error {
+    background: hsla(0, 90.5%, 41.2%, 0.3);;
+    margin-top: -15px;
+    padding: 5px;
+}
+
+
+input[type="text"], input[type="password"]  {
+    border: 0px;
+    border: 1px solid hsla(0, 0%, 100%, 0.3);
+    background: transparent;
+    margin-bottom: 15px;
+    padding: 15px;
+}
+
+input[type="submit"] {
+    background: hsla(0, 0%, 100%, 0.1);
+    border: 1px solid hsla(0, 0%, 100%, 0.3);
+    box-shadow: 1px 1px 2px black;
+    margin-bottom: 15px;
+    padding: 15px;
+}
+
+input[type="submit"]:hover {
+    background: hsla(0, 0%, 100%, 0.3);
+}
+
 
 /* BACKGROUND */
 
@@ -78,22 +140,53 @@ a:active {
     flex-direction: column;
 }
 
-#root input[type="text"] {
-    border: 0px;
-    border: 1px solid hsla(0, 0%, 100%, 0.3);
-    background: transparent;
-    margin-bottom: 15px;
-    padding: 15px;
+/* LOGIN */
+
+#root.login {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-#root input[type="submit"] {
-    background: hsla(0, 0%, 100%, 0.1);
-    border: 1px solid hsla(0, 0%, 100%, 0.3);
-    box-shadow: 1px 1px 2px black;
-    margin-bottom: 15px;
-    padding: 15px;
+#root.login form {
+    display: flex;
+    flex-direction: column;
 }
 
-#root input[type="submit"]:hover {
-    background: hsla(0, 0%, 100%, 0.3);
+/* REGISTER */
+
+#root.register {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#root.register form {
+    display: flex;
+    flex-direction: column;
+}
+
+/* HOME */
+
+#root.home form {
+    display: flex;
+    justify-content: center;
+}
+
+#root.home .menu {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+#root.home .menu > div {
+    box-layout: border;
+    width: 300px;
+    margin: 15px;
+    padding: 10px;
+    border: 1px solid hsla(0, 0%, 100%, 0.3);
+    border-radius: 3px;
+    text-align: justify;
 }

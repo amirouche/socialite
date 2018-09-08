@@ -28,7 +28,9 @@ from setproctitle import setproctitle  # pylint: disable=no-name-in-module
 
 from socialite import settings
 from socialite.helpers import no_auth
+from socialite import filters
 from socialite import fdb
+from socialite import user
 
 
 log = daiquiri.getLogger(__name__)
@@ -52,19 +54,20 @@ async def middleware_check_auth(app, handler):
             return response
         else:
             try:
-                token = request.headers['X-AUTH-TOKEN']
+                token = request.cookies['token']
             except KeyError:
-                raise web.HTTPForbidden(reason='auth token required')
+                log.debug('No auth token found')
+                raise web.HTTPFound(location='/')
             else:
                 max_age = app['settings'].TOKEN_MAX_AGE
                 try:
                     user_uid = app['signer'].unsign(token, max_age=max_age)
                 except SignatureExpired:
                     log.debug('Token expired')
-                    raise web.HTTPForbidden(reason='auth token expired')
+                    raise web.HTTPFound(location='/')
                 except BadSignature:
                     log.debug('Bad signature')
-                    raise web.HTTPForbidden(reason='bad signature')
+                    raise web.HTTPFound(location='/')
                 else:
                     log.debug('User authenticated as {}'.format(user_uid))
                     request.user_uid = user_uid
@@ -74,66 +77,37 @@ async def middleware_check_auth(app, handler):
     return middleware_handler
 
 
-# index
+# home
+
+async def home(request):
+    context = {'settings': request.app['settings']}
+    return request.app.render('home.jinja2', request, context)
 
 
-@fdb.transactional
-async def counter_get(tr):
-    counter = await tr.get(b'counter')
-    counter = fdb.unpack(counter)[0]
-    return counter
-
-
-@no_auth
-async def index(request):
-    app = request.app
-    settings = request.app['settings']
-    db = request.app['db']
-    counter = await counter_get(db)
-    context = dict(settings=settings, counter=counter)
-    return app.render('index.jinja2', request, context)
-
-
-@fdb.transactional
-async def counter_increment(tr):
-    counter = await counter_get(tr)
-    counter += 1
-    counter = fdb.pack((counter,))
-    counter = tr.set(b'counter', counter)
-
-
-@no_auth
-async def increment(request):
-    await counter_increment(request.app['db'])
-    raise web.HTTPFound(location='/')
-
-
-# api
-
+# status
 
 @no_auth
 async def status(request):
     """Check that the app is properly working"""
-    return web.json_response('OK!')
+    return web.json_response('OK')
 
 
 # boot the app
 
-@fdb.transactional
-async def counter_init(tr):
-    tr.set(b'counter', fdb.pack((0,)))
-
-
 async def init_database(app):
     log.debug("init database")
     app['db'] = await fdb.open()
-    await counter_init(app['db'])
     return app
 
 
 def create_app(loop):
     """Starts the aiohttp process to serve the REST API"""
-    setproctitle('socialite-api')
+    # setup logging
+    level_name = os.environ.get('DEBUG', 'INFO')
+    level = getattr(logging, level_name)
+    daiquiri.setup(level=level, outputs=('stderr',))
+
+    setproctitle('socialite')
 
     log.debug("boot")
 
@@ -143,7 +117,8 @@ def create_app(loop):
     templates = Path(__file__).parent / 'templates'
     setup_jinja2(
         app,
-        loader=FileSystemLoader(str(templates))
+        loader=FileSystemLoader(str(templates)),
+        filters=vars(filters),  # XXX: improve that stuff
     )
     # others
     app.render = render
@@ -153,10 +128,16 @@ def create_app(loop):
     app['hasher'] = PasswordHasher()
     app['signer'] = TimestampSigner(settings.SECRET)
     app['session'] = ClientSession()
-    # frontend
-    app.router.add_route('GET', '/', index)
-    app.router.add_route('POST', '/', increment)
-    # api
+
+    # user routes
+    app.router.add_route('GET', '/', user.login_get)
+    app.router.add_route('POST', '/', user.login_post)
+    # register
+    app.router.add_route('GET', '/user/register', user.register_get)
+    app.router.add_route('POST', '/user/register', user.register_post)
+    # home route
+    app.router.add_route('GET', '/home', home)
+    # api route
     app.router.add_route('GET', '/api/status', status)
 
     return app
@@ -167,16 +148,11 @@ def main():
     args = docopt(__doc__)
     setproctitle('socialite')
 
-    # setup logging
-    level_name = os.environ.get('DEBUG', 'INFO')
-    level = getattr(logging, level_name)
-    daiquiri.setup(level=level, outputs=('stderr',))
-
     if args.get('run'):
         asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
         loop = asyncio.get_event_loop()
         app = create_app(loop)
-        web.run_app(app, host='127.0.0.1', port=8000)
+        web.run_app(app, host='0.0.0.0', port=8000)
     else:
         print('Use --help to know more')
 
