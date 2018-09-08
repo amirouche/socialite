@@ -35,8 +35,8 @@ async def _random_identifier(tr, prefix):
 @fdb.transactional
 async def all(tr, collection):
     prefix = SubspacePrefix.COLLECTIONS.value + collection.value + CollectionSpace.DATA.value
-    start = prefix + b'\x00'
-    end = prefix + b'\xff'
+    start = prefix
+    end = fdb.strinc(prefix)
     out = []
     items = tr.get_range(start, end)
     async for key, value in items:
@@ -60,9 +60,9 @@ async def insert(tr, collection, **document):
 
 @fdb.transactional
 async def get(tr, collection, uid):
-    prefix = SubspacePrefix.COLLECTIONS + collection.value + CollectionSpace.DATA
+    prefix = SubspacePrefix.COLLECTIONS.value + collection.value + CollectionSpace.DATA.value
     key = prefix + uid.bytes
-    value = tr[key]
+    value = await tr.get(key)
     document = loads(value)
     document['uid'] = uid
     return document
