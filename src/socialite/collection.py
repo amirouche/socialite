@@ -49,7 +49,6 @@ async def all(tr, collection):
     async for key, value in items:
         uid = key[len(prefix):]
         uid = UUID(bytes=uid)
-        print(value)
         document = loads(value)
         document['uid'] = uid
         out.append(document)
