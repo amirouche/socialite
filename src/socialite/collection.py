@@ -21,6 +21,7 @@ class CollectionSpace(Enum):
 @fdb.transactional
 async def _random_identifier(tr, prefix):
     """Look for a random key that has no value"""
+    # TODO: maybe remove the for loop
     for _ in range(255):
         uid = uuid4()
         key = prefix + uid.bytes
