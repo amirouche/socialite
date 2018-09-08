@@ -128,3 +128,8 @@ async def login_post(request):
 async def login_get(request):
     context = {'settings': request.app['settings'], 'errors': {}}
     return request.app.render('user/login.jinja2', request, context)
+
+
+@fdb.transactional
+async def user_by_uid(tr, uid):
+    return await collection.get(tr, USERS, uid)

@@ -8,6 +8,7 @@ Options:
 import asyncio
 import logging
 import os
+from uuid import UUID
 
 import daiquiri
 import uvloop
@@ -61,7 +62,7 @@ async def middleware_check_auth(app, handler):
             else:
                 max_age = app['settings'].TOKEN_MAX_AGE
                 try:
-                    user_uid = app['signer'].unsign(token, max_age=max_age)
+                    uid = app['signer'].unsign(token, max_age=max_age)
                 except SignatureExpired:
                     log.debug('Token expired')
                     raise web.HTTPFound(location='/')
@@ -69,8 +70,11 @@ async def middleware_check_auth(app, handler):
                     log.debug('Bad signature')
                     raise web.HTTPFound(location='/')
                 else:
-                    log.debug('User authenticated as {}'.format(user_uid))
-                    request.user_uid = user_uid
+                    uid = uid.decode('utf-8')
+                    uid = UUID(hex=uid)
+                    document = await user.user_by_uid(request.app["db"], uid)
+                    log.debug("User authenticated as '%s'", document["username"])
+                    request.user = document
                     response = await handler(request)
                     return response
 

@@ -19,6 +19,7 @@
 # limitations under the License.
 #
 from found.v510.base import open
+from found.v510.base import strinc
 from found.v510.base import transactional
 from found.v510.tuple import pack
 from found.v510.tuple import pack_with_versionstamp
