@@ -1,6 +1,10 @@
 from enum import Enum
-from socialite.fdb import transactional
-from socialite.fdb import Subspace
+import msgpack
+
+
+class SocialiteException(Exception):
+    """Base socialite exception"""
+    pass
 
 
 class SocialiteBase:
@@ -8,31 +12,13 @@ class SocialiteBase:
     pass
 
 
-
-class SubspacePrefixes(Enum):
-    COLLECTIONS = (b'\x00',)
-
+class SubspacePrefix(Enum):
+    COLLECTIONS = b'\x00'
 
 
-COLLECTIONS = Subspace(SubspacePrefixes.COLLECTIONS)
+def dumps(o):
+    return msgpack.dumps(o, encoding='utf-8')
 
 
-
-@fdb.transactional
-async def insert(tr, collection, document):
-    pass
-
-
-@fdb.transactional
-async def get(tr, collection, document):
-    pass
-
-
-@fdb.transactional
-async def query(tr, collection, where):
-    pass
-
-
-@fdb.transactional
-async def delete(tr, collection, uid):
-    pass
+def loads(bytes):
+    return msgpack.loads(bytes, encoding='utf-8')
