@@ -14,9 +14,8 @@ view.
 
 socialite wants to proove that a complex application can be developed
 and operated more easily as a monolithic service using the right
-abstractions and expert systems. That's why socialite use
-[FoundationDB](https://apple.github.io/foundationdb/) and does not use
-REDIS.
+abstractions. That's why socialite use
+[FoundationDB](https://apple.github.io/foundationdb/).
 
 <!-- socialite experiment with an innovative [distributed **priority** task -->
 <!-- queue](https://github.com/amirouche/socialite/issues/14). The goal of -->
