@@ -181,8 +181,7 @@ input[type="submit"]:hover {
     flex-wrap: wrap;
 }
 
-#root.home .menu > div {
-    box-layout: border;
+#root.home .menu > a {
     width: 300px;
     margin: 15px;
     padding: 10px;
