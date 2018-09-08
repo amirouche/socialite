@@ -67,6 +67,14 @@ async def insert(tr, collection, **document):
 
 
 @fdb.transactional
+async def update(tr, collection, uid, **document):
+    prefix = SubspacePrefix.COLLECTIONS.value + collection.value + CollectionSpace.DATA.value
+    key = prefix + uid.bytes
+    value = dumps(document)
+    tr.set(key, value)
+
+
+@fdb.transactional
 async def get(tr, collection, uid):
     prefix = SubspacePrefix.COLLECTIONS.value + collection.value + CollectionSpace.DATA.value
     key = prefix + uid.bytes
