@@ -143,9 +143,11 @@ def create_app(loop):
     # home route
     app.router.add_route('GET', '/home', home)
     # stream
-    app.router.add_route('GET', '/stream/', stream.timeline_get)
-    app.router.add_route('POST', '/stream/', stream.timeline_post)
+    app.router.add_route('GET', '/stream/', stream.stream_get)
+    app.router.add_route('POST', '/stream/', stream.stream_post)
     app.router.add_route('GET', '/stream/{username}', stream.items)
+    app.router.add_route('GET', '/stream/{username}/follow', stream.follow_get)
+    app.router.add_route('POST', '/stream/{username}/follow', stream.follow_post)
     # api route
     app.router.add_route('GET', '/api/status', status)
 

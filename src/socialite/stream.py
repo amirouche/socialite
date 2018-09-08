@@ -15,6 +15,7 @@ log = daiquiri.getLogger(__name__)
 
 
 STREAM = collection.Collection.STREAM
+USERS = collection.Collection.USERS
 
 markdown = Markdown()
 
@@ -36,13 +37,17 @@ async def items(request):
         raise web.HTTPNotFound()
     else:
         items = await items_for_user(request.app['db'], user)
-        log.debug('items is %r', items)
-        context = {"settings": request.app["settings"], "user": user, "items": items}
+        context = {
+            "settings": request.app["settings"],
+            "user": user,
+            "items": items,
+            "current_user": request.user,
+        }
         return request.app.render("stream/items.jinja2", request, context)
 
 
 @fdb.transactional
-async def timeline(tr, user):
+async def stream(tr, user):
     followee = user.get('followee', [])
     followee.append(user["uid"].hex)
     items = await collection.all(tr, STREAM)
@@ -62,8 +67,8 @@ async def timeline(tr, user):
     return out
 
 
-async def timeline_get(request):
-    items = await timeline(request.app["db"], request.user)
+async def stream_get(request):
+    items = await stream(request.app["db"], request.user)
     context = {"settings": request.app["settings"], "items": items}
     return request.app.render("stream/stream.jinja2", request, context)
 
@@ -85,11 +90,38 @@ async def expression_insert(tr, uid, expression, html):
     return uid
 
 
-async def timeline_post(request):
+async def stream_post(request):
     data = await request.post()
     expression = data['expression']
     log.debug('Post expression: %s', expression)
     # TODO: some security validation and sanitization like with bleach
     html = markdown(expression)
     await expression_insert(request.app['db'], request.user['uid'], expression, html)
+    raise web.HTTPSeeOther(location="/stream/")
+
+
+async def follow_get(request):
+    username = request.match_info['username']
+    log.debug("follow_get username=%r", username)
+    user = await user_by_username(request.app["db"], username)
+    context = {"settings": request.app["settings"], "user": user}
+    return request.app.render("stream/follow.jinja2", request, context)
+
+
+@fdb.transactional
+async def follow(tr, user, username):
+    other = await user_by_username(tr, username)
+    uid = user.pop('uid')
+    try:
+        followee = user['followee']
+    except KeyError:
+        user['followee'] = followee = []
+    followee.append(other['uid'].hex)
+    await collection.update(tr, USERS, uid, **user)
+
+
+async def follow_post(request):
+    username = request.match_info['username']
+    log.debug("follow_get username=%r", username)
+    await follow(request.app["db"], request.user, username)
     raise web.HTTPSeeOther(location="/stream/")

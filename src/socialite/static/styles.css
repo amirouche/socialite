@@ -142,14 +142,16 @@ input[type="submit"]:hover {
 
 /* LOGIN */
 
-#root.login {
+#root.login,
+#root.follow {
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-#root.login form {
+#root.login form,
+#root.follow form {
     display: flex;
     flex-direction: column;
 }

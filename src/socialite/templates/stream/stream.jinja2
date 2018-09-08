@@ -3,7 +3,7 @@
 {% block class %}stream{% endblock %}
 
 {% block root %}
-    <h1>socialite · timeline</h1>
+    <h1>socialite · stream</h1>
     <form method="POST" action="/stream/">
         <p><textarea placeholder="Expression..." name="expression"></textarea></p>
         <p><input type="submit" value="submit" /></p>
@@ -12,7 +12,7 @@
         {% for item in items %}
             <div class="item">
                 <!-- <img src="https://picsum.photos/48" /> -->
-                <div class="html {{ item['source']['kind'] }}"><a href="/stream/{{ item['user']["username"] }}" class="source">{{ item['user']["username"] }}</a> {{ item['html'] | safe }}</div>
+                <div class="html {{ item['source']['kind'] }}"><a href="/stream/{{ item['user']["username"] }}/" class="source">{{ item['user']["username"] }}</a> {{ item['html'] | safe }}</div>
                 <p class="metadata">
                     <a href="/item/{{ item['uid'].hex }}">{{ item['modified_at'] | epoch2human }} seconds ago...</a>
                 </p>
