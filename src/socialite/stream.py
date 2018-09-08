@@ -1,4 +1,5 @@
 from time import time
+from uuid import UUID
 
 import daiquiri
 from mistune import Markdown
@@ -7,6 +8,7 @@ from aiohttp import web
 from socialite import collection
 from socialite import fdb
 from socialite.user import user_by_username
+from socialite.user import user_by_uid
 
 
 log = daiquiri.getLogger(__name__)
@@ -39,8 +41,30 @@ async def items(request):
         return request.app.render("stream/items.jinja2", request, context)
 
 
+@fdb.transactional
+async def timeline(tr, user):
+    followee = user.get('followee', [])
+    followee.append(user["uid"].hex)
+    items = await collection.all(tr, STREAM)
+    out = []
+    for item in items:
+        if item["user"] in followee:
+            out.append(item)
+    out.sort(key=lambda x: x['modified_at'], reverse=True)
+    out = out[:100]
+    # join users
+    for item in out:
+        uid = item['user']
+        uid = UUID(hex=uid)
+        user = await user_by_uid(tr, uid)
+        item['user'] = user
+
+    return out
+
+
 async def timeline_get(request):
-    context = {"settings": request.app["settings"]}
+    items = await timeline(request.app["db"], request.user)
+    context = {"settings": request.app["settings"], "items": items}
     return request.app.render("stream/stream.jinja2", request, context)
 
 

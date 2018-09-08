@@ -9,10 +9,14 @@
         <p><input type="submit" value="submit" /></p>
     </form>
     <div class="stream">
-        <div class="item">
-            <img src="https://picsum.photos/48" />
-            <div class="html"><a href="/stream/htmlfu" class="source">htmlfu</a> Curabitur vulputate vestibulum lorem.  Etiam vel tortor sodales tellus ultricies commodo.  Phasellus lacus.  Nunc eleifend leo vitae magna.  Vivamus id enim.</div>
-            <p class="metadata"><a href="/item/1234567890">2018-09-21 13:37:00</a></p>
-        </div>
+        {% for item in items %}
+            <div class="item">
+                <!-- <img src="https://picsum.photos/48" /> -->
+                <div class="html {{ item['source']['kind'] }}"><a href="/stream/{{ item['user']["username"] }}" class="source">{{ item['user']["username"] }}</a> {{ item['html'] | safe }}</div>
+                <p class="metadata">
+                    <a href="/item/{{ item['uid'].hex }}">{{ item['modified_at'] | epoch2human }} seconds ago...</a>
+                </p>
+            </div>
+        {% endfor %}
     </div>
 {% endblock %}
