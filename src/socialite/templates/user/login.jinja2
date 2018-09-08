@@ -7,6 +7,9 @@
     <form method="POST" action="/">
         <input type="text" placeholder="username" name="username" />
         <input type="password" placeholder="password" name="password" />
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
         <input type="submit" value="login" />
     </form>
     <p><a href="/user/register">create an account</a> · <a href="/user/recovery">account recovery</a></p>
