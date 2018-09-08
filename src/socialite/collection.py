@@ -44,7 +44,8 @@ async def all(tr, collection):
     start = prefix
     end = fdb.strinc(prefix)
     out = []
-    log.debug("fetching everything in collection=%r between start=%r and end=%r", collection.name, start, end)
+    msg = "fetching everything in collection=%r between start=%r and end=%r"
+    log.debug(msg, collection.name, start, end)
     items = tr.get_range(start, end)
     async for key, value in items:
         uid = key[len(prefix):]
