@@ -5,7 +5,7 @@
 socialite is proof-of-concept social network that experiments various
 backend architectural choices.
 
-[//]: # (It takes inspiration from peer-to-peer systems ideas and apply them in the context of controlled environments.)
+<!-- It takes inspiration from peer-to-peer systems ideas and apply them in the context of controlled environments. -->
 
 socialite is built using the Model-View-Controller pattern on top of
 [aiohttp](https://aiohttp.readthedocs.io/en/stable/). The
@@ -18,6 +18,15 @@ abstractions and expert systems. That's why socialite use
 [FoundationDB](https://apple.github.io/foundationdb/) and does not use
 REDIS.
 
-socialite experiment with an innovative [distributed **priority** task
-queue](https://github.com/amirouche/socialite/issues/14). The goal of
-that particular component is to ease operation of the application.
+<!-- socialite experiment with an innovative [distributed **priority** task -->
+<!-- queue](https://github.com/amirouche/socialite/issues/14). The goal of -->
+<!-- that particular component is to ease operation of the application. -->
+
+## Styles Style Guide
+
+- Do no rely on LESS or SASS
+- Only rely on classes and tags
+- Avoid class when tag is sufficent to disambiguate
+- Prefix class names with component name to avoid any leak
+- Avoid cascade ie. all styles must appear in the class declaration
+- When it makes sens, be precise in the selector (most of the time it must start with `#root.root-class`)
