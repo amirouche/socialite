@@ -28,5 +28,5 @@ REDIS.
 - Only rely on classes and tags
 - Avoid class when tag is sufficent to disambiguate
 - Prefix class names with component name to avoid any leak
-- Avoid cascade ie. all styles must appear in the class declaration
+- Avoid cascade ie. all styles must appear in the class declaration (ie. it is not DRY)
 - When it makes sens, be precise in the selector (most of the time it must start with `#root.root-class`)
