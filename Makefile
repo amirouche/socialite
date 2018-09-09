@@ -43,3 +43,6 @@ clean: ## Clean up
 
 database-clean:  ## Remove all data from the database
 	fdbcli --exec "writemode on; clearrange \x00 \xFF;"
+
+todo:
+	grep -nR --color=always TODO src/
