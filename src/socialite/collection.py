@@ -17,6 +17,7 @@ log = daiquiri.getLogger(__name__)
 class Collection(Enum):
     USERS = b'\x00'
     STREAM = b'\x01'
+    FOLLOWING = b'\x02'
 
 
 class CollectionSpace(Enum):

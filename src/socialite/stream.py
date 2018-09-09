@@ -16,6 +16,8 @@ log = daiquiri.getLogger(__name__)
 
 STREAM = collection.Collection.STREAM
 USERS = collection.Collection.USERS
+FOLLOWING = collection.Collection.FOLLOWING
+
 
 markdown = Markdown()
 
@@ -23,9 +25,13 @@ markdown = Markdown()
 @fdb.transactional
 async def items_for_user(tr, user):
     # TODO: optimize using an index or something
-    items = await collection.query(tr, STREAM, user=user['uid'].hex)
-    items.sort(key=lambda x: x['modified_at'], reverse=True)
-    return items
+    items = await collection.all(tr, STREAM)
+    out = list()
+    for item in items:
+        if (item['emitter']['kind'] == 'user' and item['emitter']['uid'] == user['uid'].hex):
+            out.append(item)
+    out.sort(key=lambda x: x['modified_at'], reverse=True)
+    return out
 
 
 async def items(request):
@@ -48,22 +54,31 @@ async def items(request):
 
 @fdb.transactional
 async def stream(tr, user):
-    followee = user.get('followee', [])
-    followee.append(user["uid"].hex)
+    """Fetch latest items of things that ``user`` follows"""
+    # fetch followee aka. what user follows
+    query = {
+        'follower_kind': 'user',
+        'follower_uid': user['uid'].hex,
+    }
+    followees = await collection.query(tr, FOLLOWING, **query)
+    log.critical(followees)
+    followees = [(x['followee_kind'], x['followee_uid']) for x in followees]
+    followees.append(('user', user["uid"].hex))
+    # fetch items for the followees aka. filter
     items = await collection.all(tr, STREAM)
     out = []
     for item in items:
-        if item["user"] in followee:
+        key = (item['emitter']['kind'], item["emitter"]['uid'])
+        if key in followees:
             out.append(item)
     out.sort(key=lambda x: x['modified_at'], reverse=True)
     out = out[:100]
-    # join users
+    # fetch and embed users aka. join USER collection
     for item in out:
-        uid = item['user']
+        uid = item['emitter']['uid']
         uid = UUID(hex=uid)
         user = await user_by_uid(tr, uid)
         item['user'] = user
-
     return out
 
 
@@ -77,7 +92,10 @@ async def stream_get(request):
 async def expression_insert(tr, uid, expression, html):
     now = int(time())
     document = {
-        'user': uid.hex,  # XXX: because msgpack doesn't have a disjoint type for bytes
+        'emitter': {
+            'uid': uid.hex,
+            'kind': 'user',
+        },
         'source': {
             'kind': 'expression',
             'expression': expression,
@@ -110,14 +128,15 @@ async def follow_get(request):
 
 @fdb.transactional
 async def follow(tr, user, username):
-    other = await user_by_username(tr, username)
     uid = user.pop('uid')
-    try:
-        followee = user['followee']
-    except KeyError:
-        user['followee'] = followee = []
-    followee.append(other['uid'].hex)
-    await collection.update(tr, USERS, uid, **user)
+    other = await user_by_username(tr, username)
+    document = {
+        'follower_uid': uid.hex,
+        'follower_kind': 'user',
+        'followee_uid': other['uid'].hex,
+        'followee_kind': 'user',
+    }
+    await collection.insert(tr, FOLLOWING, **document)
 
 
 async def follow_post(request):
