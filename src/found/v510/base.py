@@ -102,7 +102,7 @@ def ensure_version():
     elif found.CURRENT_LOADED_VERSION != CLIENT_VERSION:
         msg = "found already loaded with for a different version "
         raise RuntimeError(msg)
-    log.info('found configured to use client API %s', CLIENT_VERSION)
+    log.debug('found configured to use client API %s', CLIENT_VERSION)
     return True
 
 
