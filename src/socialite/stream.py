@@ -122,6 +122,6 @@ async def follow(tr, user, username):
 
 async def follow_post(request):
     username = request.match_info['username']
-    log.debug("follow_get username=%r", username)
+    log.debug("follow_post username=%r", username)
     await follow(request.app["db"], request.user, username)
     raise web.HTTPSeeOther(location="/stream/")
