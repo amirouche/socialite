@@ -14,6 +14,7 @@ class SocialiteBase:
 
 class SubspacePrefix(Enum):
     COLLECTIONS = b'\x00'
+    SPARKY = b'\x01'
 
 
 def dumps(o):
