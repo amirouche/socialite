@@ -42,4 +42,4 @@ clean: ## Clean up
 	git clean -fX
 
 database-clean:  ## Remove all data from the database
-	fdbcli --exec 'writemode on; clearrange "" \xFF;'
+	fdbcli --exec "writemode on; clearrange \x00 \xFF;"
