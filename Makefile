@@ -13,12 +13,12 @@ install: ## Prepare the host sytem for development
 	pipenv run pre-commit install
 
 check: ## Run tests
-	pipenv run py.test --capture=no src/tests/
+	pipenv run py.test --verbose --capture=no src/tests/
 	pipenv check
 	@echo "\033[95m\n\nYou may now run 'make lint' or 'make coverage'.\n\033[0m"
 
 coverage: ## Code coverage
-	pipenv run py.test --capture=no --cov-config .coveragerc --verbose --cov-report term --cov-report html --cov-report xml --cov=src src/tests/
+	pipenv run py.test --verbose --cov-config .coveragerc --verbose --cov-report term --cov-report html --cov-report xml --cov=src src/tests/
 
 help: ## This help.
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
