@@ -26,7 +26,6 @@ async def all(tr):
     msg = "fetching everything between start=%r and end=%r"
     log.debug(msg, start, end)
     out = []
-
     async for key, value in tr.get_range(start, end):
         key = key[PREFIX_LENGTH:]
         graph, subject, predicate = fdb.unpack(key)
@@ -91,19 +90,16 @@ async def where(tr, pattern, *patterns):
         binding = match(pattern, quad, binding)
         if binding is not None:
             seed.append(binding)
-    if not seed:
-        return []
-    else:
-        bindings = seed
-        for pattern in patterns:
-            for binding in bindings:
-                next_bindings = []
-                quads = await all(tr)
-                for quad in quads:
-                    new = match(pattern, quad, binding)
-                    if new is None:
-                        continue
-                    else:
-                        next_bindings.append(new)
-            bindings = next_bindings
-        return bindings
+    bindings = seed
+    for pattern in patterns:
+        for binding in bindings:
+            next_bindings = []
+            quads = await all(tr)
+            for quad in quads:
+                new = match(pattern, quad, binding)
+                if new is None:
+                    continue
+                else:
+                    next_bindings.append(new)
+        bindings = next_bindings
+    return bindings
