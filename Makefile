@@ -46,3 +46,6 @@ database-clean:  ## Remove all data from the database
 
 todo:
 	grep -nR --color=always TODO src/
+
+xxx:
+	grep -nR --color=always --before-context=2  --after-context=2 XXX src/
