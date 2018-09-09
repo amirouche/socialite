@@ -45,7 +45,7 @@ database-clean:  ## Remove all data from the database
 	fdbcli --exec "writemode on; clearrange \x00 \xFF;"
 
 todo:
-	grep -nR --color=always TODO src/
+	@grep -nR --color=always TODO src/
 
 xxx:
-	grep -nR --color=always --before-context=2  --after-context=2 XXX src/
+	@grep -nR --color=always --before-context=2  --after-context=2 XXX src/
