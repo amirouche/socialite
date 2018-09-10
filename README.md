@@ -192,12 +192,12 @@ WHERE blog.title='hyperdev.fr'
 Here is the equivalent using sparky:
 
 ```python
-query = [
+patterns = [
 	('blog', sparky.var('blog'), 'title', 'hyperdev.fr'),
 	('post', sparky.var('post'), 'blog', sparky.var('blog')),
 	('post', sparky.var('post'), 'title', sparky.var('title')),
 ]
-out = await sparky.where(db, *query)
+out = await sparky.where(db, *patterns)
 ```
 
 That is you can do regular `SELECT` without joins or a `SELECT` with
