@@ -1,5 +1,7 @@
 # socialite - wanna be private-first social network
 
+**step-by-step**
+
 [![travis](https://api.travis-ci.com/amirouche/socialite.svg?branch=master)](https://travis-ci.com/amirouche/socialite) [![codecov](https://codecov.io/gh/amirouche/socialite/branch/master/graph/badge.svg)](https://codecov.io/gh/amirouche/socialite)
 
 socialite is proof-of-concept social network that experiments various
@@ -21,6 +23,38 @@ abstractions. That's why socialite use
 <!-- queue](https://github.com/amirouche/socialite/issues/14). The goal of -->
 <!-- that particular component is to ease operation of the application. -->
 
+## ROADMAP
+
+- 2018/09/30 - What Are The Civilian Applications
+
+	- Continous Integration [DONE]
+	- Basic Data Persistence [DONE]
+	- Example use of `collection.py` see `stream.py` [DONE]
+	- Basic Task queue [TODO]
+	- Example use of `sparky.py` see `reader.py` [TODO]
+	- Example Unit Test that mocks a coroutine [TODO]
+	- Deploy [TODO]
+
+- 2018/10/XY - [Pick a Culture ship at random](http://bryanschuetz.github.io/culture-namer/)
+
+	- Basic TODO
+	- Basic Wiki
+	- Basic Forum
+	- Basic Paste
+	- CSRF Protection
+	- Basic Search Engine with a crawler
+
+## Functions for the win
+
+socialite use a lot of functions.  There is nothing wrong with
+classes.  In particular there is no Object Data Mapper (ODM) or Object
+Relational Mapper (ORM) abstraction, yet.
+
+That said, socialite rely on
+[trafaret](https://github.com/Deepwalker/trafaret/) for data
+validation which is built using classes. Also socialite make use of
+`SocialiteException` class that you can inherit.
+
 ## Database
 
 Socialite rely on [FoundationDB](https://foundationdb.org/) (FDB) to
@@ -38,7 +72,7 @@ There is so far two layers:
 
 - `src/socialite/collection.py` offers an api similar to mongodb.
 - `src/socialite/sparky.py` offers an abstraction similar to rdf /
-  sparql but implements a subset of the standard. That should be very
+  sparql. It implements a subset of the standard that should be very
   easy to get started.
 
 `sparky` is the prefered layer.
@@ -57,9 +91,15 @@ fact that socialite rely on a fork of
 based on cffi (which is the recommeded way to interop with C code by
 PyPy).
 
+Of course it would be very nice to have single well-thought, easy
+to use, with migration magics. socialite proceed step-by-step.
+Implement, use, gain knowledge, then build higher level abstractions.
+When things seem blurry, do not over think it and try something
+simple to get started.
+
 Follows a description and roadmap of the layers in socialite.
 
-## `collection`
+### `collection`
 
 `collection` offers an abstraction that is more like document store a
 la mongodb. That is it stores JSON-like documents serialized with
@@ -101,7 +141,7 @@ And the machinery that allows to link a given index to its collection
 upfront and on-the-fly indices. Don't forget to update the index in
 case of `collection.update` or `collection.delete` is called!
 
-## `sparky`
+### `sparky`
 
 `sparky` is small RDF-like layer which support a subset of SparQL.
 
