@@ -186,7 +186,18 @@ matching part which makes coding things like the following SQL query:
 SELECT post.title
 FROM blog, post
 WHERE blog.title='hyperdev.fr'
-    AND post.blog_id
+    AND post.blog_id=blog.id
+```
+
+Here is the equivalent using sparky:
+
+```python
+query = [
+	('blog', sparky.var('blog'), 'title', 'hyperdev.fr'),
+	('post', sparky.var('post'), 'blog', sparky.var('blog')),
+	('post', sparky.var('post'), 'title', sparky.var('title')),
+]
+out = await sparky.where(db, *query)
 ```
 
 That is you can do regular `SELECT` without joins or a `SELECT` with
@@ -202,7 +213,7 @@ query planner.  That said, for the time being we will not rely on
 explicit indexing but instead index-all-the-things. Another machinery
 **might** be put to good use that is [inspired from Gremlin and
 implemented in AjguDB](https://bit.ly/2CEc72q), if one can make `async
-for` in a transaction work for us without leaks.
+for` in a transaction work without leaks.
 
 Mind the fact, that since sparky use `fdb.pack` for serialiazing a
 tuple items, lexicographic ordering is preserved. That is, one can
