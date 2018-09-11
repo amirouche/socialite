@@ -85,12 +85,14 @@ def match(pattern, quad, binding):
 async def where(tr, pattern, *patterns):
     seed = []
     quads = await all(tr)
+    # poor man do-while
     for quad in quads:
         binding = Map()
         binding = match(pattern, quad, binding)
         if binding is not None:
             seed.append(binding)
     bindings = seed
+    # while
     for pattern in patterns:
         for binding in bindings:
             next_bindings = []
