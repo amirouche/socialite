@@ -38,7 +38,6 @@ async def test_get():
     assert out == b'test'
 
 
-
 @pytest.mark.asyncio
 async def test_range():
     # prepare
