@@ -210,7 +210,7 @@ def on_transaction_get(fdb_future, aio_future):
     value_length = ffi.new('int *')
     error = lib.fdb_future_get_value(fdb_future, present, value, value_length)
     if error == 0:
-        if present == 0:
+        if present[0] == 0:
             _loop.call_soon_threadsafe(aio_future.set_result, None)
             lib.fdb_future_destroy(fdb_future)
         else:

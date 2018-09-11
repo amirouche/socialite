@@ -33,7 +33,7 @@ async def _random_identifier(tr, prefix):
         uid = uuid4()
         key = prefix + uid.bytes
         value = await tr.get(key)
-        if value == b'':
+        if value is None:
             return uid
     msg = 'It seems like the collection is full!'
     raise SocialiteException(msg)
