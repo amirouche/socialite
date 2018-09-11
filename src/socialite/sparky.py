@@ -12,7 +12,7 @@ log = daiquiri.getLogger(__name__)
 
 SPARKY = SubspacePrefix.SPARKY.value
 PREFIX_DATA = b'\x00'
-PREFIX_LENGTH = 2
+PREFIX_LENGTH = len(SPARKY + PREFIX_DATA)
 
 
 def random_identifier():
