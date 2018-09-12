@@ -81,11 +81,11 @@ async def test_where_several_pattern():
         ('blog', 'uid2', 'descrption', 'forward and beyond!'),
     ]
     await sparky.add(db, *data)
-    query = [
+    patterns = [
         ('blog', sparky.var('blog'), 'title', 'sparky'),
         ('post', sparky.var('post'), 'blog', sparky.var('blog')),
         ('post', sparky.var('post'), 'title', sparky.var('title')),
     ]
-    out = await sparky.where(db, *query)
+    out = await sparky.where(db, *patterns)
     out = [dict(x.items()) for x in out]
     assert out == [{'blog': 'uid1', 'post': 'uid3', 'title': 'sparky query language'}]
