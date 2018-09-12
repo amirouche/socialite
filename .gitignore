@@ -3,6 +3,7 @@ upstream
 doc/build
 foundationdb-clients_*
 foundationdb-server_*
+src/benchmarks/conceptnet-assertions-5.6.0.csv.gz
 
 # found
 src/found/_fdb_c.c

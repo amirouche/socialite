@@ -16,6 +16,7 @@ jedi = "*"
 pytest-asyncio = "*"
 pre-commit = "*"
 pylint = "*"
+asyncpg = "*"
 
 [packages]
 aiohttp = "*"
