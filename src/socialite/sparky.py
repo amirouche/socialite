@@ -5,6 +5,7 @@ from immutables import Map
 
 from socialite import fdb
 from socialite.base import SubspacePrefix
+from socialite.base import SocialiteException
 
 
 log = daiquiri.getLogger(__name__)
@@ -12,11 +13,19 @@ log = daiquiri.getLogger(__name__)
 
 SPARKY = SubspacePrefix.SPARKY.value
 PREFIX_DATA = b'\x00'
+PREFIX_UUID = b'\x01'
 PREFIX_LENGTH = len(SPARKY + PREFIX_DATA)
 
 
-def random_identifier():
-    return uuid4().hex
+@fdb.transactional
+async def random_uid(tr):
+    uid = uuid4().hex
+    key = SPARKY + PREFIX_UUID + uid.encode('utf8')
+    value = await tr.get(tr, key)
+    if value is None:
+        tr.set(tr, key, b'')
+        return uid
+    raise SocialiteException('Unlikely Error!')
 
 
 @fdb.transactional
