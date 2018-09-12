@@ -9,12 +9,12 @@
         <p><input type="submit" value="submit" /></p>
     </form>
     <div class="stream">
-        {% for item in items %}
-            <div class="item">
+        {% for expression in expressions %}
+            <div class="expression">
                 <!-- <img src="https://picsum.photos/48" /> -->
-                <div class="html {{ item['source']['kind'] }}"><a href="/stream/{{ item['user']["username"] }}/" class="source">{{ item['user']["username"] }}</a> {{ item['html'] | safe }}</div>
+                <div class="html"><a href="/stream/{{ expression['name'] }}/" class="source">{{ expression['name'] }}</a> {{ expression['html'] | safe }}</div>
                 <p class="metadata">
-                    <a href="/item/{{ item['uid'].hex }}">{{ item['modified_at'] | epoch2human }} seconds ago...</a>
+                    <a href="/expression/{{ expression['uid'] }}">{{ expression['modified-at'] | epoch2human }} seconds ago...</a>
                 </p>
             </div>
         {% endfor %}

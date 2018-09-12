@@ -203,25 +203,25 @@ input[type="submit"]:hover {
     padding-top: 15px;
 }
 
-#root.stream > .stream > .item {
+#root.stream > .stream > .expression {
     border: 1px solid hsla(0, 0%, 100%, 0.3);
     border-radius: 3px;
     padding: 10px;
     margin-bottom: 15px;
 }
 
-#root.stream > .stream > .item > img {
+#root.stream > .stream > .expression > img {
     float: left;
     margin-right: 10px;
     margin-botto: 10px;
 }
 
-#root.stream > .stream > .item > .html > a.source {
+#root.stream > .stream > .expression > .html > a.source {
     font-weight: bolder;
     text-decoration: none;
 }
 
-#root.stream > .stream > .item > .metadata > a {
+#root.stream > .stream > .expression > .metadata > a {
     text-decoration: none;
     opacity: 0.7;
     font-size: 0.8em;
