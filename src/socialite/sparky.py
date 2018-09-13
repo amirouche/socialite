@@ -109,9 +109,7 @@ async def where(tr, pattern, *patterns):
             quads = await all(tr)
             for quad in quads:  # XXX: quads ftw!
                 new = match(pattern, quad, binding)
-                if new is None:
-                    continue
-                else:
+                if new is not None:
                     next_bindings.append(new)
         bindings = next_bindings
     return bindings
