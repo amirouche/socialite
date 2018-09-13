@@ -51,12 +51,11 @@ async def stream(tr, user):
         ('stream', sparky.var('follow'), 'follower', user),
         ('stream', sparky.var('follow'), 'followee', sparky.var('followee')),
         ('stream', sparky.var('expression'), 'html', sparky.var('html')),
-        ('stream', sparky.var('expression'), 'user', sparky.var('followee')),
+        ('stream', sparky.var('expression'), 'actor', sparky.var('followee')),
         ('stream', sparky.var('expression'), 'modified-at', sparky.var('modified-at')),
         ('actor', sparky.var('followee'), 'name', sparky.var('name')),
     )
     out = await sparky.where(tr, *patterns)
-    print(out)
     out.sort(key=lambda x: x['modified-at'], reverse=True)
     out = out[:100]
     return out
@@ -75,7 +74,7 @@ async def expression_insert(tr, user, expression, html):
     tuples = (
         ('stream', uid, 'html', html),
         ('stream', uid, 'expression', expression),
-        ('stream', uid, 'user', user),
+        ('stream', uid, 'actor', user),
         ('stream', uid, 'modified-at', now),
         ('stream', uid, 'created-at', now),
     )
