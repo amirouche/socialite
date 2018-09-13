@@ -104,8 +104,8 @@ async def where(tr, pattern, *patterns):
     # while
     next_bindings = []
     for pattern in patterns:
+        next_bindings = []
         for binding in bindings:
-            next_bindings = []
             quads = await all(tr)
             for quad in quads:  # XXX: quads ftw!
                 new = match(pattern, quad, binding)
