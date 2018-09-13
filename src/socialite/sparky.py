@@ -21,9 +21,9 @@ PREFIX_LENGTH = len(SPARKY + PREFIX_DATA)
 async def random_uid(tr):
     uid = uuid4().hex
     key = SPARKY + PREFIX_UUID + uid.encode('utf8')
-    value = await tr.get(tr, key)
+    value = await tr.get(key)
     if value is None:
-        tr.set(tr, key, b'')
+        tr.set(key, b'')
         return uid
     raise SocialiteException('Unlikely Error!')
 
@@ -102,6 +102,7 @@ async def where(tr, pattern, *patterns):
             seed.append(binding)
     bindings = seed
     # while
+    next_bindings = []
     for pattern in patterns:
         for binding in bindings:
             next_bindings = []

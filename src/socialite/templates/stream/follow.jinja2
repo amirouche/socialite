@@ -3,8 +3,8 @@
 {% block class %}follow{% endblock %}
 
 {% block root %}
-    <h1>socialite · {{ user['username']}} · follow</h1>
-    <form method="POST" action="/stream/{{ user['username']}}/follow">
-        <input type="submit" value="follow {{ user['username']}}" />
+    <h1>socialite · {{ user["name"]}} · follow</h1>
+    <form method="POST" action="/stream/{{ user["name"]}}/follow">
+        <input type="submit" value="follow {{ user["name"]}}" />
     </form>
 {% endblock %}

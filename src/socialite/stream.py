@@ -18,12 +18,12 @@ markdown = Markdown()
 
 @fdb.transactional
 async def expressions_for_user(tr, username):
-    patterns = [
+    patterns = (
         ('actor', sparky.var('actor'), 'name', username),
         ('stream', sparky.var('expression'), 'html', sparky.var('html')),
         ('stream', sparky.var('expression'), 'actor', sparky.var('actor')),
         ('stream', sparky.var('expression'), 'modified-at', sparky.var('modified-at')),
-    ]
+    )
     out = await sparky.where(tr, *patterns)
     out.sort(key=lambda x: x['modified-at'], reverse=True)
     out = out[:100]
@@ -47,15 +47,16 @@ async def expressions(request):
 async def stream(tr, user):
     """Fetch latest expressions of things that ``user`` follows"""
     # fetch followee aka. what user follows
-    patterns = [
-        ('stream', sparky.var('following'), 'follower', user),
-        ('stream', sparky.var('following'), 'followee', sparky.var('followee')),
+    patterns = (
+        ('stream', sparky.var('follow'), 'follower', user),
+        ('stream', sparky.var('follow'), 'followee', sparky.var('followee')),
         ('stream', sparky.var('expression'), 'html', sparky.var('html')),
         ('stream', sparky.var('expression'), 'user', sparky.var('followee')),
         ('stream', sparky.var('expression'), 'modified-at', sparky.var('modified-at')),
         ('actor', sparky.var('followee'), 'name', sparky.var('name')),
-    ]
+    )
     out = await sparky.where(tr, *patterns)
+    print(out)
     out.sort(key=lambda x: x['modified-at'], reverse=True)
     out = out[:100]
     return out
@@ -70,14 +71,14 @@ async def stream_get(request):
 @fdb.transactional
 async def expression_insert(tr, user, expression, html):
     now = int(time())
-    uid = sparky.random_uid(tr)
-    tuples = [
+    uid = await sparky.random_uid(tr)
+    tuples = (
         ('stream', uid, 'html', html),
         ('stream', uid, 'expression', expression),
         ('stream', uid, 'user', user),
         ('stream', uid, 'modified-at', now),
         ('stream', uid, 'created-at', now),
-    ]
+    )
     await sparky.add(tr, *tuples)
     return uid
 
@@ -101,16 +102,14 @@ async def follow_get(request):
 
 
 @fdb.transactional
-async def follow(tr, user, username):
-    uid = user.pop('uid')
-    other = await user_by_username(tr, username)
-    document = {
-        'follower_uid': uid.hex,
-        'follower_kind': 'user',
-        'followee_uid': other['uid'].hex,
-        'followee_kind': 'user',
-    }
-    await collection.insert(tr, FOLLOWING, **document)
+async def follow(tr, user, other):
+    other = await user_by_username(tr, other)
+    uid = await sparky.random_uid(tr)
+    tuples = (
+        ('stream', uid, 'follower', user["uid"]),
+        ('stream', uid, 'followee', other["uid"]),
+    )
+    await sparky.add(tr, *tuples)
 
 
 async def follow_post(request):

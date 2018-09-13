@@ -3,12 +3,12 @@
 {% block class %}stream{% endblock %}
 
 {% block root %}
-    <h1>socialite · {{ user["username"] }} · {% if current_user['uid'].hex != user['uid'].hex %}<a href="/stream/{{ user['username'] }}/follow">follow</a>{% endif %}</h1>
+    <h1>socialite · {{ username }} · <a href="/stream/{{ username }}/follow">follow</a></h1>
     <div class="stream">
         {% for expression in expressions %}
             <div class="expression">
                 <!-- <img src="https://picsum.photos/48" /> -->
-                <div class="html"><a href="/stream/{{ user["name"] }}/" class="source">{{ user["name"] }}</a> {{ expression['html'] | safe }}</div>
+                <div class="html"><a href="/stream/{{ username }}/" class="source">{{ username }}</a> {{ expression['html'] | safe }}</div>
                 <p class="metadata">
                     <a href="/expression/{{ expression['uid'] }}">{{ expression['modified-at'] | epoch2human }} seconds ago...</a>
                 </p>

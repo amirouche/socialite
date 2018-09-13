@@ -5,15 +5,12 @@ from aiohttp import web
 import trafaret as t
 from argon2.exceptions import VerifyMismatchError
 
-from socialite import collection
 from socialite import fdb
+from socialite import sparky
 from socialite.helpers import no_auth
 
 
 log = daiquiri.getLogger(__name__)
-
-
-USERS = collection.Collection.USERS
 
 
 @no_auth
@@ -42,11 +39,20 @@ user_validate = t.Dict(
 
 @fdb.transactional
 async def register(tr, username, password):
-    documents = await collection.query(tr, USERS, username=username)
+    tuples = (
+        ('actor', sparky.var('uid'), "name", username),
+    )
+    actors = await sparky.where(tr, *tuples)
     try:
-        documents[0]
+        actors[0]
     except IndexError:
-        uid = await collection.insert(tr, USERS, username=username, password=password)
+        uid = await sparky.random_uid(tr)
+        tuples = (
+            ('actor', uid, 'name', username),
+            ('actor', uid, 'password', password),
+            ('actor', uid, 'is a', 'user'),
+        )
+        await sparky.add(tr, *tuples)
         return uid
     else:
         # TODO: Replace with DeepValidationException inherit from SocialiteException
@@ -93,8 +99,15 @@ async def register_post(request):
 
 @fdb.transactional
 async def user_by_username(tr, username):
-    users = await collection.query(tr, USERS, username=username)
-    return users[0]
+    tuples = (
+        ('actor', sparky.var('uid'), 'name', username),
+        ('actor', sparky.var('uid'), 'password', sparky.var('password')),
+    )
+    users = await sparky.where(tr, *tuples)
+    assert len(users) == 1
+    user = users[0]
+    user = user.set('name', username)
+    return user
 
 
 @no_auth
@@ -115,7 +128,7 @@ async def login_post(request):
             context = {"settings": request.app["settings"], "error": "Wrong credentials"}
             return request.app.render('user/login.jinja2', request, context)
         else:
-            uid = user['uid'].hex
+            uid = user['uid']
             token = request.app['signer'].sign(uid)
             token = token.decode('utf-8')
             redirect = web.HTTPSeeOther(location='/home')
@@ -132,4 +145,12 @@ async def login_get(request):
 
 @fdb.transactional
 async def user_by_uid(tr, uid):
-    return await collection.get(tr, USERS, uid)
+    tuples = (
+        ('actor', uid, 'name', sparky.var('name')),
+        ('actor', uid, 'password', sparky.var('password')),
+    )
+    users = await sparky.where(tr, *tuples)
+    assert len(users) == 1
+    user = users[0]
+    user = user.set('uid', uid)
+    return user

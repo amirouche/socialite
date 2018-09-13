@@ -72,10 +72,9 @@ async def middleware_check_auth(app, handler):
                     raise web.HTTPFound(location='/')
                 else:
                     uid = uid.decode('utf-8')
-                    uid = UUID(hex=uid)
-                    document = await user.user_by_uid(request.app["db"], uid)
-                    log.debug("User authenticated as '%s'", document["username"])
-                    request.user = document
+                    actor = await user.user_by_uid(request.app["db"], uid)
+                    log.debug("User authenticated as '%s'", actor["name"])
+                    request.user = actor
                     response = await handler(request)
                     return response
 
@@ -145,7 +144,7 @@ def create_app(loop):
     # stream
     app.router.add_route('GET', '/stream/', stream.stream_get)
     app.router.add_route('POST', '/stream/', stream.stream_post)
-    app.router.add_route('GET', '/stream/{username}', stream.items)
+    app.router.add_route('GET', '/stream/{username}', stream.expressions)
     app.router.add_route('GET', '/stream/{username}/follow', stream.follow_get)
     app.router.add_route('POST', '/stream/{username}/follow', stream.follow_post)
     # api route
