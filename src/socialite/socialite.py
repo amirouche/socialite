@@ -37,6 +37,11 @@ from socialite.helpers import no_auth
 log = daiquiri.getLogger(__name__)
 
 
+__version__ = (0, 0, 0)
+VERSION = 'v' + '.'.join([str(x) for x in __version__])
+HOMEPAGE = 'https://bit.ly/2D2fT5Q'
+
+
 # middleware
 
 
@@ -112,7 +117,7 @@ def create_app(loop):
 
     setproctitle('socialite')
 
-    log.debug("boot")
+    log.debug("boot socialite %s", VERSION)
 
     # init app
     app = web.Application()  # pylint: disable=invalid-name
@@ -130,7 +135,9 @@ def create_app(loop):
     app['settings'] = settings
     app['hasher'] = PasswordHasher()
     app['signer'] = TimestampSigner(settings.SECRET)
-    app['session'] = ClientSession()
+    user_agent = 'socialite {} ({})'.format(VERSION, HOMEPAGE)
+    headers = {'User-Agent': user_agent}
+    app['session'] = ClientSession(headers=headers)
 
     # user routes
     app.router.add_route('GET', '/', user.login_get)
