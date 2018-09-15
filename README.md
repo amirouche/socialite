@@ -171,7 +171,7 @@ can have the following three tuples in the same database:
 ```python
 ("blog", "P4X432", "title", "hyperdev.fr")
 ("blog", "P4X432", "SeeAlso", "julien.danjou.info")
-("blog", "P4X432", "SeeAlso", "blog.dolead.com/")
+("blog", "P4X432", "SeeAlso", "blog.dolead.com")
 ```
 
 This is not possible in document-store because the `SeeAlso` appears
