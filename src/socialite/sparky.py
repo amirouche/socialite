@@ -37,8 +37,7 @@ async def all(tr):
     out = []
     async for key, value in tr.get_range(start, end):
         key = key[PREFIX_LENGTH:]
-        graph, subject, predicate = fdb.unpack(key)
-        object = fdb.unpack(value)[0]
+        graph, subject, predicate, object = fdb.unpack(key)
         out.append((graph, subject, predicate, object))
     return out
 
@@ -46,15 +45,14 @@ async def all(tr):
 @fdb.transactional
 async def add(tr, *quads):
     for quad in quads:
-        key = SPARKY + PREFIX_DATA + fdb.pack(quad[:3])
-        value = fdb.pack((quad[3],))
-        tr.set(key, value)
+        key = SPARKY + PREFIX_DATA + fdb.pack(quad)
+        tr.set(key, b'')
 
 
 @fdb.transactional
 async def remove(tr, *quads):
     for quad in quads:
-        key = SPARKY + PREFIX_DATA + fdb.pack(quad[:3])
+        key = SPARKY + PREFIX_DATA + fdb.pack(quad)
         tr.clear(key)
 
 
