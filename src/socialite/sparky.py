@@ -67,7 +67,7 @@ class var:
         return '<var %r>' % self.name
 
 
-def match(pattern, quad, binding):
+def bind(pattern, quad, binding):
     for target, value in zip(pattern, quad):
         if isinstance(target, var):
             try:
@@ -94,8 +94,7 @@ async def where(tr, pattern, *patterns):
     quads = await all(tr)
     # poor man do-while
     for quad in quads:
-        binding = Map()
-        binding = match(pattern, quad, binding)
+        binding = bind(pattern, quad, Map())
         if binding is not None:
             seed.append(binding)
     bindings = seed
@@ -105,7 +104,7 @@ async def where(tr, pattern, *patterns):
         for binding in bindings:
             quads = await all(tr)
             for quad in quads:  # XXX: quads ftw!
-                new = match(pattern, quad, binding)
+                new = bind(pattern, quad, binding)
                 if new is not None:
                     next_bindings.append(new)
         bindings = next_bindings
