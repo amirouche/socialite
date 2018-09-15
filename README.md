@@ -29,9 +29,9 @@ abstractions. That's why socialite use
 
 	- Continous Integration [DONE]
 	- Basic Data Persistence [DONE]
-	- Example use of `collection.py` see `stream.py` [DONE]
+	- Example use of `sparky.py` see `stream.py` [DONE]
+	- Baisc Feed Reader [TODO]
 	- Basic Task queue [TODO]
-	- Example use of `sparky.py` see `reader.py` [TODO]
 	- Example Unit Test that mocks a coroutine [TODO]
 	- Deploy [TODO]
 
