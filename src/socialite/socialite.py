@@ -8,7 +8,6 @@ Options:
 import asyncio
 import logging
 import os
-from uuid import UUID
 
 import daiquiri
 import uvloop
