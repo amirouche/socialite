@@ -117,7 +117,7 @@ def create_app(loop):
 
     setproctitle('socialite')
 
-    log.debug("boot socialite %s", VERSION)
+    log.info("init socialite %s", VERSION)
 
     # init app
     app = web.Application()  # pylint: disable=invalid-name
@@ -168,6 +168,7 @@ def main():
         asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
         loop = asyncio.get_event_loop()
         app = create_app(loop)
+        log.info('running webserver on http://0.0.0.0:8000')
         web.run_app(app, host='0.0.0.0', port=8000)  # nosec
     else:
         print('Use --help to know more')
