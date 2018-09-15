@@ -16,6 +16,7 @@ check: ## Run tests
 	pipenv run py.test -vv --capture=no src/tests/
 	make database-clean
 	pipenv check
+	bandit -r src/
 	@echo "\033[95m\n\nYou may now run 'make lint' or 'make coverage'.\n\033[0m"
 
 coverage: ## Code coverage

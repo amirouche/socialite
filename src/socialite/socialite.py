@@ -161,7 +161,7 @@ def main():
         asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
         loop = asyncio.get_event_loop()
         app = create_app(loop)
-        web.run_app(app, host='0.0.0.0', port=8000)
+        web.run_app(app, host='0.0.0.0', port=8000)  # nosec
     else:
         print('Use --help to know more')
 

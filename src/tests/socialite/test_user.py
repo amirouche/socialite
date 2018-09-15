@@ -12,7 +12,7 @@ def test_account_new_validate_empty():
 
 
 def _test_account_new_validate_valid():
-    data = dict(
+    data = dict(  # nosec
         username="amirouche",
         password="FooBar!42count",
         validation="FooBar!42count",
@@ -21,7 +21,7 @@ def _test_account_new_validate_valid():
 
 
 def test_account_new_validate_invalid_password():
-    data = dict(
+    data = dict(  # nosec
         username="peon",
         password="toosimple",
         validation="toosimple",

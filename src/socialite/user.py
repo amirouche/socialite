@@ -81,7 +81,7 @@ async def register_post(request):
         if data['password'] != data['validation']:
             log.debug('deep validation failed: passwords do not match')
             context['values']["username"] = data.get("username")
-            context['errors']['password'] = "Doesn't match validation"
+            context['errors']['password'] = "Doesn't match validation"  # nosec
             return request.app.render('user/register.jinja2', request, context)
         # Check that the username is not already taken and register the new user
         password = request.app['hasher'].hash(data['password'])
