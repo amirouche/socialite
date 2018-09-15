@@ -25,4 +25,3 @@ from found.v510.tuple import pack
 from found.v510.tuple import pack_with_versionstamp
 from found.v510.tuple import unpack
 from found.v510.tuple import range
-from found.v510.subspace import Subspace
