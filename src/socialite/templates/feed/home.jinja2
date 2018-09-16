@@ -16,6 +16,11 @@
                 <li><a href="{{ entry['link'] }}">{{ entry['title'] }}</a></li>
             {% endfor %}
             </ul>
+            {# TODO: add an 'if' if the feed is already in the stream #}
+            <form method="POST" action="/feed/add">
+                <input type="hidden" name="url" value="{{ url }}" />
+                <input type="submit" value="add to stream"/>
+            </form>
         {% else %}
             <p>It seems like the feed is emtpy!</p>
         {% endif %}

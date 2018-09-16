@@ -92,17 +92,29 @@ async def stream_post(request):
     raise web.HTTPSeeOther(location="/stream/")
 
 
+@fdb.transactional
+async def actor_by_name(tr, name):
+    tuples = (
+        ('actor', sparky.var('uid'), 'name', name),
+    )
+    users = await sparky.where(tr, *tuples)
+    assert len(users) == 1
+    user = users[0]
+    user = user.set('name', name)
+    return user
+
+
 async def follow_get(request):
     username = request.match_info['username']
     log.debug("follow_get username=%r", username)
-    user = await user_by_username(request.app["db"], username)
+    user = await actor_by_name(request.app["db"], username)
     context = {"settings": request.app["settings"], "user": user}
     return request.app.render("stream/follow.jinja2", request, context)
 
 
 @fdb.transactional
 async def follow(tr, user, other):
-    other = await user_by_username(tr, other)
+    other = await actor_by_name(tr, other)
     uid = await sparky.random_uid(tr)
     tuples = (
         ('stream', uid, 'follower', user["uid"]),

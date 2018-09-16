@@ -1,9 +1,14 @@
+from time import time
+
 import async_timeout
-
 import daiquiri
-
+import trafaret as t
+from aiohttp import web
 from defusedxml.lxml import fromstring as bytes2xml
+
 from socialite.base import SocialiteException
+from socialite import fdb
+from socialite import sparky
 
 
 log = daiquiri.getLogger(__name__)
@@ -90,3 +95,43 @@ async def parse(session, url):
         return extract(raw, url)
     except Exception as exc:
         raise FeedException('Failed to parse') from exc
+
+
+@fdb.transactional
+async def add(tr, feed):
+    # TODO: check that the feed doesn't already exists
+    uid = feed['uid'] = await sparky.random_uid(tr)
+    tuples = [
+        ('actor', uid, 'name', feed['title']),
+        ('actor', uid, 'is a', 'feed'),
+    ]
+    for entry in feed['entries']:
+        uid = await sparky.random_uid(tr)
+        html = '<div><p><a href="{}">{}</a></p></div>'
+        html = html.format(entry['link'], entry['title'])
+        now = int(time())
+        tuples.extend([
+            ('stream', uid, 'html', html),
+            ('stream', uid, 'expression', entry['title']),
+            ('stream', uid, 'actor', feed['uid']),
+            ('stream', uid, 'modified-at', now),
+            ('stream', uid, 'created-at', now),
+        ])
+
+    await sparky.add(tr, *tuples)
+
+    return feed['title']
+
+
+async def add_post(request):
+    data = await request.post()
+    url = data['url']
+    try:
+        url = t.URL(url)
+    except t.DataError:
+        raise web.HTTPBadRequest()
+    feed = await parse(request.app['session'], url)
+    name = await add(request.app['db'], feed)
+    log.debug('added stream name=%r', name)
+    location = '/stream/{}'.format(name)
+    raise web.HTTPSeeOther(location=location)

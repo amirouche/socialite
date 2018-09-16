@@ -28,6 +28,7 @@ from setproctitle import setproctitle  # pylint: disable=no-name-in-module
 
 from socialite import settings
 from socialite import fdb
+from socialite import feed
 from socialite import user
 from socialite import stream
 from socialite.filters import FILTERS
@@ -152,9 +153,12 @@ def create_app(loop):
     # stream
     app.router.add_route('GET', '/stream/', stream.stream_get)
     app.router.add_route('POST', '/stream/', stream.stream_post)
+    # TODO: rename '{username}' to '{name}'
     app.router.add_route('GET', '/stream/{username}', stream.expressions)
     app.router.add_route('GET', '/stream/{username}/follow', stream.follow_get)
     app.router.add_route('POST', '/stream/{username}/follow', stream.follow_post)
+    # feed
+    app.router.add_route('POST', '/feed/add', feed.add_post)
     # api route
     app.router.add_route('GET', '/api/status', status)
 
