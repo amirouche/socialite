@@ -33,7 +33,9 @@ async def fetch(session, url):
             if response.status != 200:
                 log.error("feed not found at url=%r response=%r", response)
                 raise FeedNotFound((url, response.status))
-            return await response.read()
+            else:
+                out = await response.read()
+                return out
 
 
 def extract(raw, source):

@@ -32,6 +32,7 @@ from socialite import user
 from socialite import stream
 from socialite.filters import FILTERS
 from socialite.helpers import no_auth
+from socialite.query import query
 
 
 log = daiquiri.getLogger(__name__)
@@ -147,6 +148,7 @@ def create_app(loop):
     app.router.add_route('POST', '/user/register', user.register_post)
     # home route
     app.router.add_route('GET', '/home', home)
+    app.router.add_route('GET', '/query', query)
     # stream
     app.router.add_route('GET', '/stream/', stream.stream_get)
     app.router.add_route('POST', '/stream/', stream.stream_post)

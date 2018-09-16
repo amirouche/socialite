@@ -1,0 +1,23 @@
+{% extends "base.jinja2" %}
+
+{% block class %}home feed{% endblock %}
+
+{% block root %}
+    <h1>socialite</h1>
+    <form method="GET" action="/query">
+        <input type="text" name="query" value="{{ url }}"/>
+        <input type="submit" submit="submit" />
+    </form>
+    <div>
+        <h2>{{ feed["title"] }}</h2>
+        {% if feed['entries'] %}
+            <ul>
+            {% for entry in feed['entries'] %}
+                <li><a href="{{ entry['link'] }}">{{ entry['title'] }}</a></li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>It seems like the feed is emtpy!</p>
+        {% endif %}
+    </div>
+{% endblock %}
