@@ -1,5 +1,4 @@
 from enum import Enum
-import msgpack
 
 
 class SocialiteException(Exception):
@@ -13,13 +12,4 @@ class SocialiteBase:
 
 
 class SubspacePrefix(Enum):
-    COLLECTIONS = b'\x00'
     SPARKY = b'\x01'
-
-
-def dumps(o):
-    return msgpack.dumps(o, encoding='utf-8')
-
-
-def loads(bytes):
-    return msgpack.loads(bytes, encoding='utf-8')

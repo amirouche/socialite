@@ -68,78 +68,22 @@ in-memory backend.  The goal with this choice is double:
 - Experiment operations of FDB from development to deployement of
   single machine cluster to multiple machine clusters.
 
-There is so far two layers:
-
-- `src/socialite/collection.py` offers an api similar to mongodb.
-- `src/socialite/sparky.py` offers an abstraction similar to rdf /
-  SPARQL. It implements a subset of the standard that should be very
-  easy to get started.
-
-`sparky` is the prefered layer.
-
-Both implementation are very naive. More detailed description
-below. Also, both implementation do no rely on FDB's
-[`Subspace`](https://apple.github.io/foundationdb/api-python.html#subspaces)
-and
-[`Directory`](https://apple.github.io/foundationdb/api-python.html#directories)
-class.
+`src/socialite/sparky.py` offers an abstraction similar to rdf /
+SPARQL. It implements a subset of the standard that should be very
+easy to get started.
 
 To get started you can read [FDB's documentation about the Python
 client](https://apple.github.io/foundationdb/index.html). Mind the
 fact that socialite rely on a fork of
-[found](https://github.com/amirouche/found) that is asyncio driver FDB
+[found](https://github.com/amirouche/found) that is asyncio driver for FDB
 based on cffi (which is the recommeded way to interop with C code by
 PyPy).
 
-Of course it would be very nice to have single well-thought, easy
-to use, with migration magics. socialite proceed step-by-step.
-Implement, use, gain knowledge, then build higher level abstractions.
-When things seem blurry, do not over think it and try something
-simple to get started.
-
-Follows a description and roadmap of the layers in socialite.
-
-### `collection`
-
-`collection` offers an abstraction that is more like document store a
-la mongodb. That is it stores JSON-like documents serialized with
-`msgpack` in a key-value pair where the key is the an identifier
-guaranteed to be unique in the collection. The implementation is naive
-in the sense that there is not support for creating or using indices.
-The [`collection.query(tr, collection,
-**where)`](https://bit.ly/2wZB5TK) coroutine rely on
-`collection.all()` coroutine to do the filtering. The complexity in
-the worst case is O(n*m) where n is the number of documents in the
-collection and m the number of key-value pair in the `where`
-parameter.  It only support exact match lookup.
-
-Have look at the [unit tests of collection.py](https://bit.ly/2N47IdI)
-for a quick glimpse.
-
-If you choose to use that layer, mind the fact that sorting and
-filtering must happen inside a transaction. That is inside a coroutine
-decorated with [`fdb.transactional`](https://bit.ly/2wVFuqO) in order
-to allow future optimization; if any.
-
-The roadmap of this layer is as simple as to implement the exact same
-interface as [pymongodb
-drivers](http://api.mongodb.com/python/current/tutorial.html). Since
-MongoDB is open-source, one can have a look at how it's actually done
-and almost map one-to-one to FDB API since
-[MongoDB](https://github.com/mongodb/mongo) rely also on a key-value
-storage engine. Simply said, one must implement the following indices:
-
-- exact match
-- range / sort lookup
-- compound
-- full-text search (see python-whoosh)
-- geospatial (see the forum
-  [[1]](https://bit.ly/2oW0hXS)[[2]](https://bit.ly/2CBa4vO) and the
-  documentation)
-
-And the machinery that allows to link a given index to its collection
-upfront and on-the-fly indices. Don't forget to update the index in
-case of `collection.update` or `collection.delete` is called!
+Of course it would be very nice to have well-thought, easy to use,
+with migration magics. socialite proceed step-by-step.  Implement,
+use, gain knowledge, then build higher level abstractions.  When
+things seem blurry, do not over think it and try something simple to
+get started.
 
 ### `sparky`
 
