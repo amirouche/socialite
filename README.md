@@ -72,7 +72,7 @@ There is so far two layers:
 
 - `src/socialite/collection.py` offers an api similar to mongodb.
 - `src/socialite/sparky.py` offers an abstraction similar to rdf /
-  sparql. It implements a subset of the standard that should be very
+  SPARQL. It implements a subset of the standard that should be very
   easy to get started.
 
 `sparky` is the prefered layer.
@@ -143,7 +143,7 @@ case of `collection.update` or `collection.delete` is called!
 
 ### `sparky`
 
-`sparky` is small RDF-like layer which support a subset of SparQL.
+`sparky` is small RDF-like layer which support a subset of SPARQL.
 
 Simply said, it's a quad-store.
 
@@ -178,7 +178,7 @@ This is not possible in document-store because the `SeeAlso` appears
 twice.
 
 Querying in RDF land happens via a language "similar" to SQL that is
-called SparQL. Basically, it's pattern matching with bells and
+called SPARQL. Basically, it's pattern matching with bells and
 dragons... That being said, sparky implements only the pattern
 matching part which makes coding things like the following SQL query:
 
@@ -203,6 +203,9 @@ out = await sparky.where(db, *patterns)
 That is you can do regular `SELECT` without joins or a `SELECT` with
 multiple joins in a single declarative statment. See the [unit tests
 for examples](https://bit.ly/2oVz735).
+
+See this [superb tutorial on SPARQL at
+data.world](https://docs.data.world/tutorials/sparql/).
 
 The roadmap is to implement something like
 [datomic](https://www.datomic.com/) without versioning.
