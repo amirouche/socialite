@@ -1,5 +1,8 @@
 .PHONY: help doc
 
+all: help
+	@echo "\nTry something...\n"
+
 install: ## Prepare the host sytem for development
 	# install FoundationDB
 	wget https://www.foundationdb.org/downloads/5.2.5/ubuntu/installers/foundationdb-clients_5.2.5-1_amd64.deb
