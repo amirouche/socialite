@@ -8,8 +8,11 @@ Options:
 import asyncio
 import logging
 import os
+from uuid import UUID
 
 import daiquiri
+import found
+import found.sparky
 import uvloop
 from aiohttp import ClientSession
 from aiohttp import web
@@ -27,10 +30,10 @@ from pathlib import Path
 from setproctitle import setproctitle  # pylint: disable=no-name-in-module
 
 from socialite import settings
-from socialite import fdb
 from socialite import feed
 from socialite import user
 from socialite import stream
+from socialite.base import SpacePrefix
 from socialite.filters import FILTERS
 from socialite.helpers import no_auth
 from socialite.query import query
@@ -78,7 +81,8 @@ async def middleware_check_auth(app, handler):
                     raise web.HTTPFound(location='/')
                 else:
                     uid = uid.decode('utf-8')
-                    actor = await user.user_by_uid(request.app["db"], uid)
+                    uid = UUID(hex=uid)
+                    actor = await user.user_by_uid(request.app["db"], request.app["sparky"], uid)
                     log.debug("User authenticated as '%s'", actor["name"])
                     request.user = actor
                     response = await handler(request)
@@ -106,7 +110,8 @@ async def status(request):
 
 async def init_database(app):
     log.debug("init database")
-    app['db'] = await fdb.open()
+    app['db'] = await found.open()
+    app['sparky'] = found.sparky.Sparky(SpacePrefix.SPARKY.value)
     return app
 
 
