@@ -2,7 +2,7 @@ sudo: required
 language: python
 cache: pip
 python: 3.6
-install: make
+install: make install
 script: make check
 after_success:
   - make coverage
