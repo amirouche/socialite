@@ -11,5 +11,5 @@ class SocialiteBase:
     pass
 
 
-class SubspacePrefix(Enum):
-    SPARKY = b'\x01'
+class SpacePrefix(Enum):
+    SPARKY = b'\x00'

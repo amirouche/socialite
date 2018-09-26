@@ -1,12 +1,12 @@
 from string import punctuation
 
 import daiquiri
-from aiohttp import web
+import found
 import trafaret as t
+
+from aiohttp import web
 from argon2.exceptions import VerifyMismatchError
 
-from socialite import fdb
-from socialite import sparky
 from socialite.helpers import no_auth
 
 
@@ -37,20 +37,20 @@ user_validate = t.Dict(
 )
 
 
-@fdb.transactional
-async def register(tr, username, password):
+@found.transactional
+async def register(tr, sparky, username, password):
     tuples = (
-        ('actor', sparky.var('uid'), "name", username),
+        (sparky.var('uid'), "name", username),
     )
     actors = await sparky.where(tr, *tuples)
     try:
         actors[0]
     except IndexError:
-        uid = await sparky.random_uid(tr)
+        uid = await sparky.uuid(tr)
         tuples = (
-            ('actor', uid, 'name', username),
-            ('actor', uid, 'password', password),
-            ('actor', uid, 'is a', 'user'),
+            (uid, 'name', username),
+            (uid, 'password', password),
+            (uid, 'is a', 'user'),
         )
         await sparky.add(tr, *tuples)
         return uid
@@ -87,7 +87,7 @@ async def register_post(request):
         password = request.app['hasher'].hash(data['password'])
         username = data['username']
         try:
-            await register(request.app['db'], username, password)
+            await register(request.app['db'], request.app['sparky'], username, password)
         except t.DataError:
             log.debug('deep validation failed: username taken')
             context['errors']['username'] = "Username already in use"
@@ -97,11 +97,11 @@ async def register_post(request):
             return web.HTTPSeeOther(location='/')
 
 
-@fdb.transactional
-async def user_by_username(tr, username):
+@found.transactional
+async def user_by_username(tr, sparky, username):
     tuples = (
-        ('actor', sparky.var('uid'), 'name', username),
-        ('actor', sparky.var('uid'), 'password', sparky.var('password')),
+        (sparky.var('uid'), 'name', username),
+        (sparky.var('uid'), 'password', sparky.var('password')),
     )
     users = await sparky.where(tr, *tuples)
     assert len(users) == 1
@@ -116,7 +116,7 @@ async def login_post(request):
     data = await request.post()
     username = data['username']
     try:
-        user = await user_by_username(request.app["db"], username)
+        user = await user_by_username(request.app["db"], request.app['sparky'], username)
     except IndexError:
         context = {"settings": request.app["settings"], "error": "Wrong credentials"}
         return request.app.render('user/login.jinja2', request, context)
@@ -129,7 +129,7 @@ async def login_post(request):
             return request.app.render('user/login.jinja2', request, context)
         else:
             uid = user['uid']
-            token = request.app['signer'].sign(uid)
+            token = request.app['signer'].sign(uid.hex)
             token = token.decode('utf-8')
             redirect = web.HTTPSeeOther(location='/home')
             max_age = request.app['settings'].TOKEN_MAX_AGE
@@ -143,11 +143,11 @@ async def login_get(request):
     return request.app.render('user/login.jinja2', request, context)
 
 
-@fdb.transactional
-async def user_by_uid(tr, uid):
+@found.transactional
+async def user_by_uid(tr, sparky, uid):
     tuples = (
-        ('actor', uid, 'name', sparky.var('name')),
-        ('actor', uid, 'password', sparky.var('password')),
+        (uid, 'name', sparky.var('name')),
+        (uid, 'password', sparky.var('password')),
     )
     users = await sparky.where(tr, *tuples)
     assert len(users) == 1

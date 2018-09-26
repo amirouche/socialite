@@ -1,13 +1,9 @@
 from time import time
-from uuid import UUID
 
 import daiquiri
+import found
 from mistune import Markdown
 from aiohttp import web
-
-from socialite import fdb
-from socialite import sparky
-from socialite.user import user_by_username
 
 
 log = daiquiri.getLogger(__name__)
@@ -16,13 +12,13 @@ log = daiquiri.getLogger(__name__)
 markdown = Markdown()
 
 
-@fdb.transactional
-async def expressions_for_user(tr, username):
+@found.transactional
+async def expressions_for_user(tr, sparky, username):
     patterns = (
-        ('actor', sparky.var('actor'), 'name', username),
-        ('stream', sparky.var('expression'), 'html', sparky.var('html')),
-        ('stream', sparky.var('expression'), 'actor', sparky.var('actor')),
-        ('stream', sparky.var('expression'), 'modified-at', sparky.var('modified-at')),
+        (sparky.var('actor'), 'name', username),
+        (sparky.var('expression'), 'actor', sparky.var('actor')),
+        (sparky.var('expression'), 'html', sparky.var('html')),
+        (sparky.var('expression'), 'modified-at', sparky.var('modified-at')),
     )
     out = await sparky.where(tr, *patterns)
     out.sort(key=lambda x: x['modified-at'], reverse=True)
@@ -33,7 +29,7 @@ async def expressions_for_user(tr, username):
 async def expressions(request):
     username = request.match_info['username']
     log.debug("Stream for username='%s'", username)
-    expressions = await expressions_for_user(request.app['db'], username)
+    expressions = await expressions_for_user(request.app['db'], request.app['sparky'], username)
     context = {
         "settings": request.app["settings"],
         "username": username,
@@ -43,17 +39,18 @@ async def expressions(request):
     return request.app.render("stream/user.jinja2", request, context)
 
 
-@fdb.transactional
-async def stream(tr, user):
+@found.transactional
+async def stream(tr, sparky, user):
     """Fetch latest expressions of things that ``user`` follows"""
+    log.debug("fetching stream")
     # fetch followee aka. what user follows
     patterns = (
-        ('stream', sparky.var('follow'), 'follower', user),
-        ('stream', sparky.var('follow'), 'followee', sparky.var('followee')),
-        ('stream', sparky.var('expression'), 'html', sparky.var('html')),
-        ('stream', sparky.var('expression'), 'actor', sparky.var('followee')),
-        ('stream', sparky.var('expression'), 'modified-at', sparky.var('modified-at')),
-        ('actor', sparky.var('followee'), 'name', sparky.var('name')),
+        (sparky.var('follow'), 'follower', user),
+        (sparky.var('follow'), 'followee', sparky.var('followee')),
+        (sparky.var('expression'), 'actor', sparky.var('followee')),
+        (sparky.var('expression'), 'html', sparky.var('html')),
+        (sparky.var('expression'), 'modified-at', sparky.var('modified-at')),
+        (sparky.var('followee'), 'name', sparky.var('name')),
     )
     out = await sparky.where(tr, *patterns)
     out.sort(key=lambda x: x['modified-at'], reverse=True)
@@ -62,21 +59,21 @@ async def stream(tr, user):
 
 
 async def stream_get(request):
-    expressions = await stream(request.app["db"], request.user['uid'])
+    expressions = await stream(request.app["db"], request.app["sparky"], request.user['uid'])
     context = {"settings": request.app["settings"], "expressions": expressions}
     return request.app.render("stream/stream.jinja2", request, context)
 
 
-@fdb.transactional
-async def expression_insert(tr, user, expression, html):
+@found.transactional
+async def insert(tr, sparky, user, expression, html):
     now = int(time())
-    uid = await sparky.random_uid(tr)
+    uid = await sparky.uuid(tr)
     tuples = (
-        ('stream', uid, 'html', html),
-        ('stream', uid, 'expression', expression),
-        ('stream', uid, 'actor', user),
-        ('stream', uid, 'modified-at', now),
-        ('stream', uid, 'created-at', now),
+        (uid, 'html', html),
+        (uid, 'expression', expression),
+        (uid, 'actor', user),
+        (uid, 'modified-at', now),
+        (uid, 'created-at', now),
     )
     await sparky.add(tr, *tuples)
     return uid
@@ -88,14 +85,14 @@ async def stream_post(request):
     log.debug('Post expression: %s', expression)
     # TODO: some security validation and sanitization like with bleach
     html = markdown(expression)
-    await expression_insert(request.app['db'], request.user['uid'], expression, html)
+    await insert(request.app['db'], request.app['sparky'], request.user['uid'], expression, html)
     raise web.HTTPSeeOther(location="/stream/")
 
 
-@fdb.transactional
-async def actor_by_name(tr, name):
+@found.transactional
+async def actor_by_name(tr, sparky, name):
     tuples = (
-        ('actor', sparky.var('uid'), 'name', name),
+        (sparky.var('uid'), 'name', name),
     )
     users = await sparky.where(tr, *tuples)
     assert len(users) == 1
@@ -107,18 +104,18 @@ async def actor_by_name(tr, name):
 async def follow_get(request):
     username = request.match_info['username']
     log.debug("follow_get username=%r", username)
-    user = await actor_by_name(request.app["db"], username)
+    user = await actor_by_name(request.app["db"], request.app["sparky"], username)
     context = {"settings": request.app["settings"], "user": user}
     return request.app.render("stream/follow.jinja2", request, context)
 
 
-@fdb.transactional
-async def follow(tr, user, other):
-    other = await actor_by_name(tr, other)
-    uid = await sparky.random_uid(tr)
+@found.transactional
+async def follow(tr, sparky, user, other):
+    other = await actor_by_name(tr, sparky, other)
+    uid = await sparky.uuid(tr)
     tuples = (
-        ('stream', uid, 'follower', user["uid"]),
-        ('stream', uid, 'followee', other["uid"]),
+        (uid, 'follower', user["uid"]),
+        (uid, 'followee', other["uid"]),
     )
     await sparky.add(tr, *tuples)
 
@@ -126,5 +123,5 @@ async def follow(tr, user, other):
 async def follow_post(request):
     username = request.match_info['username']
     log.debug("follow_post username=%r", username)
-    await follow(request.app["db"], request.user, username)
+    await follow(request.app["db"], request.app["sparky"], request.user, username)
     raise web.HTTPSeeOther(location="/stream/")
