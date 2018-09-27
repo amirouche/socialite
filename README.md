@@ -70,14 +70,14 @@ in-memory backend.  The goal with this choice is double:
 
 `src/socialite/sparky.py` offers an abstraction similar to rdf /
 SPARQL. It implements a subset of the standard that should be very
-easy to get started.
+easy to pick.
 
 To get started you can read [FDB's documentation about the Python
 client](https://apple.github.io/foundationdb/index.html). Mind the
-fact that socialite rely on a fork of
-[found](https://github.com/amirouche/found) that is asyncio driver for FDB
-based on cffi (which is the recommeded way to interop with C code by
-PyPy).
+fact that socialite rely on
+[found](https://github.com/amirouche/asyncio-foundationdb) that is
+asyncio driver for FDB based on cffi (which is the recommeded way to
+interop with C code by PyPy).
 
 Of course it would be very nice to have well-thought, easy to use,
 with migration magics. socialite proceed step-by-step.  Implement,
@@ -89,23 +89,22 @@ get started.
 
 `sparky` is small RDF-like layer which support a subset of SPARQL.
 
-Simply said, it's a quad-store.
+Simply said, it's a triple-store.
 
 Let's try again.
 
-Simply said, it stores a **set** of 4-tuples of primitive datatypes
+Simply said, it stores a **set** of 3-tuples of primitive datatypes
 (`int`, `float`, `tuples`, `str` and `bytes` (ie. `dict` is not
 supported as-is)) most commonly described as:
 
 ```python
-(graph, subject, predicate, object)
+(subject, predicate, object)
 ```
 
-But one might have an easier time mapping that machinery to the easier
-to the mind when you come from MongoDB:
+But one might have an easier time mapping that machinery to:
 
 ```python
-(collection, uid, field, value)
+(uid, key, value)
 ```
 
 The difference with a document store is that tuples are very unique!
@@ -113,9 +112,9 @@ Which makes sense since it is a **set** ot tuples. Otherwise said, you
 can have the following three tuples in the same database:
 
 ```python
-("blog", "P4X432", "title", "hyperdev.fr")
-("blog", "P4X432", "SeeAlso", "julien.danjou.info")
-("blog", "P4X432", "SeeAlso", "blog.dolead.com")
+("P4X432", "title", "hyperdev.fr")
+(P4X432", "SeeAlso", "julien.danjou.info")
+(P4X432", "SeeAlso", "blog.dolead.com")
 ```
 
 This is not possible in document-store because the `SeeAlso` appears
@@ -137,9 +136,9 @@ Here is the equivalent using sparky:
 
 ```python
 patterns = [
-	('blog', sparky.var('blog'), 'title', 'hyperdev.fr'),
-	('post', sparky.var('post'), 'blog', sparky.var('blog')),
-	('post', sparky.var('post'), 'title', sparky.var('title')),
+	(sparky.var('blog'), 'title', 'hyperdev.fr'),
+	(sparky.var('post'), 'blog', sparky.var('blog')),
+	(sparky.var('post'), 'title', sparky.var('title')),
 ]
 out = await sparky.where(db, *patterns)
 ```
@@ -153,14 +152,6 @@ data.world](https://docs.data.world/tutorials/sparql/).
 
 The roadmap is to implement something like
 [datomic](https://www.datomic.com/) without versioning.
-
-The current implementation is very naive but the API is (almost) set.
-Basically, going further means implementing a cost / statistic based
-query planner.  That said, for the time being we will not rely on
-explicit indexing but instead index-all-the-things. Another machinery
-**might** be put to good use that is [inspired from Gremlin and
-implemented in AjguDB](https://bit.ly/2CEc72q), if one can make `async
-for` in a transaction work without leaks.
 
 Mind the fact, that since sparky use `fdb.pack` for serialiazing a
 tuple items, lexicographic ordering is preserved. That is, one can
