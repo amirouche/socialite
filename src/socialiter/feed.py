@@ -7,7 +7,7 @@ import trafaret as t
 from aiohttp import web
 from defusedxml.lxml import fromstring as bytes2xml
 
-from socialite.base import SocialiteException
+from socialiter.base import SocialiterException
 
 
 log = daiquiri.getLogger(__name__)
@@ -16,7 +16,7 @@ log = daiquiri.getLogger(__name__)
 TIMEOUT_FEED_FETCH = 3
 
 
-class FeedException(SocialiteException):
+class FeedException(SocialiterException):
     """Base error for the feed module"""
     pass
 

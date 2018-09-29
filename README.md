@@ -1,26 +1,26 @@
-# socialite - wanna be private-first social network
+# socialiter - wanna be private-first social network
 
 **step-by-step**
 
-[![travis](https://api.travis-ci.com/amirouche/socialite.svg?branch=master)](https://travis-ci.com/amirouche/socialite) [![codecov](https://codecov.io/gh/amirouche/socialite/branch/master/graph/badge.svg)](https://codecov.io/gh/amirouche/socialite)
+[![travis](https://api.travis-ci.com/amirouche/socialiter.svg?branch=master)](https://travis-ci.com/amirouche/socialiter) [![codecov](https://codecov.io/gh/amirouche/socialiter/branch/master/graph/badge.svg)](https://codecov.io/gh/amirouche/socialiter)
 
-socialite is proof-of-concept social network that experiments various
+socialiter is proof-of-concept social network that experiments various
 backend architectural choices.
 
 <!-- It takes inspiration from peer-to-peer systems ideas and apply them in the context of controlled environments. -->
 
-socialite is built using the Model-View-Controller pattern on top of
+socialiter is built using the Model-View-Controller pattern on top of
 [aiohttp](https://aiohttp.readthedocs.io/en/stable/). The
 [jinja2](http://jinja.pocoo.org/) library is used for rendering the
 view.
 
-socialite wants to proove that a complex application can be developed
+socialiter wants to proove that a complex application can be developed
 and operated more easily as a monolithic service using the right
-abstractions. That's why socialite use
+abstractions. That's why socialiter use
 [FoundationDB](https://apple.github.io/foundationdb/).
 
-<!-- socialite experiment with an innovative [distributed **priority** task -->
-<!-- queue](https://github.com/amirouche/socialite/issues/14). The goal of -->
+<!-- socialiter experiment with an innovative [distributed **priority** task -->
+<!-- queue](https://github.com/amirouche/socialiter/issues/14). The goal of -->
 <!-- that particular component is to ease operation of the application. -->
 
 ## ROADMAP
@@ -46,18 +46,18 @@ abstractions. That's why socialite use
 
 ## Functions for the win
 
-socialite use a lot of functions.  There is nothing wrong with
+socialiter use a lot of functions.  There is nothing wrong with
 classes.  In particular there is no Object Data Mapper (ODM) or Object
 Relational Mapper (ORM) abstraction, yet.
 
-That said, socialite rely on
+That said, socialiter rely on
 [trafaret](https://github.com/Deepwalker/trafaret/) for data
-validation which is built using classes. Also socialite make use of
-`SocialiteException` class that you can inherit.
+validation which is built using classes. Also socialiter make use of
+`SocialiterException` class that you can inherit.
 
 ## Database
 
-Socialite rely on [FoundationDB](https://foundationdb.org/) (FDB) to
+Socialiter rely on [FoundationDB](https://foundationdb.org/) (FDB) to
 persist data to disk.  Becareful the default configuration use the
 in-memory backend.  The goal with this choice is double:
 
@@ -68,19 +68,19 @@ in-memory backend.  The goal with this choice is double:
 - Experiment operations of FDB from development to deployement of
   single machine cluster to multiple machine clusters.
 
-`src/socialite/sparky.py` offers an abstraction similar to rdf /
+`src/socialiter/sparky.py` offers an abstraction similar to rdf /
 SPARQL. It implements a subset of the standard that should be very
 easy to pick.
 
 To get started you can read [FDB's documentation about the Python
 client](https://apple.github.io/foundationdb/index.html). Mind the
-fact that socialite rely on
+fact that socialiter rely on
 [found](https://github.com/amirouche/asyncio-foundationdb) that is
 asyncio driver for FDB based on cffi (which is the recommeded way to
 interop with C code by PyPy).
 
 Of course it would be very nice to have well-thought, easy to use,
-with migration magics. socialite proceed step-by-step.  Implement,
+with migration magics. socialiter proceed step-by-step.  Implement,
 use, gain knowledge, then build higher level abstractions.  When
 things seem blurry, do not over think it and try something simple to
 get started.

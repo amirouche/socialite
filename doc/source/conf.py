@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# socialite documentation build configuration file, created by
+# socialiter documentation build configuration file, created by
 # sphinx-quickstart on Sat Jul 22 23:57:05 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -52,9 +52,9 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'socialite'
-copyright = '2017-2018, socialite'
-author = 'socialite'
+project = 'socialiter'
+copyright = '2017-2018, socialiter'
+author = 'socialiter'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -106,7 +106,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'socialitedoc'
+htmlhelp_basename = 'socialiterdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -133,8 +133,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'socialite.tex', 'socialite Documentation',
-     'socialite', 'manual'),
+    (master_doc, 'socialiter.tex', 'socialiter Documentation',
+     'socialiter', 'manual'),
 ]
 
 
@@ -143,7 +143,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'socialite', 'socialite Documentation',
+    (master_doc, 'socialiter', 'socialite Documentation',
      [author], 1)
 ]
 
@@ -154,8 +154,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'socialite', 'socialite Documentation',
-     author, 'socialite', 'One line description of project.',
+    (master_doc, 'socialiter', 'socialiter Documentation',
+     author, 'socialiter', 'One line description of project.',
      'Miscellaneous'),
 ]
 

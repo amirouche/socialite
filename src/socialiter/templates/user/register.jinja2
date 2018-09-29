@@ -3,7 +3,7 @@
 {% block class %}register{% endblock %}
 
 {% block root %}
-    <h1>socialite</h1>
+    <h1>socialiter</h1>
     <form method="POST" action="/user/register">
         <input type="text" placeholder="username" name="username" value="{{ values.get('username') | maybe }}"/>
         {% if errors['username'] %}

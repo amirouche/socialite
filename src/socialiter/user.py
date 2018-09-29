@@ -7,7 +7,7 @@ import trafaret as t
 from aiohttp import web
 from argon2.exceptions import VerifyMismatchError
 
-from socialite.helpers import no_auth
+from socialiter.helpers import no_auth
 
 
 log = daiquiri.getLogger(__name__)
@@ -55,7 +55,7 @@ async def register(tr, sparky, username, password):
         await sparky.add(tr, *tuples)
         return uid
     else:
-        # TODO: Replace with DeepValidationException inherit from SocialiteException
+        # TODO: Replace with DeepValidationException inherit from SocialiterException
         raise t.DataError()
 
 
