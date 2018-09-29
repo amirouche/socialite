@@ -29,14 +29,15 @@ from jinja2 import FileSystemLoader
 from pathlib import Path
 from setproctitle import setproctitle  # pylint: disable=no-name-in-module
 
+from socialiter import beyond
+from socialiter.beyond import h
+
 from socialiter import settings
-from socialiter import feed
-from socialiter import user
-from socialiter import stream
+# from socialiter import feed
+# from socialiter import query
+# from socialiter import user
+# from socialiter import stream
 from socialiter.base import SpacePrefix
-from socialiter.filters import FILTERS
-from socialiter.helpers import no_auth
-from socialiter.query import query
 
 
 log = daiquiri.getLogger(__name__)
@@ -47,60 +48,8 @@ VERSION = 'v' + '.'.join([str(x) for x in __version__])
 HOMEPAGE = 'https://bit.ly/2D2fT5Q'
 
 
-# middleware
-
-
-async def middleware_check_auth(app, handler):
-    """Check that the request has a valid token.
-
-    Raise HTTPForbidden when the token is not valid.
-
-    `handler` can be marked to ignore token. This is useful for pages like
-    account login, account creation and password retrieval
-
-    """
-    async def middleware_handler(request):
-        if getattr(handler, 'no_auth', False):
-            response = await handler(request)
-            return response
-        else:
-            try:
-                token = request.cookies['token']
-            except KeyError:
-                log.debug('No auth token found')
-                raise web.HTTPFound(location='/')
-            else:
-                max_age = app['settings'].TOKEN_MAX_AGE
-                try:
-                    uid = app['signer'].unsign(token, max_age=max_age)
-                except SignatureExpired:
-                    log.debug('Token expired')
-                    raise web.HTTPFound(location='/')
-                except BadSignature:
-                    log.debug('Bad signature')
-                    raise web.HTTPFound(location='/')
-                else:
-                    uid = uid.decode('utf-8')
-                    uid = UUID(hex=uid)
-                    actor = await user.user_by_uid(request.app["db"], request.app["sparky"], uid)
-                    log.debug("User authenticated as '%s'", actor["name"])
-                    request.user = actor
-                    response = await handler(request)
-                    return response
-
-    return middleware_handler
-
-
-# home
-
-async def home(request):
-    context = {'settings': request.app['settings']}
-    return request.app.render('home.jinja2', request, context)
-
-
 # status
 
-@no_auth
 async def status(request):
     """Check that the app is properly working"""
     return web.json_response('OK')
@@ -128,50 +77,70 @@ def create_app(loop):
 
     # init app
     app = web.Application()  # pylint: disable=invalid-name
-    # jinja2
-    templates = Path(__file__).parent / 'templates'
-    setup_jinja2(
-        app,
-        loader=FileSystemLoader(str(templates)),
-        filters=FILTERS,  # TODO: improve that stuff
-    )
     # others
-    app.render = render
     app.on_startup.append(init_database)
-    app.middlewares.append(middleware_check_auth)
     app['settings'] = settings
     app['hasher'] = PasswordHasher()
     app['signer'] = TimestampSigner(settings.SECRET)
+    # setup HTTP session
     user_agent = 'socialiter {} ({})'.format(VERSION, HOMEPAGE)
     headers = {'User-Agent': user_agent}
     app['session'] = ClientSession(headers=headers)
 
-    # user routes
-    app.router.add_route('GET', '/', user.login_get)
-    app.router.add_route('POST', '/', user.login_post)
-    # register
-    app.router.add_route('GET', '/user/register', user.register_get)
-    app.router.add_route('POST', '/user/register', user.register_post)
-    # home route
-    app.router.add_route('GET', '/home', home)
-    app.router.add_route('GET', '/query', query)
-    # stream
-    app.router.add_route('GET', '/stream/', stream.stream_get)
-    app.router.add_route('POST', '/stream/', stream.stream_post)
-    # TODO: rename '{username}' to '{name}'
-    app.router.add_route('GET', '/stream/{username}', stream.expressions)
-    app.router.add_route('GET', '/stream/{username}/follow', stream.follow_get)
-    app.router.add_route('POST', '/stream/{username}/follow', stream.follow_post)
-    # feed
-    app.router.add_route('POST', '/feed/add', feed.add_post)
     # api route
     app.router.add_route('GET', '/api/status', status)
+
+    # beyond routes
+    app.router.add_route('GET', '/websocket', beyond.websocket)
+    app.router.add_route('GET', '/', beyond.index)
+    app.router.add_route('GET', '/{path:.+}', beyond.index)
+
+    # application routes
+    app.handle = router = beyond.Router()
+
+    async def index_init(event):
+        model = {
+            'conversation': [],
+        }
+        event.request.model = model
+        for command in ['echo', 'alpha', 'bravo']:
+            message = {'command': command, 'replies': {'echo': command}}
+            event.request.model['conversation'].append(message)
+
+    @beyond.beyond
+    async def on_submit(event):
+        message = {'command': 'form submit', 'replies': {'echo': 'submit'}}
+        event.request.model['conversation'].append(message)
+
+    def index_render(model):
+        log.debug('render chatbot: %r', model)
+        shell = h.div(id="shell", Class="chatbot")
+
+        shell.append(h.h1()["beyondjs"])
+
+        for messages in model['conversation']:
+            command = messages['command']
+            replies = messages['replies']
+            shell.append(h.p()[command])
+            for chat, reply in replies.items():
+                shell.append(h.p(Class='reply ' + chat)[chat + ': ' + reply])
+
+        chatbox = h.div(id="chatbox")
+        form = h.form(on_submit=on_submit)
+        form.append(h.input(type="text"))
+        form.append(h.input(type="submit"))
+        chatbox.append(form)
+
+        shell.append(chatbox)
+
+        return shell
+
+    router.add_route(r'^/$', index_init, index_render)
 
     return app
 
 
 def main():
-    """entry point of the whole application, equivalent to django's manage.py"""
     args = docopt(__doc__)
     setproctitle('socialiter')
 

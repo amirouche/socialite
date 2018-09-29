@@ -1,21 +1,7 @@
-/* flexbox cheatsheet: https://bit.ly/1xEYMhF */
-
-/* universal box sizing with inheritance */
-/* https://css-tricks.com/box-sizing/ */
-
-html {
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-}
-*, *:before, *:after {
-  -webkit-box-sizing: inherit;
-  -moz-box-sizing: inherit;
-  box-sizing: inherit;
-}
-
-
 /* BASICS */
+* {
+    color: white;
+}
 
 body {
     font-family: sans;
@@ -24,75 +10,30 @@ body {
 }
 
 h1 {
-    font-family: 'League Gothic', Impact, sans-serif, sans;
+    font-family: 'League Gothic', sans;
     font-weight: normal;
     color: white;
     text-align: left;
 }
 
 h2, h3, h4, h5, h6 {
-    font-family: 'League Gothic', Impact, sans-serif, sans;
+    font-family: sans;
     font-weight: normal;
-    color: white;
-    text-align: left;
-    margin: 0px
-}
-
-p {
-    margin: 0px;
-    line-height: 1.6em;
 }
 
 code {
-    background: hsla(0, 0%, 100%, 0.1);
+    background: hsla(0,0%,100%,0.1);
     font-size: 0.8em;
     padding: 3px;
     border-radius: 3px;
 }
 
 a:link,
+a:hover,
 a:visited,
 a:active {
     color: white;
-    text-decoration: none;
-    border-bottom: 1px solid white;
 }
-
-a:hover {
-    color: #3498db;
-    border-bottom: 1px solid #3498db;
-}
-
-
-/* FORM */
-
-form p.error {
-    background: hsla(0, 90.5%, 41.2%, 0.3);;
-    margin-top: -15px;
-    padding: 5px;
-}
-
-
-textarea, input[type="text"], input[type="password"]  {
-    border: 0px;
-    border: 1px solid hsla(0, 0%, 100%, 0.3);
-    background: transparent;
-    margin-bottom: 15px;
-    padding: 15px;
-}
-
-input[type="submit"] {
-    background: hsla(0, 0%, 100%, 0.1);
-    border: 1px solid hsla(0, 0%, 100%, 0.3);
-    box-shadow: 1px 1px 2px black;
-    margin-bottom: 15px;
-    padding: 15px;
-}
-
-input[type="submit"]:hover {
-    background: hsla(0, 0%, 100%, 0.3);
-}
-
 
 /* BACKGROUND */
 
@@ -106,12 +47,12 @@ input[type="submit"]:hover {
     height: auto;
     z-index: -100;
     transform: translateX(-50%) translateY(-50%);
-    background: url(video/poster.jpeg) no-repeat;
+    background: url(/static/video/poster.jpeg) no-repeat;
     background-size: cover;
 }
 
 @media screen and (max-device-width: 800px) {
-    body { background: url(video/poster.jpeg) #000 no-repeat center center fixed;}
+    body { background: url(/static/video/poster.jpeg) #000 no-repeat center center fixed;}
     #background { display: none; }
 }
 
@@ -127,102 +68,83 @@ input[type="submit"]:hover {
     height: auto;
     z-index: -99;
     transform: translateX(-50%) translateY(-50%);
-    background: url(video/overlay.png);
+    background: url(/static/video/overlay.png);
 }
 
-/* ROOT */
+/* HEADER */
 
-#root {
+#header {
+    padding: 15px;
+    text-align: right;
+    margin: 0px;
+}
+
+#header a {
+    text-decoration: none;
+    color: hsla(0, 0%, 100%, 0.3);
+    font-family: 'League Gothic', Impact, sans;
+    font-size: 2em;
+}
+
+#header a:hover {
+    color: white;
+    border-bottom: 1px solid white;
+}
+
+#header:hover {
+    color: white;
+}
+
+/* SHELL */
+
+#shell {
     margin: auto;
     paddding: 15px;
     max-width: 666px;
-    display: flex;
-    flex-direction: column;
 }
 
-/* LOGIN */
-
-#root.login,
-#root.follow {
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-#root.login form,
-#root.follow form {
-    display: flex;
-    flex-direction: column;
-}
-
-/* REGISTER */
-
-#root.register {
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-#root.register form {
-    display: flex;
-    flex-direction: column;
-}
-
-/* HOME */
-
-#root.home form {
-    display: flex;
-    justify-content: center;
-}
-
-#root.home .menu {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-#root.home .menu > a {
-    width: 300px;
-    margin: 15px;
-    padding: 10px;
+input[type="text"], input[type="password"] {
+    border: 0px;
     border: 1px solid hsla(0, 0%, 100%, 0.3);
-    border-radius: 3px;
-    text-align: justify;
+    background: transparent;
+    margin-bottom: 15px;
+    padding: 15px;
 }
 
-/* STREAM */
-
-#root.stream > form > p > textarea {
+textarea {
     width: 100%;
-}
-
-#root.stream > .stream {
-    border-top: 1px solid hsla(0, 0%, 100%, 0.3);
-    padding-top: 15px;
-}
-
-#root.stream > .stream > .expression {
-    border: 1px solid hsla(0, 0%, 100%, 0.3);
-    border-radius: 3px;
-    padding: 10px;
+    background: transparent;
+    border: 1px solid white;
+    padding: 15px;
     margin-bottom: 15px;
 }
 
-#root.stream > .stream > .expression > img {
-    float: left;
-    margin-right: 10px;
-    margin-botto: 10px;
+input[type="submit"] {
+    background: hsla(0, 0%, 100%, 0.1);
+    border: 1px solid hsla(0, 0%, 100%, 0.3);
+    box-shadow: 1px 1px 2px black;
+    margin-bottom: 15px;
+    padding: 15px;
 }
 
-#root.stream > .stream > .expression > .html > a.source {
-    font-weight: bolder;
-    text-decoration: none;
+input[type="submit"]:hover {
+    background: hsla(0, 0%, 100%, 0.3);
+    box-shadow: 2px 2px 2px black;
 }
 
-#root.stream > .stream > .expression > .metadata > a {
-    text-decoration: none;
-    opacity: 0.7;
-    font-size: 0.8em;
+
+/* CHATBOT */
+
+#shell.chatbot .reply {
+    border-left: solid 5px white;
+    padding-left: 15px;
+}
+
+
+#shell.chatbot #chatbox {
+    display: flex;
+}
+
+#shell.chatbot #chatbox input[type="text"] {
+    flex: 2;
 }
