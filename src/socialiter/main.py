@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Usage:
-  socialite run
+  socialiter run
 
 Options:
   -h --help     Show this screen.
@@ -29,14 +29,14 @@ from jinja2 import FileSystemLoader
 from pathlib import Path
 from setproctitle import setproctitle  # pylint: disable=no-name-in-module
 
-from socialite import settings
-from socialite import feed
-from socialite import user
-from socialite import stream
-from socialite.base import SpacePrefix
-from socialite.filters import FILTERS
-from socialite.helpers import no_auth
-from socialite.query import query
+from socialiter import settings
+from socialiter import feed
+from socialiter import user
+from socialiter import stream
+from socialiter.base import SpacePrefix
+from socialiter.filters import FILTERS
+from socialiter.helpers import no_auth
+from socialiter.query import query
 
 
 log = daiquiri.getLogger(__name__)
@@ -122,9 +122,9 @@ def create_app(loop):
     level = getattr(logging, level_name)
     daiquiri.setup(level=level, outputs=('stderr',))
 
-    setproctitle('socialite')
+    setproctitle('socialiter')
 
-    log.info("init socialite %s", VERSION)
+    log.info("init socialiter %s", VERSION)
 
     # init app
     app = web.Application()  # pylint: disable=invalid-name
@@ -142,7 +142,7 @@ def create_app(loop):
     app['settings'] = settings
     app['hasher'] = PasswordHasher()
     app['signer'] = TimestampSigner(settings.SECRET)
-    user_agent = 'socialite {} ({})'.format(VERSION, HOMEPAGE)
+    user_agent = 'socialiter {} ({})'.format(VERSION, HOMEPAGE)
     headers = {'User-Agent': user_agent}
     app['session'] = ClientSession(headers=headers)
 
@@ -173,7 +173,7 @@ def create_app(loop):
 def main():
     """entry point of the whole application, equivalent to django's manage.py"""
     args = docopt(__doc__)
-    setproctitle('socialite')
+    setproctitle('socialiter')
 
     if args.get('run'):
         asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())

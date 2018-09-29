@@ -1,7 +1,7 @@
 import trafaret as t
 from aiohttp import web
 
-from socialite import feed
+from socialiter import feed
 
 
 async def query(request):
