@@ -13,7 +13,7 @@ from uuid import uuid4
 
 import aiohttp
 from aiohttp import web
-
+from markupsafe import escape
 
 log = logging.getLogger(__name__)
 
@@ -61,17 +61,15 @@ class Node(object):  # inspired from nevow
     def extend(self, nodes):
         [self.append(node) for node in nodes]
 
-    def __getitem__(self, nodes):
+    def __getitem__(self, node):
         """Add nodes as children"""
         # XXX: __getitem__ is implemented in terms of `Node.append`
         # so that widgets can simply inherit from node and override
         # self.append with the bound `Node.append`.
-        if isinstance(nodes, (str, float, int)):
-            self.append(nodes)
-        elif isinstance(nodes, (list, tuple)):
-            [self.append(node) for node in nodes]
+        if isinstance(node, Node):
+            self.append(node)
         else:
-            self.append(nodes)
+            self.append(escape(node))
         return self
 
 
