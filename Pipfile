@@ -5,7 +5,6 @@ name = "pypi"
 
 [dev-packages]
 aiohttp-devtools = "*"
-debug = "*"
 ipython = "*"
 sphinx = "*"
 pytest = "*"
