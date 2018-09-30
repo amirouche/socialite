@@ -113,8 +113,8 @@ can have the following three tuples in the same database:
 
 ```python
 ("P4X432", "title", "hyperdev.fr")
-(P4X432", "SeeAlso", "julien.danjou.info")
-(P4X432", "SeeAlso", "blog.dolead.com")
+("P4X432", "SeeAlso", "julien.danjou.info")
+("P4X432", "SeeAlso", "blog.dolead.com")
 ```
 
 This is not possible in document-store because the `SeeAlso` appears
