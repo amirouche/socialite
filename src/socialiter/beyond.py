@@ -56,6 +56,8 @@ class Node(object):  # inspired from nevow
 
     def append(self, node):
         """Append a single node or string as a child"""
+        if not isinstance(node, Node):
+            node = escape(node)
         self._children.append(node)
 
     def extend(self, nodes):
@@ -66,10 +68,7 @@ class Node(object):  # inspired from nevow
         # XXX: __getitem__ is implemented in terms of `Node.append`
         # so that widgets can simply inherit from node and override
         # self.append with the bound `Node.append`.
-        if isinstance(node, Node):
-            self.append(node)
-        else:
-            self.append(escape(node))
+        self.append(node)
         return self
 
 
