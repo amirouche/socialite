@@ -22,6 +22,17 @@ class BeyondException(Exception):
     pass
 
 
+class Style(dict):
+
+    def __init__(self, *args, **kwargs):
+        for arg in args:
+            self.update(args)
+        self.update(kwargs)
+
+    def render(self):
+        return '; '.join([key + ': ' + value for key, value in self.items()])
+
+
 def generate_unique_key(dictionary):
     key = uuid4().hex
     if key not in dictionary:
@@ -93,6 +104,8 @@ def serialize(node):
                 yield 'class', value
             elif key == 'For':
                 yield 'for', value
+            elif key == 'style':
+                yield 'style', value.render()
             else:
                 yield key, value
 
@@ -265,7 +278,8 @@ async def index(request):
     """Return the index page"""
     filepath = os.path.join(os.path.dirname(__file__), 'index.html')
     with open(filepath, 'rb') as f:
-        return web.Response(body=f.read(), content_type='text/html')
+        body = f.read()
+    return web.Response(body=body, content_type='text/html')
 
 
 Route = namedtuple('Route', ('regex', 'init', 'handler'))

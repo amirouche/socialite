@@ -118,7 +118,7 @@ def create_app(loop):
         log.debug('render chatbot: %r', model)
         shell = h.div(id="shell", Class="chatbot")
 
-        shell.append(h.h1()["beyondjs"])
+        shell.append(h.h1(style=beyond.Style(**{'background': 'red'}))["beyondjs"])
 
         for messages in model['conversation']:
             command = messages['command']
