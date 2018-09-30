@@ -122,29 +122,9 @@ textarea {
 input[type="submit"] {
     background: hsla(0, 0%, 100%, 0.1);
     border: 1px solid hsla(0, 0%, 100%, 0.3);
-    box-shadow: 1px 1px 2px black;
-    margin-bottom: 15px;
     padding: 15px;
 }
 
 input[type="submit"]:hover {
     background: hsla(0, 0%, 100%, 0.3);
-    box-shadow: 2px 2px 2px black;
-}
-
-
-/* CHATBOT */
-
-#shell.chatbot .reply {
-    border-left: solid 5px white;
-    padding-left: 15px;
-}
-
-
-#shell.chatbot #chatbox {
-    display: flex;
-}
-
-#shell.chatbot #chatbox input[type="text"] {
-    flex: 2;
 }
