@@ -12,6 +12,7 @@ var patch = snabbdom.init([
 ]);
 
 var h = snabbdom.h;
+var retry = 0;
 
 // TODO: support https/wss
 // TOOD: do not hardcode domain
@@ -35,7 +36,7 @@ var translate = function(json) {
                     event: {'target.value': event.target.value},
                     token: localStorage.getItem('token'),
                 };
-                console.log('send', msg);
+                // console.log('send', msg);
                 ws.send(JSON.stringify(msg));
             }
         });
@@ -54,7 +55,7 @@ var translate = function(json) {
 }
 
 ws.onmessage = function(msg) {
-    console.log('onmessage', msg);
+    // console.log('onmessage', msg);
     var msg = JSON.parse(msg.data);
     if (msg.type == 'dom-update') {
         container = patch(container, translate(msg.html));
@@ -67,7 +68,7 @@ ws.onmessage = function(msg) {
     }
 }
 
-ws.onopen = function (_) {
+ws.onopen = function () {
     var msg = {
         path: location.pathname,
         type: 'init',
