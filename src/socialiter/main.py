@@ -109,8 +109,10 @@ def create_app(loop):
 
     @beyond.beyond
     async def on_submit(event):
-        message = {'command': 'form submit', 'replies': {'echo': 'submit'}}
+        message = {'command': 'form submit', 'replies': {'echo': 'y submit'}}
         event.request.model['conversation'].append(message)
+        await event.token('fuuuuu')
+        await event.redirect('/foobar')
 
     def index_render(model):
         log.debug('render chatbot: %r', model)

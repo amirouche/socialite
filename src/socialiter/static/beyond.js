@@ -33,6 +33,7 @@ var translate = function(json) {
                     type: 'dom-event',
                     key: json.on[event_name],
                     event: {'target.value': event.target.value},
+                    token: localStorage.getItem('token'),
                 };
                 console.log('send', msg);
                 ws.send(JSON.stringify(msg));
@@ -55,7 +56,15 @@ var translate = function(json) {
 ws.onmessage = function(msg) {
     console.log('onmessage', msg);
     var msg = JSON.parse(msg.data);
-    container = patch(container, translate(msg.html))
+    if (msg.type == 'dom-update') {
+        container = patch(container, translate(msg.html));
+    } else if (msg.type == 'token-update') {
+        localStorage.setItem('token', msg.token);
+    } else if (msg.type == 'location-update') {
+        location.pathname = msg.pathname;
+    } else {
+        console.log("message not supported", msg);
+    }
 }
 
 ws.onopen = function (_) {

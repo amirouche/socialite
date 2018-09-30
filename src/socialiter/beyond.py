@@ -192,17 +192,22 @@ def beyond(callable):
 
 class Event:
 
-    __slot__ = ('type', 'request', 'websocket', 'path', 'payload')
+    __slot__ = ('type', 'request', 'websocket', 'payload')
 
-    def __init__(self, type, request, websocket, path, payload):
+    def __init__(self, type, request, websocket, payload):
         self.type = type
         self.request = request
         self.websocket = websocket
-        self.path = path
         self.payload = payload
 
     def __repr__(self):
-        return '<Event {} {} {}>'.format(self.type, self.path, self.payload)
+        return '<Event {} {}>'.format(self.type, self.payload)
+
+    async def redirect(self, path):
+        await self.websocket.send_json(dict(type='location-update', pathname=path))
+
+    async def token(self, value=None):
+        await self.websocket.send_json(dict(type='token-update', token=value))
 
 
 async def websocket(request):
@@ -211,7 +216,6 @@ async def websocket(request):
     await websocket.prepare(request)
 
     async for msg in websocket:
-
         if msg.type == aiohttp.WSMsgType.ERROR:
             msg = 'websocket connection closed with exception %s'
             msg = msg % websocket.exception()
@@ -222,21 +226,20 @@ async def websocket(request):
             event = loads(msg.data)
             log.debug('websocket got message type: %s', event["type"])
             if event['type'] == 'init':
-
                 # Render the page
-                event = Event('init', request, websocket, event['path'], None)
+                event = Event('init', request, websocket, event)
                 html = await request.app.handle(event)
                 # serialize html and extract event handlers
                 html, events = serialize(html)
                 # update event handlers
                 websocket.events = events
                 # send html update
-                msg = dict(html=html)
+                msg = dict(type='dom-update', html=html)
                 await websocket.send_str(dumps(msg))
             elif event['type'] == 'dom-event':
                 # Build backend event
                 key = event['key']
-                event = Event('dom-event', request, websocket, event['path'], event['event'])  # noqa
+                event = Event('dom-event', request, websocket, event)
                 # retrieve callback for event
                 callback = websocket.events[key]
                 # exec, prolly sending back a response via event.websocket
@@ -248,7 +251,7 @@ async def websocket(request):
                 # update event handlers
                 websocket.events = events
                 # send html update
-                msg = dict(html=html)
+                msg = dict(type='dom-update', html=html)
                 await websocket.send_str(dumps(msg))
             else:
                 msg = "msg type '%s' is not supported yet" % msg['type']
@@ -284,7 +287,7 @@ class Router:
 
     async def __call__(self, event):
         log.debug("new event %r", event)
-        path = event.path
+        path = event.payload['path']
         log.debug('routing path: %s' % path)
         for route in self._routes:
             match = route.regex.match(path)
