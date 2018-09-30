@@ -9,6 +9,10 @@ body {
     color: white;
 }
 
+p {
+    margin: 0px;
+}
+
 h1 {
     font-family: 'League Gothic', sans;
     font-weight: normal;
@@ -107,7 +111,6 @@ input[type="text"], input[type="password"] {
     border: 0px;
     border: 1px solid hsla(0, 0%, 100%, 0.3);
     background: transparent;
-    margin-bottom: 15px;
     padding: 15px;
 }
 
@@ -116,7 +119,6 @@ textarea {
     background: transparent;
     border: 1px solid white;
     padding: 15px;
-    margin-bottom: 15px;
 }
 
 input[type="submit"] {

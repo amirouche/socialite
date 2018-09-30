@@ -204,7 +204,7 @@ class Event:
         self.payload = payload
 
     def __repr__(self):
-        return '<Event {} {}>'.format(self.type, self.payload)
+        return '<Event {}>'.format(self.type)
 
     async def redirect(self, path):
         await self.websocket.send_json(dict(type='location-update', pathname=path))
@@ -227,7 +227,7 @@ async def websocket(request):
             break
         elif msg.type == aiohttp.WSMsgType.TEXT:
             event = loads(msg.data)
-            log.debug('websocket got message: %s', event)
+            log.debug('websocket got message')
             if event['type'] == 'init':
                 # Render the page
                 event = Event('init', request, websocket, event)

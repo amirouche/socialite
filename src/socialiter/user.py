@@ -1,6 +1,6 @@
 from string import punctuation
 
-import daiquiri
+import logging
 import found
 import trafaret as t
 
@@ -12,8 +12,10 @@ from socialiter.beyond import beyond
 from socialiter.beyond import set
 from socialiter.beyond import Style
 
+from socialiter.helpers import maybe
 
-log = daiquiri.getLogger(__name__)
+
+log = logging.getLogger(__name__)
 
 
 def strong_password(string):
@@ -29,7 +31,7 @@ def strong_password(string):
 
 user_validate = t.Dict(
     username=t.String(min_length=1, max_length=255) & t.Regexp(r'^[\w]+$'),
-    password=t.String(min_length=10, max_length=255) & strong_password,
+    password=t.String(min_length=8, max_length=255) & strong_password,
     validation=t.String(),
 )
 
@@ -95,7 +97,53 @@ async def register_post(request):
 
 @beyond
 async def on_register(event):
-    pass
+    model = event.request.model
+    data = {
+        'username': model.get('username'),
+        'password': model.get('password'),
+        'validation': model.get('validation'),
+    }
+    try:
+        user_validate(data)
+    except t.DataError as exc:
+        log.debug('shallow validation failed')
+        for key, value in exc.as_dict().items():
+            model[key + '-error'] = value
+        return
+    model['username-error'] = None
+    model['password-error'] = None
+    model['validation-error'] = None
+
+    # Check that the passwords are the same
+    if model['password'] != model['validation']:
+        model['password-error'] = "Does not match validation"
+        return
+
+
+def Input(type, name, placeholder, value, error):
+    control = h.div(style=Style(**{'margin-bottom': '5px'}))
+    if error:
+        style = Style(**{'border': '1px solid hsla(0, 100%, 30%, 0.3)'})
+    else:
+        style = Style()
+    input = h.input(
+        type=type,
+        placeholder=placeholder,
+        style=style,
+        value=maybe(value),
+        on_input=set(name),
+    )
+    control.append(h.p()[input])
+    if error:
+        style = {
+            'background': 'hsla(0, 100%, 30%, 0.3)',
+            'margin': '0px',
+            'padding': '5px',
+        }
+        msg = h.p(style=Style(**style))
+        msg.append(error)
+        control.append(msg)
+    return control
 
 
 def view_register(model):
@@ -108,23 +156,33 @@ def view_register(model):
     }
     shell = h.div(id="shell", style=Style(**style))
     shell.append(h.h1()["register"])
+
     form = h.form(style=Style(**{'text-align': 'center'}), on_submit=on_register)
-    form.append(h.div()[h.input(
-        type="text",
-        value=model.get('username') or '',
-        placeholder='username',
-        on_input=set('username')
-    )])
-    form.append(h.div()[h.input(
-        type="password",
-        placeholder='password',
-        on_input=set('password')
-    )])
-    form.append(h.div()[h.input(
-        type="password",
-        placeholder='confirmation',
-        on_input=set('confirmation')
-    )])
+    username = Input(
+        'text',
+        'username',
+        'username',
+        model.get('username'),
+        model.get('username-error')
+    )
+    form.append(username)
+    password = Input(
+        'password',
+        'password',
+        'password',
+        None,
+        model.get('password-error'),
+    )
+    form.append(password)
+    validation = Input(
+        'password',
+        'validation',
+        'validation',
+        None,
+        model.get('validation-error'),
+    )
+    form.append(validation)
+
     form.append(h.div()[h.input(type="submit", value="register")])
     shell.append(form)
     return shell
