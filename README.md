@@ -23,6 +23,17 @@ abstractions. That's why socialiter use
 <!-- queue](https://github.com/amirouche/socialiter/issues/14). The goal of -->
 <!-- that particular component is to ease operation of the application. -->
 
+## Getting started
+
+If you are on ubuntu or other debian derivatives try the following:
+
+```sh
+make install
+```
+
+For other distribution it's recommended to use LXC and install Ubuntu
+18.04.
+
 ## ROADMAP
 
 - 2018/09/30 - What Are The Civilian Applications
