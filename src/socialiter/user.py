@@ -7,16 +7,13 @@ import trafaret as t
 from aiohttp import web
 from argon2.exceptions import VerifyMismatchError
 
-from socialiter.helpers import no_auth
+from socialiter.beyond import h
+from socialiter.beyond import beyond
+from socialiter.beyond import set
+from socialiter.beyond import Style
 
 
 log = daiquiri.getLogger(__name__)
-
-
-@no_auth
-async def register_get(request):
-    context = {'settings': request.app['settings'], 'errors': {}, 'values': {}, }
-    return request.app.render('user/register.jinja2', request, context)
 
 
 def strong_password(string):
@@ -31,7 +28,7 @@ def strong_password(string):
 
 
 user_validate = t.Dict(
-    username=t.String(min_length=1, max_length=255) & t.Regexp(r'^[\w-]+$'),
+    username=t.String(min_length=1, max_length=255) & t.Regexp(r'^[\w]+$'),
     password=t.String(min_length=10, max_length=255) & strong_password,
     validation=t.String(),
 )
@@ -59,7 +56,6 @@ async def register(tr, sparky, username, password):
         raise t.DataError()
 
 
-@no_auth
 async def register_post(request):
     """Create a new user raise bad request in case of error"""
     context = {
@@ -97,6 +93,43 @@ async def register_post(request):
             return web.HTTPSeeOther(location='/')
 
 
+@beyond
+async def on_register(event):
+    pass
+
+
+def view_register(model):
+    style = {
+        'display': 'flex',
+        'flex-direction': 'column',
+        'justify-content': 'center',
+        'align-items': 'center',
+        'min-height': '100vh',
+    }
+    shell = h.div(id="shell", style=Style(**style))
+    shell.append(h.h1()["register"])
+    form = h.form(style=Style(**{'text-align': 'center'}), on_submit=on_register)
+    form.append(h.div()[h.input(
+        type="text",
+        value=model.get('username') or '',
+        placeholder='username',
+        on_input=set('username')
+    )])
+    form.append(h.div()[h.input(
+        type="password",
+        placeholder='password',
+        on_input=set('password')
+    )])
+    form.append(h.div()[h.input(
+        type="password",
+        placeholder='confirmation',
+        on_input=set('confirmation')
+    )])
+    form.append(h.div()[h.input(type="submit", value="register")])
+    shell.append(form)
+    return shell
+
+
 @found.transactional
 async def user_by_username(tr, sparky, username):
     tuples = (
@@ -110,7 +143,6 @@ async def user_by_username(tr, sparky, username):
     return user
 
 
-@no_auth
 async def login_post(request):
     """Try to login an user, return token if successful"""
     data = await request.post()
@@ -137,10 +169,24 @@ async def login_post(request):
             raise redirect
 
 
-@no_auth
-async def login_get(request):
-    context = {'settings': request.app['settings'], 'errors': {}}
-    return request.app.render('user/login.jinja2', request, context)
+def view_login(model):
+    style = {
+        'display': 'flex',
+        'flex-direction': 'column',
+        'justify-content': 'center',
+        'align-items': 'center',
+        'min-height': '100vh',
+    }
+    shell = h.div(id="shell", style=Style(**style))
+    shell.append(h.h1()["socialiter"])
+    form = h.form(style=Style(**{'text-align': 'center'}))
+    form.append(h.div()[h.input(type="text", placeholder='username')])
+    form.append(h.div()[h.input(type="password", placeholder='passowrd')])
+    form.append(h.div()[h.input(type="submit", value="login")])
+    shell.append(form)
+    shell.append(h.div()[h.a(href="/user/register")["register an account"]])
+    shell.append(h.div()[h.a(href="/user/recovery")["password recovery"]])
+    return shell
 
 
 @found.transactional

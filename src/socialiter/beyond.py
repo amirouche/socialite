@@ -33,13 +33,6 @@ class Style(dict):
         return '; '.join([key + ': ' + value for key, value in self.items()])
 
 
-def generate_unique_key(dictionary):
-    key = uuid4().hex
-    if key not in dictionary:
-        return key
-    raise BeyondException('Seems like the dictionary is full')
-
-
 class Node(object):  # inspired from nevow
     """Python representaiton of html nodes.
 
@@ -124,7 +117,7 @@ def serialize(node):
             out['attributes'] = dict(to_html_attributes(node._attributes))
             on = dict()
             for event, callback in to_html_events(node._attributes):
-                key = generate_unique_key(events)
+                key = callback.__name__
                 events[key] = callback  # XXX: side effect!
                 on[event] = key
             if on:
@@ -234,7 +227,7 @@ async def websocket(request):
             break
         elif msg.type == aiohttp.WSMsgType.TEXT:
             event = loads(msg.data)
-            log.debug('websocket got message type: %s', event["type"])
+            log.debug('websocket got message: %s', event)
             if event['type'] == 'init':
                 # Render the page
                 event = Event('init', request, websocket, event)
@@ -297,9 +290,8 @@ class Router:
         self._routes.append(route)
 
     async def __call__(self, event):
-        log.debug("new event %r", event)
+        log.debug("routing new event %r", event)
         path = event.payload['path']
-        log.debug('routing path: %s' % path)
         for route in self._routes:
             match = route.regex.match(path)
             if match is not None:
@@ -308,11 +300,23 @@ class Router:
                 log.debug('Match found %r with args=%r', route, args)
                 if event.type == 'init':
                     await route.init(event, *args)
-                assert getattr(event.request, 'model'), "model must be set in route init function"
+                assert getattr(event.request, 'model') is not None, "model must be set in route init function"  # noqa
                 html = route.handler(event.request.model)
                 return html
         else:
             # Ark! The route is not defined! Error 404 wanna be.
             return h.h1()['beyondjs: no route found']
+
+
+async def make_model(event):
+    event.request.model = dict()
+
+
+def set(name):
+    async def setter(event):
+        value = event.payload['event']['target.value']
+        event.request.model[name] = value
+    setter.__name__ = 'set_' + name
+    return setter
 
 # <3

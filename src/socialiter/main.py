@@ -8,7 +8,6 @@ Options:
 import asyncio
 import logging
 import os
-from uuid import UUID
 
 import daiquiri
 import found
@@ -16,26 +15,19 @@ import found.sparky
 import uvloop
 from aiohttp import ClientSession
 from aiohttp import web
-from aiohttp_jinja2 import setup as setup_jinja2
-from aiohttp_jinja2 import render_template as render
 from argon2 import PasswordHasher
 
 from docopt import docopt
-from itsdangerous import BadSignature
-from itsdangerous import SignatureExpired
 from itsdangerous import TimestampSigner
 
-from jinja2 import FileSystemLoader
-from pathlib import Path
 from setproctitle import setproctitle  # pylint: disable=no-name-in-module
 
 from socialiter import beyond
-from socialiter.beyond import h
 
 from socialiter import settings
 # from socialiter import feed
 # from socialiter import query
-# from socialiter import user
+from socialiter import user
 # from socialiter import stream
 from socialiter.base import SpacePrefix
 
@@ -98,46 +90,8 @@ def create_app(loop):
     # application routes
     app.handle = router = beyond.Router()
 
-    async def index_init(event):
-        model = {
-            'conversation': [],
-        }
-        event.request.model = model
-        for command in ['echo', 'alpha', 'bravo']:
-            message = {'command': command, 'replies': {'echo': command}}
-            event.request.model['conversation'].append(message)
-
-    @beyond.beyond
-    async def on_submit(event):
-        message = {'command': 'form submit', 'replies': {'echo': 'y submit'}}
-        event.request.model['conversation'].append(message)
-        await event.token('fuuuuu')
-        await event.redirect('/foobar')
-
-    def index_render(model):
-        log.debug('render chatbot: %r', model)
-        shell = h.div(id="shell", Class="chatbot")
-
-        shell.append(h.h1(style=beyond.Style(**{'background': 'red'}))["beyondjs"])
-
-        for messages in model['conversation']:
-            command = messages['command']
-            replies = messages['replies']
-            shell.append(h.p()[command])
-            for chat, reply in replies.items():
-                shell.append(h.p(Class='reply ' + chat)[chat + ': ' + reply])
-
-        chatbox = h.div(id="chatbox")
-        form = h.form(on_submit=on_submit)
-        form.append(h.input(type="text"))
-        form.append(h.input(type="submit"))
-        chatbox.append(form)
-
-        shell.append(chatbox)
-
-        return shell
-
-    router.add_route(r'^/$', index_init, index_render)
+    router.add_route(r'^/$', beyond.make_model, user.view_login)
+    router.add_route(r'^/user/register$', beyond.make_model, user.view_register)
 
     return app
 
