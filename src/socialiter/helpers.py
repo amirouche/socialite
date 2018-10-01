@@ -1,3 +1,4 @@
+import time
 import async_timeout
 
 
@@ -13,3 +14,11 @@ def no_auth(handler):
     """
     handler.no_auth = True
     return handler
+
+
+def maybe(v):
+    return '' if v is None else v
+
+
+def epoch2human(epoch):
+    return int(time() - epoch)  # TODO: humanize for the real

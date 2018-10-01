@@ -1,0 +1,132 @@
+/* BASICS */
+* {
+    color: white;
+}
+
+body {
+    font-family: sans;
+    font-size: 18px;
+    color: white;
+}
+
+p {
+    margin: 0px;
+}
+
+h1 {
+    font-family: 'League Gothic', sans;
+    font-weight: normal;
+    color: white;
+    text-align: left;
+}
+
+h2, h3, h4, h5, h6 {
+    font-family: sans;
+    font-weight: normal;
+}
+
+code {
+    background: hsla(0,0%,100%,0.1);
+    font-size: 0.8em;
+    padding: 3px;
+    border-radius: 3px;
+}
+
+a:link,
+a:hover,
+a:visited,
+a:active {
+    color: white;
+}
+
+/* BACKGROUND */
+
+#background video {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: -100;
+    transform: translateX(-50%) translateY(-50%);
+    background: url(/static/video/poster.jpeg) no-repeat;
+    background-size: cover;
+}
+
+@media screen and (max-device-width: 800px) {
+    body { background: url(/static/video/poster.jpeg) #000 no-repeat center center fixed;}
+    #background { display: none; }
+}
+
+/* OVERLAY */
+
+#overlay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: -99;
+    transform: translateX(-50%) translateY(-50%);
+    background: url(/static/video/overlay.png);
+}
+
+/* HEADER */
+
+#header {
+    padding: 15px;
+    text-align: right;
+    margin: 0px;
+}
+
+#header a {
+    text-decoration: none;
+    color: hsla(0, 0%, 100%, 0.3);
+    font-family: 'League Gothic', Impact, sans;
+    font-size: 2em;
+}
+
+#header a:hover {
+    color: white;
+    border-bottom: 1px solid white;
+}
+
+#header:hover {
+    color: white;
+}
+
+/* SHELL */
+
+#shell {
+    margin: auto;
+    paddding: 15px;
+    max-width: 666px;
+}
+
+input[type="text"], input[type="password"] {
+    border: 0px;
+    border: 1px solid hsla(0, 0%, 100%, 0.3);
+    background: transparent;
+    padding: 15px;
+}
+
+textarea {
+    width: 100%;
+    background: transparent;
+    border: 1px solid white;
+    padding: 15px;
+}
+
+input[type="submit"] {
+    background: hsla(0, 0%, 100%, 0.1);
+    border: 1px solid hsla(0, 0%, 100%, 0.3);
+    padding: 15px;
+}
+
+input[type="submit"]:hover {
+    background: hsla(0, 0%, 100%, 0.3);
+}

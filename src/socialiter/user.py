@@ -1,22 +1,21 @@
 from string import punctuation
 
-import daiquiri
+import logging
 import found
 import trafaret as t
 
 from aiohttp import web
 from argon2.exceptions import VerifyMismatchError
 
-from socialite.helpers import no_auth
+from socialiter.beyond import h
+from socialiter.beyond import beyond
+from socialiter.beyond import set
+from socialiter.beyond import Style
+
+from socialiter.helpers import maybe
 
 
-log = daiquiri.getLogger(__name__)
-
-
-@no_auth
-async def register_get(request):
-    context = {'settings': request.app['settings'], 'errors': {}, 'values': {}, }
-    return request.app.render('user/register.jinja2', request, context)
+log = logging.getLogger(__name__)
 
 
 def strong_password(string):
@@ -31,8 +30,8 @@ def strong_password(string):
 
 
 user_validate = t.Dict(
-    username=t.String(min_length=1, max_length=255) & t.Regexp(r'^[\w-]+$'),
-    password=t.String(min_length=10, max_length=255) & strong_password,
+    username=t.String(min_length=1, max_length=255) & t.Regexp(r'^[\w]+$'),
+    password=t.String(min_length=8, max_length=255) & strong_password,
     validation=t.String(),
 )
 
@@ -55,11 +54,10 @@ async def register(tr, sparky, username, password):
         await sparky.add(tr, *tuples)
         return uid
     else:
-        # TODO: Replace with DeepValidationException inherit from SocialiteException
+        # TODO: Replace with DeepValidationException inherit from SocialiterException
         raise t.DataError()
 
 
-@no_auth
 async def register_post(request):
     """Create a new user raise bad request in case of error"""
     context = {
@@ -97,6 +95,103 @@ async def register_post(request):
             return web.HTTPSeeOther(location='/')
 
 
+@beyond
+async def on_register(event):
+    model = event.request.model
+    data = {
+        'username': model.get('username'),
+        'password': model.get('password'),
+        'validation': model.get('validation'),
+    }
+    try:
+        user_validate(data)
+    except t.DataError as exc:
+        log.debug('shallow validation failed')
+        for key, value in exc.as_dict().items():
+            model[key + '-error'] = value
+        return
+
+    # reset errors because it passed shallow validation
+    model['username-error'] = None
+    model['password-error'] = None
+    model['validation-error'] = None
+
+    # Check that the passwords are the same
+    if model['password'] != model['validation']:
+        model['password-error'] = "Does not match validation"
+        return
+
+    # TODO: try to add user
+
+
+def Input(type, name, placeholder, value, error):
+    control = h.div(style=Style(**{'margin-bottom': '5px'}))
+    if error:
+        style = Style(**{'border': '1px solid hsla(0, 100%, 30%, 0.3)'})
+    else:
+        style = Style()
+    input = h.input(
+        type=type,
+        placeholder=placeholder,
+        style=style,
+        value=maybe(value),
+        on_input=set(name),
+    )
+    control.append(h.p()[input])
+    if error:
+        style = {
+            'background': 'hsla(0, 100%, 30%, 0.3)',
+            'margin': '0px',
+            'padding': '5px',
+        }
+        msg = h.p(style=Style(**style))
+        msg.append(error)
+        control.append(msg)
+    return control
+
+
+def view_register(model):
+    style = {
+        'display': 'flex',
+        'flex-direction': 'column',
+        'justify-content': 'center',
+        'align-items': 'center',
+        'min-height': '100vh',
+    }
+    shell = h.div(id="shell", style=Style(**style))
+    shell.append(h.h1()["register"])
+
+    form = h.form(style=Style(**{'text-align': 'center'}), on_submit=on_register)
+    username = Input(
+        'text',
+        'username',
+        'username',
+        model.get('username'),
+        model.get('username-error')
+    )
+    form.append(username)
+    password = Input(
+        'password',
+        'password',
+        'password',
+        None,
+        model.get('password-error'),
+    )
+    form.append(password)
+    validation = Input(
+        'password',
+        'validation',
+        'validation',
+        None,
+        model.get('validation-error'),
+    )
+    form.append(validation)
+
+    form.append(h.div()[h.input(type="submit", value="register")])
+    shell.append(form)
+    return shell
+
+
 @found.transactional
 async def user_by_username(tr, sparky, username):
     tuples = (
@@ -110,7 +205,6 @@ async def user_by_username(tr, sparky, username):
     return user
 
 
-@no_auth
 async def login_post(request):
     """Try to login an user, return token if successful"""
     data = await request.post()
@@ -137,10 +231,24 @@ async def login_post(request):
             raise redirect
 
 
-@no_auth
-async def login_get(request):
-    context = {'settings': request.app['settings'], 'errors': {}}
-    return request.app.render('user/login.jinja2', request, context)
+def view_login(model):
+    style = {
+        'display': 'flex',
+        'flex-direction': 'column',
+        'justify-content': 'center',
+        'align-items': 'center',
+        'min-height': '100vh',
+    }
+    shell = h.div(id="shell", style=Style(**style))
+    shell.append(h.h1()["socialiter"])
+    form = h.form(style=Style(**{'text-align': 'center'}))
+    form.append(h.div()[h.input(type="text", placeholder='username')])
+    form.append(h.div()[h.input(type="password", placeholder='passowrd')])
+    form.append(h.div()[h.input(type="submit", value="login")])
+    shell.append(form)
+    shell.append(h.div()[h.a(href="/user/register")["register an account"]])
+    shell.append(h.div()[h.a(href="/user/recovery")["password recovery"]])
+    return shell
 
 
 @found.transactional
