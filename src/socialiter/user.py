@@ -110,6 +110,8 @@ async def on_register(event):
         for key, value in exc.as_dict().items():
             model[key + '-error'] = value
         return
+
+    # reset errors because it passed shallow validation
     model['username-error'] = None
     model['password-error'] = None
     model['validation-error'] = None
@@ -118,6 +120,8 @@ async def on_register(event):
     if model['password'] != model['validation']:
         model['password-error'] = "Does not match validation"
         return
+
+    # TODO: try to add user
 
 
 def Input(type, name, placeholder, value, error):
