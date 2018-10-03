@@ -2,7 +2,7 @@ import pytest
 
 import trafaret as t
 
-from socialite import user
+from socialiter import user
 
 
 def test_account_new_validate_empty():
@@ -13,19 +13,13 @@ def test_account_new_validate_empty():
 
 def _test_account_new_validate_valid():
     data = dict(  # nosec
-        username="amirouche",
-        password="FooBar!42count",
-        validation="FooBar!42count",
+        username="amirouche", password="FooBar!42count", validation="FooBar!42count"
     )
     assert user.user_validate(data)
 
 
 def test_account_new_validate_invalid_password():
-    data = dict(  # nosec
-        username="peon",
-        password="toosimple",
-        validation="toosimple",
-    )
+    data = dict(username="peon", password="toosimple", validation="toosimple")  # nosec
     with pytest.raises(t.DataError) as exc:
         assert user.user_validate(data)
-        assert exc.as_dict()['password']
+        assert exc.as_dict()["password"]
