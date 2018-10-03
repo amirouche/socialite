@@ -34,6 +34,22 @@ make install
 For other distribution it's recommended to use LXC and install Ubuntu
 18.04.
 
+## How to contribute?
+
+- Read the README and the code
+- Pick a task in the the roadmap (see below) or in
+  [brainstorming](https://github.com/amirouche/socialiter/issues/10)
+- [Create an
+  issue](https://github.com/amirouche/socialiter/issues/new)
+  describing your plan
+- Fork the repository
+- Create a branch
+- Code + Tests
+- Commit
+- Submit a pull-request
+
+Thanks in advance!
+
 ## ROADMAP
 
 - 2018/10/03 - What Are The Civilian Applications
