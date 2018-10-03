@@ -36,24 +36,24 @@ For other distribution it's recommended to use LXC and install Ubuntu
 
 ## ROADMAP
 
-- 2018/09/30 - What Are The Civilian Applications
+- 2018/10/03 - What Are The Civilian Applications
 
-	- Continous Integration [DONE]
-	- Basic Data Persistence [DONE]
-	- Example use of `sparky.py` see `stream.py` [DONE]
-	- Baisc Feed Reader [TODO]
-	- Basic Task queue [TODO]
-	- Example Unit Test that mocks a coroutine [TODO]
-	- Deploy [TODO]
+	- Continous Integration
+	- Basic Data Persistence
+	- Example use of `sparky.py` see `stream.py`
+	- Baisc Feed Reader
 
 - 2018/10/XY - [Pick a Culture ship at random](http://bryanschuetz.github.io/culture-namer/)
 
+	- Basic Task queue [TODO]
+	- Example Unit Test that mocks a coroutine [TODO]
 	- Basic TODO
 	- Basic Wiki
 	- Basic Forum
 	- Basic Paste
 	- CSRF Protection
 	- Basic Search Engine with a crawler
+	- Deploy [TODO]
 
 ## Functions for the win
 
@@ -104,9 +104,9 @@ Simply said, it's a triple-store.
 
 Let's try again.
 
-Simply said, it stores a **set** of 3-tuples of primitive datatypes
-(`int`, `float`, `tuples`, `str` and `bytes` (ie. `dict` is not
-supported as-is)) most commonly described as:
+Simply said, sparky stores a **set** of 3-tuples of primitive
+datatypes (`int`, `float`, `tuples`, `str` and `bytes` (ie. `dict` is
+not supported as-is)) most commonly described as:
 
 ```python
 (subject, predicate, object)
