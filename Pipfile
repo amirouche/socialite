@@ -18,6 +18,7 @@ pylint = "*"
 asyncpg = "*"
 requests = "*"
 bandit = "*"
+black = "*"
 
 [packages]
 aiohttp = "*"
@@ -41,3 +42,6 @@ immutables = "*"
 defusedxml = "*"
 asyncio-foundationdb = "*"
 lxml = "*"
+
+[pipenv]
+allow_prereleases = true

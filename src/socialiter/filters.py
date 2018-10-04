@@ -5,10 +5,10 @@ FILTERS = dict()
 
 
 def maybe(v):
-    return '' if v is None else v
+    return "" if v is None else v
 
 
-FILTERS['maybe'] = maybe
+FILTERS["maybe"] = maybe
 
 
 def epoch2human(epoch):
