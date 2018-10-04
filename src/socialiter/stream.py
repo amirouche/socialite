@@ -87,7 +87,10 @@ async def stream_post(request):
     data = await request.post()
     expression = data["expression"]
     log.debug("Post expression: %s", expression)
-    html = markdown(clean(expression))
+    cleaned = clean(expression.strip())
+    if not cleaned:
+        raise web.HTTPSeeOther(location="/stream/")
+    html = markdown(cleaned)
     if html:
         await insert(
             request.app["db"],
