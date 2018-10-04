@@ -42,6 +42,7 @@ immutables = "*"
 defusedxml = "*"
 asyncio-foundationdb = "*"
 lxml = "*"
+bleach = "*"
 
 [pipenv]
 allow_prereleases = true

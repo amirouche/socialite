@@ -2,6 +2,7 @@ from time import time
 
 import daiquiri
 import found
+from bleach import clean
 from mistune import Markdown
 from aiohttp import web
 
@@ -45,7 +46,6 @@ async def expressions(request):
 async def stream(tr, sparky, user):
     """Fetch latest expressions of things that ``user`` follows"""
     log.debug("fetching stream")
-    # fetch followee aka. what user follows
     patterns = (
         (sparky.var("follow"), "follower", user),
         (sparky.var("follow"), "followee", sparky.var("followee")),
@@ -87,11 +87,15 @@ async def stream_post(request):
     data = await request.post()
     expression = data["expression"]
     log.debug("Post expression: %s", expression)
-    # TODO: some security validation and sanitization like with bleach
-    html = markdown(expression)
-    await insert(
-        request.app["db"], request.app["sparky"], request.user["uid"], expression, html
-    )
+    html = markdown(clean(expression))
+    if html:
+        await insert(
+            request.app["db"],
+            request.app["sparky"],
+            request.user["uid"],
+            expression,
+            html,
+        )
     raise web.HTTPSeeOther(location="/stream/")
 
 
