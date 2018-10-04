@@ -57,19 +57,23 @@ Thanks in advance!
 	- Continous Integration
 	- Basic Data Persistence
 	- Example use of `sparky.py` see `stream.py`
-	- Baisc Feed Reader
+	- Basic Feed Reader
 
-- 2018/10/XY - [Pick a Culture ship at random](http://bryanschuetz.github.io/culture-namer/)
+- 2018/11/31 - Unfortunate Conflict Of Evidence
 
 	- Basic Task queue [TODO]
 	- Example Unit Test that mocks a coroutine [TODO]
-	- Basic TODO
-	- Basic Wiki
-	- Basic Forum
-	- Basic Paste
-	- CSRF Protection
-	- Basic Search Engine with a crawler
+	- Basic TODO [TODO]
+	- Basic Wiki [TODO]
+	- Basic Forum [TODO]
+	- Basic Paste [TODO]
+	- CSRF Protection [TODO]
+	- Basic Search Engine with a crawler [TODO]
 	- Deploy [TODO]
+
+- 2018/12/XY - [Pick a Culture ship at random](http://bryanschuetz.github.io/culture-namer/)
+
+	- python-fu [TODO]
 
 ## Functions for the win
 
