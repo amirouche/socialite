@@ -46,6 +46,7 @@ async def expressions(request):
 async def stream(tr, sparky, user):
     """Fetch latest expressions of things that ``user`` follows"""
     log.debug("fetching stream")
+    # TODO: Replace with an index directly in FDB
     patterns = (
         (sparky.var("follow"), "follower", user),
         (sparky.var("follow"), "followee", sparky.var("followee")),
