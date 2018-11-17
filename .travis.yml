@@ -5,5 +5,5 @@ python: 3.6
 install: make install
 script: make check
 after_success:
-  - make coverage
+  - make check-coverage
   - codecov
