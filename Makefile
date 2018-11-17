@@ -4,26 +4,24 @@ all: help
 	@echo "\nTry something...\n"
 
 install: ## Prepare the host sytem for development
-	# install FoundationDB
 	wget https://www.foundationdb.org/downloads/5.2.5/ubuntu/installers/foundationdb-clients_5.2.5-1_amd64.deb
 	sudo dpkg -i foundationdb-clients_5.2.5-1_amd64.deb
 	wget https://www.foundationdb.org/downloads/5.2.5/ubuntu/installers/foundationdb-server_5.2.5-1_amd64.deb
 	sudo dpkg -i foundationdb-server_5.2.5-1_amd64.deb
-	# Proceed with python dependencies
 	pip3 install pipenv --upgrade
 	pipenv install --dev --skip-lock
 	pipenv run pre-commit install
 
 check: ## Run tests
-	pipenv run py.test -vv --capture=no src/tests/
 	make database-clean
+	pipenv run py.test -vv --capture=no src/tests/
 	pipenv check
 	bandit --skip=B101 -r src/
 	@echo "\033[95m\n\nYou may now run 'make lint' or 'make coverage'.\n\033[0m"
 
-coverage: ## Code coverage
-	pipenv run py.test -vv --cov-config .coveragerc --cov-report term --cov-report html --cov-report xml --cov=src src/tests/
+check-coverage: ## Code coverage
 	make database-clean
+	pipenv run py.test -vv --cov-config .coveragerc --cov-report term --cov-report html --cov-report xml --cov=src src/tests/
 
 help: ## This help.
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
@@ -32,7 +30,7 @@ devrun: ## Run application in development mode
 	cd src && DEBUG=DEBUG adev runserver --livereload --static socialite/static/ socialite/socialite.py
 
 lint: ## Lint the code
-	pipenv run pylint src/
+	pipenv run pylint src/  # TODO: replace with lama
 
 doc: ## Build the documentation
 	cd doc && make html
