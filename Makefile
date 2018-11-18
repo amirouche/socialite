@@ -8,7 +8,7 @@ dev: ## Prepare the host sytem for development
 	sudo dpkg -i foundationdb-server_6.0.15-1_amd64.deb
 	pip3 install pipenv==2018.10.13
 	pipenv install --dev --skip-lock
-	pipenv run pre-commit install
+	pipenv run pre-commit install --hook-type pre-push
 
 check: ## Run tests
 	make database-clean
