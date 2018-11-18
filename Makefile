@@ -25,7 +25,7 @@ devrun: ## Run application in development mode
 	cd src && DEBUG=DEBUG adev runserver --livereload --static socialiter/static/ socialiter/main.py
 
 lint: ## Lint the code
-	pipenv run pylint src/  # TODO: replace with lama
+	pipenv run pylama src/
 
 doc: ## Build the documentation
 	cd src/doc && make html

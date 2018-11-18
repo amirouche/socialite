@@ -20,6 +20,7 @@ requests = "*"
 bandit = "*"
 black = "*"
 pylama = "*"
+pylama-pylint = "*"
 
 [packages]
 aiohttp = "*"
