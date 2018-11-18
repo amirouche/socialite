@@ -8,7 +8,8 @@ Options:
 import asyncio
 import logging
 import os
-from uuid import UUID
+import trafaref as t
+from string import punctuation
 
 import daiquiri
 import found
@@ -16,27 +17,17 @@ import found.sparky
 import uvloop
 from aiohttp import ClientSession
 from aiohttp import web
-from aiohttp_jinja2 import setup as setup_jinja2
-from aiohttp_jinja2 import render_template as render
 from argon2 import PasswordHasher
 
 from docopt import docopt
+from itsdangerous import TimestampSigner
 from itsdangerous import BadSignature
 from itsdangerous import SignatureExpired
-from itsdangerous import TimestampSigner
 
-from jinja2 import FileSystemLoader
-from pathlib import Path
 from setproctitle import setproctitle  # pylint: disable=no-name-in-module
 
 from socialiter import settings
-from socialiter import feed
-from socialiter import user
-from socialiter import stream
 from socialiter.base import SpacePrefix
-from socialiter.filters import FILTERS
-from socialiter.helpers import no_auth
-from socialiter.query import query
 
 
 log = daiquiri.getLogger(__name__)
@@ -49,6 +40,13 @@ HOMEPAGE = "https://bit.ly/2D2fT5Q"
 
 # middleware
 
+def no_auth(handler):
+    """Decorator to tell the ``middleware_check_auth`` to not check for the token
+
+    """
+    handler.no_auth = True
+    return handler
+
 
 async def middleware_check_auth(app, handler):
     """Check that the request has a valid token.
@@ -59,55 +57,35 @@ async def middleware_check_auth(app, handler):
     account login, account creation and password retrieval
 
     """
-
     async def middleware_handler(request):
-        if getattr(handler, "no_auth", False):
+        if getattr(handler, 'no_auth', False):
             response = await handler(request)
             return response
         else:
             try:
-                token = request.cookies["token"]
+                token = request.headers['X-AUTH-TOKEN']
             except KeyError:
-                log.debug("No auth token found")
-                raise web.HTTPFound(location="/")
+                raise web.HTTPForbidden(reason='auth token required')
             else:
-                max_age = app["settings"].TOKEN_MAX_AGE
+                max_age = app['settings'].TOKEN_MAX_AGE
                 try:
-                    uid = app["signer"].unsign(token, max_age=max_age)
+                    user_uid = app['signer'].unsign(token, max_age=max_age)
                 except SignatureExpired:
-                    log.debug("Token expired")
-                    raise web.HTTPFound(location="/")
+                    log.debug('Token expired')
+                    raise web.HTTPForbidden(reason='auth token expired')
                 except BadSignature:
-                    log.debug("Bad signature")
-                    raise web.HTTPFound(location="/")
+                    log.debug('Bad signature')
+                    raise web.HTTPForbidden(reason='bad signature')
                 else:
-                    uid = uid.decode("utf-8")
-                    uid = UUID(hex=uid)
-                    actor = await user.user_by_uid(
-                        request.app["db"], request.app["sparky"], uid
-                    )
-                    if actor is None:
-                        redirect = web.HTTPSeeOther(location="/")
-                        redirect.del_cookie("token")
-                        return redirect
-                    log.debug("User authenticated as '%s'", actor["name"])
-                    request.user = actor
+                    log.debug('User authenticated as {}'.format(user_uid))
+                    request.user_uid = user_uid
                     response = await handler(request)
                     return response
 
     return middleware_handler
 
 
-# home
-
-
-async def home(request):
-    context = {"settings": request.app["settings"]}
-    return request.app.render("home.jinja2", request, context)
-
-
 # status
-
 
 @no_auth
 async def status(request):
@@ -115,13 +93,36 @@ async def status(request):
     return web.json_response("OK")
 
 
-# boot the app
+# api/v0
 
+async def check_auth(request):
+    return web.json_response('OK')
+
+
+def strong_password(string):
+    """Check that ``string`` is strong enough password"""
+    if (any(char.isdigit() for char in string)
+            and any(char.islower() for char in string)
+            and any(char.isupper() for char in string)
+            and any(char in punctuation for char in string)):
+        return string
+    else:
+        raise t.DataError('Password is not strong enough')
+
+
+account_new_validate = t.Dict(
+    username=t.String(min_length=1, max_length=255) & t.Regexp(r'^[\w-]+$'),
+    password=t.String(min_length=10, max_length=255) & strong_password,
+    validation=t.String(),
+)
+
+
+# boot the app
 
 async def init_database(app):
     log.debug("init database")
     app["db"] = await found.open()
-    app["sparky"] = found.sparky.Sparky(SpacePrefix.SPARKY.value)
+    app["main"] = found.sparky.Sparky(SpacePrefix.MAIN.value)
     return app
 
 
@@ -137,16 +138,7 @@ def create_app(loop):
     log.info("init socialiter %s", VERSION)
 
     # init app
-    app = web.Application()  # pylint: disable=invalid-name
-    # jinja2
-    templates = Path(__file__).parent / "templates"
-    setup_jinja2(
-        app,
-        loader=FileSystemLoader(str(templates)),
-        filters=FILTERS,  # TODO: improve that stuff
-    )
-    # others
-    app.render = render
+    app = web.Application()
     app.on_startup.append(init_database)
     app.middlewares.append(middleware_check_auth)
     app["settings"] = settings
@@ -156,27 +148,13 @@ def create_app(loop):
     headers = {"User-Agent": user_agent}
     app["session"] = ClientSession(headers=headers)
 
-    # user routes
-    app.router.add_route("GET", "/", user.login_get)
-    app.router.add_route("POST", "/", user.login_post)
-    # register
-    app.router.add_route("GET", "/user/register", user.register_get)
-    app.router.add_route("POST", "/user/register", user.register_post)
-    # home route
-    app.router.add_route("GET", "/home", home)
-    app.router.add_route("GET", "/query", query)
-    # stream
-    app.router.add_route("GET", "/stream/", stream.stream_get)
-    app.router.add_route("POST", "/stream/", stream.stream_post)
-    # TODO: rename '{username}' to '{name}'
-    app.router.add_route("GET", "/stream/{username}", stream.expressions)
-    app.router.add_route("GET", "/stream/{username}/follow", stream.follow_get)
-    app.router.add_route("POST", "/stream/{username}/follow", stream.follow_post)
-    # feed
-    app.router.add_route("POST", "/feed/add", feed.add_post)
-    # api route
+    # routes
     app.router.add_route("GET", "/api/status", status)
+    app.router.add_route("GET", "/api/v0/user/authenticate", user_authenticate)
+    app.router.add_route('GET', '/api/v0/user/check', user_check)
+    app.router.add_route('POST', '/api/v0/user/create', user_create)
 
+    # that's all folks
     return app
 
 

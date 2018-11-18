@@ -23,7 +23,6 @@ black = "*"
 [packages]
 aiohttp = "*"
 "argon2-cffi" = "*"
-asyncpg = "*"
 daiquiri = "*"
 docopt = "*"
 itsdangerous = "*"
@@ -32,17 +31,12 @@ trafaret = "*"
 aiodns = "*"
 yarl = "*"
 async-timeout = "*"
-"aiohttp-jinja2" = "*"
 cffi = "*"
-async-generator = "*"
 uvloop = "*"
-msgpack = "*"
 mistune = "*"
 immutables = "*"
 defusedxml = "*"
 asyncio-foundationdb = "*"
 lxml = "*"
 bleach = "*"
-
-[pipenv]
-allow_prereleases = true
+"foundationdb" = {file = "https://www.foundationdb.org/downloads/6.0.15/bindings/python/foundationdb-6.0.15.tar.gz"}
