@@ -4,3 +4,7 @@ repos:
     hooks:
     - id: black
       language_version: python3.6
+-   repo: https://github.com/gvanderest/pylama-pre-commit
+    rev: 0.1.2
+    hooks:
+    - id: pylama

@@ -40,6 +40,7 @@ HOMEPAGE = "https://bit.ly/2D2fT5Q"
 
 # middleware
 
+
 def no_auth(handler):
     """Decorator to tell the ``middleware_check_auth`` to not check for the token
 
@@ -57,27 +58,28 @@ async def middleware_check_auth(app, handler):
     account login, account creation and password retrieval
 
     """
+
     async def middleware_handler(request):
-        if getattr(handler, 'no_auth', False):
+        if getattr(handler, "no_auth", False):
             response = await handler(request)
             return response
         else:
             try:
-                token = request.headers['X-AUTH-TOKEN']
+                token = request.headers["X-AUTH-TOKEN"]
             except KeyError:
-                raise web.HTTPForbidden(reason='auth token required')
+                raise web.HTTPForbidden(reason="auth token required")
             else:
-                max_age = app['settings'].TOKEN_MAX_AGE
+                max_age = app["settings"].TOKEN_MAX_AGE
                 try:
-                    user_uid = app['signer'].unsign(token, max_age=max_age)
+                    user_uid = app["signer"].unsign(token, max_age=max_age)
                 except SignatureExpired:
-                    log.debug('Token expired')
-                    raise web.HTTPForbidden(reason='auth token expired')
+                    log.debug("Token expired")
+                    raise web.HTTPForbidden(reason="auth token expired")
                 except BadSignature:
-                    log.debug('Bad signature')
-                    raise web.HTTPForbidden(reason='bad signature')
+                    log.debug("Bad signature")
+                    raise web.HTTPForbidden(reason="bad signature")
                 else:
-                    log.debug('User authenticated as {}'.format(user_uid))
+                    log.debug("User authenticated as {}".format(user_uid))
                     request.user_uid = user_uid
                     response = await handler(request)
                     return response
@@ -87,6 +89,7 @@ async def middleware_check_auth(app, handler):
 
 # status
 
+
 @no_auth
 async def status(request):
     """Check that the app is properly working"""
@@ -95,29 +98,33 @@ async def status(request):
 
 # api/v0
 
+
 async def check_auth(request):
-    return web.json_response('OK')
+    return web.json_response("OK")
 
 
 def strong_password(string):
     """Check that ``string`` is strong enough password"""
-    if (any(char.isdigit() for char in string)
-            and any(char.islower() for char in string)
-            and any(char.isupper() for char in string)
-            and any(char in punctuation for char in string)):
+    if (
+        any(char.isdigit() for char in string)
+        and any(char.islower() for char in string)
+        and any(char.isupper() for char in string)
+        and any(char in punctuation for char in string)
+    ):
         return string
     else:
-        raise t.DataError('Password is not strong enough')
+        raise t.DataError("Password is not strong enough")
 
 
 account_new_validate = t.Dict(
-    username=t.String(min_length=1, max_length=255) & t.Regexp(r'^[\w-]+$'),
+    username=t.String(min_length=1, max_length=255) & t.Regexp(r"^[\w-]+$"),
     password=t.String(min_length=10, max_length=255) & strong_password,
     validation=t.String(),
 )
 
 
 # boot the app
+
 
 async def init_database(app):
     log.debug("init database")
@@ -151,8 +158,8 @@ def create_app(loop):
     # routes
     app.router.add_route("GET", "/api/status", status)
     app.router.add_route("GET", "/api/v0/user/authenticate", user_authenticate)
-    app.router.add_route('GET', '/api/v0/user/check', user_check)
-    app.router.add_route('POST', '/api/v0/user/create', user_create)
+    app.router.add_route("GET", "/api/v0/user/check", user_check)
+    app.router.add_route("POST", "/api/v0/user/create", user_create)
 
     # that's all folks
     return app
