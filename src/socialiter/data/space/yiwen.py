@@ -20,16 +20,15 @@ class PatternException(YiwenException):
                  query to make it work before reporting bug.
 
     """
+
     pass
 
 
-PREFIX_DATA = b"\x00"
+PREFIX_SPO = b"\x00"
 PREFIX_POS = b"\x01"
 
 
 class var:
-
-    __slots__ = ("name",)
 
     def __init__(self, name):
         self.name = name
@@ -49,9 +48,31 @@ def pattern_bind(pattern, binding):
     return subject, predicate, object
 
 
-class Yiwen:
+class Predicate:
 
-    __slots__ = ("_prefix",)
+    def __init__(self, name, validator, packing=None, pos=False):
+        self.name = name
+        self.validator = validator
+        self.packing = packing
+        self.pos = pos
+
+    def valid(self, object):
+        return self.validator(object)
+
+    def pack(self, object):
+        if self.packing is not None:
+            return self.packing.pack(object)
+        else:
+            return object
+
+    def unpack(self, object):
+        if self.packing is not None:
+            return self.packing.unpack(object)
+        else:
+            return object
+
+
+class Yiwen:
 
     var = var
 
@@ -59,23 +80,27 @@ class Yiwen:
         self._prefix = prefix
         self._predicates = {}
 
+    def predicate(self, *args, **kwargs):
+        """See ``Predicate`` class for parameters specification."""
+        predicate = Predicate(*args, **kwargs)
+        self._predicates[predicate.name] = predicate
+
     @found.transactional
     async def uuid(self, tr):
         uid = uuid4()
-        start = found.pack((self._prefix, PREFIX_DATA, uid))
+        start = found.pack((self._prefix, PREFIX_SPO, uid))
         end = b'\xFF'
         items = await tr.get_range(start, end, limit=1)
         if not items:
             return uid
         key, _ = items[0]
         _, _, subject, _, _ = found.unpack(key)
-        if subject != uid:
-            return uid
-        raise YiwenException("Unlikely Error!")
+        assert subject != uid, "Unlikely Error!"
+        return uid
 
     @found.transactional
     async def all(self, tr):
-        start = found.pack((self._prefix, PREFIX_DATA))
+        start = found.pack((self._prefix, PREFIX_SPO))
         end = found.strinc(start)
         msg = "fetching everything between start=%r and end=%r"
         log.debug(msg, start, end)
@@ -83,45 +108,61 @@ class Yiwen:
         items = await tr.get_range(start, end)
         for key, _ in items:  # value is always empty
             _, _, subject, predicate, object = found.unpack(key)
-            out.append((subject, predicate, object))
+            predicate = self._predicates[predicate]
+            object = predicate.unpack(object)
+            out.append((subject, predicate.name, object))
         return out
 
     @found.transactional
     async def add(self, tr, *triples):
         for triple in triples:
             subject, predicate, object = triple
-            # add in 'spo' aka. data
-            key = found.pack((self._prefix, PREFIX_DATA, subject, predicate, object))
+            # might fail because of unknown predicate
+            predicate = self._predicates[predicate]
+            assert predicate.valid(object), "Invalid object for predicate"
+            object = predicate.pack(object)
+            # add data aka. spo
+            key = found.pack((self._prefix, PREFIX_SPO, subject, predicate.name, object))
             tr.set(key, b"")
-            # index in 'pos'
-            key = found.pack((self._prefix, PREFIX_POS, predicate, object, subject))
-            tr.set(key, b"")
+            if predicate.pos:
+                # index in 'pos'
+                key = found.pack((self._prefix, PREFIX_POS, predicate.name, object, subject))
+                tr.set(key, b"")
 
     @found.transactional
     async def remove(self, tr, *triples):
         for triple in triples:
             subject, predicate, object = triple
+            # might fail because of unknown predicate
+            predicate = self._predicates[predicate]
+            # might fail because of not the correct type
+            object = predicate.pack(object)
             # remove from data
-            key = found.pack((self._prefix, PREFIX_DATA, subject, predicate, object))
+            key = found.pack((self._prefix, PREFIX_SPO, subject, predicate.name, object))
             tr.clear(key)
-            # remove from index
-            key = found.pack((self._prefix, PREFIX_POS, predicate, object, subject))
-            tr.clear(key)
+            if predicate.pos:
+                # remove from index
+                key = found.pack((self._prefix, PREFIX_POS, predicate.name, object, subject))
+                tr.clear(key)
 
     @found.transactional
-    async def _lookup_pos(self, tr, predicate, object):
-        start = found.pack((self._prefix, PREFIX_POS, predicate, object))
+    async def _lookup_pos_subjects(self, tr, predicate, object):
+        predicate = self._predicates[predicate]
+        object = predicate.pack(object)
+        start = found.pack((self._prefix, PREFIX_POS, predicate.name, object))
         end = found.strinc(start)
         items = await tr.get_range(start, end)
         out = list()
         for key, _ in items:
-            _, _, predicate, object, subject = found.unpack(key)
+            _, _, _, _, subject = found.unpack(key)
             out.append(subject)
         return out
 
     @found.transactional
     async def exists(self, tr, subject, predicate, object):
-        key = found.pack((self._prefix, PREFIX_DATA, subject, predicate, object))
+        predicate = self._predicates[predicate]
+        object = predicate.pack(object)
+        key = found.pack((self._prefix, PREFIX_SPO, subject, predicate.name, object))
         value = await tr.get(key)
         return value is not None
 
@@ -131,37 +172,42 @@ class Yiwen:
         vars = tuple((isinstance(item, var) for item in pattern))
         if vars == (True, False, False):
             subject, predicate, object = pattern
-            subjects = await self._lookup_pos(tr, predicate, object)
+            subjects = await self._lookup_pos_subjects(tr, predicate, object)
             name = subject.name
             bindings = [Map().set(name, subject) for subject in subjects]
         elif vars == (False, True, True):
             # TODO: extract to a method
             subject = pattern[0]
-            start = found.pack((self._prefix, PREFIX_DATA, subject))
+            start = found.pack((self._prefix, PREFIX_SPO, subject))
             end = found.strinc(start)
             items = await tr.get_range(start, end)
             bindings = []
             for key, _ in items:
                 _, _, _, predicate, object = found.unpack(key)
+                predicate = self._predicates[predicate]
+                object = predicate.unpack(object)
                 binding = Map()
-                binding = binding.set(pattern[1].name, predicate)
+                binding = binding.set(pattern[1].name, predicate.name)
                 binding = binding.set(pattern[2].name, object)
                 bindings.append(binding)
         elif vars == (False, False, True):
             # TODO: extract to a method
             subject = pattern[0]
             predicate = pattern[1]
-            start = found.pack((self._prefix, PREFIX_DATA, subject, predicate))
+            start = found.pack((self._prefix, PREFIX_SPO, subject, predicate))
             end = found.strinc(start)
             items = await tr.get_range(start, end)
             bindings = []
             for key, _ in items:
                 _, _, _, _, object = found.unpack(key)
+                predicate = self._predicates[predicate]
+                object = predicate.unpack(object)
                 binding = Map()
                 binding = binding.set(pattern[2].name, object)
                 bindings.append(binding)
         else:
             raise PatternException(pattern)
+
         log.debug("seed bindings: %r", bindings)
         # contine matching other patterns, if any.
         for pattern in patterns:  # one
@@ -183,20 +229,23 @@ class Yiwen:
                     # TODO: extract to a method
                     log.debug('clause: False, False, True')
                     subject, predicate, object = bound_pattern
-                    start = found.pack((self._prefix, PREFIX_DATA, subject, predicate))
+                    predicate = self._predicates[predicate]
+                    start = found.pack((self._prefix, PREFIX_SPO, subject, predicate.name))
                     end = found.strinc(start)
                     items = await tr.get_range(start, end)
                     for key, _ in items:
                         _, _, _, _, value = found.unpack(key)
+                        value = predicate.pack(value)
                         new = binding.set(object.name, value)
                         next_bindings.append(new)
                 elif vars == (True, False, False):
                     log.debug('clause: True, False, False')
                     subject, predicate, object = bound_pattern
-                    subjects = await self._lookup_pos(tr, predicate, object)
-                    name = subject.name
-                    for subject in subjects:
-                        new = binding.set(name, subject)
+                    predicate = self._predicates[predicate]
+                    object = predicate.pack(object)
+                    values = await self._lookup_pos_subjects(tr, predicate.name, object)
+                    for value in values:
+                        new = binding.set(subject.name, value)
                         next_bindings.append(new)
                 else:
                     raise PatternException(pattern)
