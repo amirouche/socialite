@@ -14,4 +14,6 @@ class SocialiterBase:
 
 
 class SpacePrefix(Enum):
-    SPARKY = b"\x00"
+    SPARKY = b"\x00"  # TODO: rename 'MAIN'
+    SEARCH = b"\x01"
+    COUNTERS = b"\x02"

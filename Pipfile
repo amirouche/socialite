@@ -20,6 +20,7 @@ requests = "*"
 bandit = "*"
 black = "*"
 pylama = "*"
+whoosh = "*"
 
 [packages]
 aiohttp = "*"
@@ -44,6 +45,11 @@ defusedxml = "*"
 asyncio-foundationdb = "*"
 lxml = "*"
 bleach = "*"
+"foundationdb" = {file = "https://www.foundationdb.org/downloads/6.0.15/bindings/python/foundationdb-6.0.15.tar.gz"}
+snowballstemmer = "*"
+pystemmer = "*"
+wordfreq = "*"
+unidecode = "*"
 
 [pipenv]
 allow_prereleases = true

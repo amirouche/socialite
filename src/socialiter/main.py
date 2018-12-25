@@ -34,6 +34,7 @@ from socialiter import feed
 from socialiter import user
 from socialiter import stream
 from socialiter.base import SpacePrefix
+from socialiter.search import SearchSpace
 from socialiter.filters import FILTERS
 from socialiter.helpers import no_auth
 from socialiter.query import query
@@ -122,6 +123,7 @@ async def init_database(app):
     log.debug("init database")
     app["db"] = await found.open()
     app["sparky"] = found.sparky.Sparky(SpacePrefix.SPARKY.value)
+    app["search"] = SearchSpace()
     return app
 
 
