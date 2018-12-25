@@ -12,11 +12,11 @@ from socialiter.data.space.yiwen import var
 from socialiter.data.counter import Counter
 
 
-stem = snowballstemmer.stemmer('english').stemWord
+stem = snowballstemmer.stemmer("english").stemWord
 
 
-GARBAGE_TO_SPACE = dict.fromkeys((ord(x) for x in punctuation), ' ')
-STOP_WORDS = set(top_n_list('en', 500))
+GARBAGE_TO_SPACE = dict.fromkeys((ord(x) for x in punctuation), " ")
+STOP_WORDS = set(top_n_list("en", 500))
 
 SHA2_LENGTH = 64
 
@@ -38,7 +38,6 @@ def string2words(string):
 
 
 class WordsPacking:
-
     @classmethod
     def pack(cls, value):
         return msgpack.dumps(value)
@@ -49,13 +48,12 @@ class WordsPacking:
 
 
 class SearchSpace(Yiwen):
-
     def __init__(self):
         super().__init__(SpacePrefix.SEARCH.value)
 
-        self.predicate('document/words', lambda x: isinstance(x, list), WordsPacking)
-        self.predicate('token/value', lambda x: isinstance(x, str), pos=True)
-        self.predicate('token/document', lambda x: True)
+        self.predicate("document/words", lambda x: isinstance(x, list), WordsPacking)
+        self.predicate("token/value", lambda x: isinstance(x, str), pos=True)
+        self.predicate("token/document", lambda x: True)
 
 
 @found.transactional
@@ -71,26 +69,26 @@ async def index(tr, app, uid, document, user_version=0):
     """
     # compute words for scoring
     words = string2words(document)
-    await app['search'].add(tr, (uid, 'document/words', words))
+    await app["search"].add(tr, (uid, "document/words", words))
     for word in words:
-        await Counter('$' + word + '$').increment(tr)
+        await Counter("$" + word + "$").increment(tr)
     # compute tokens for seed result matching
     tokens = set(stem(word) for word in words if stem(word) not in STOP_WORDS)
     for token in tokens:
         # get or create token entry
-        bindings = await app['search'].where(tr, (var('uid'), 'token/value', token))
+        bindings = await app["search"].where(tr, (var("uid"), "token/value", token))
         try:
             binding = bindings[0]
         except IndexError:
             token_uid = found.Versionstamp(user_version=user_version)
             user_version += 1
-            await app['search'].add(tr, (token_uid, 'token/value', token))
+            await app["search"].add(tr, (token_uid, "token/value", token))
         else:
-            token_uid = binding['uid']
+            token_uid = binding["uid"]
         # link token to document
-        await app['search'].add(tr, (token_uid, 'token/document', uid))
+        await app["search"].add(tr, (token_uid, "token/document", uid))
         # increment token counter
-        Counter('%' + token + '%').increment()
+        Counter("%" + token + "%").increment()
     return user_version
 
 

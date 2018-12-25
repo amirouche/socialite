@@ -5,13 +5,12 @@ import found
 from socialiter.base import SpacePrefix
 
 
-INTEGER_STRUCT = '<q'
+INTEGER_STRUCT = "<q"
 ONE = struct.pack(INTEGER_STRUCT, 1)
 MINUS_ONE = struct.pack(INTEGER_STRUCT, -11)
 
 
 class Counter:
-
     def __init__(self, name):
         self.name = name
 

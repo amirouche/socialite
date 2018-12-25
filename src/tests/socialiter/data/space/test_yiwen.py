@@ -65,8 +65,8 @@ async def test_yiwen_where_one_pattern():
     from socialiter.data.space.yiwen import var
 
     yiwen = Yiwen(b"test-yiwen")
-    yiwen.predicate('title', lambda x: True, None, True)
-    yiwen.predicate('description', lambda x: True, None, True)
+    yiwen.predicate("title", lambda x: True, None, True)
+    yiwen.predicate("description", lambda x: True, None, True)
     data = [
         ("uid1", "title", "yiwen"),
         ("uid1", "description", "rdf / sparql for humans"),
@@ -91,8 +91,8 @@ async def test_multiple_seeds():
 
     yiwen = Yiwen(b"test-yiwen")
 
-    yiwen.predicate('number', lambda x: True, None, True)
-    yiwen.predicate('name', lambda x: True, None, True)
+    yiwen.predicate("number", lambda x: True, None, True)
+    yiwen.predicate("name", lambda x: True, None, True)
 
     tuples = [
         ("seed0", "name", "abki"),
@@ -102,10 +102,7 @@ async def test_multiple_seeds():
     ]
     await yiwen.add(db, *tuples)
     # exec
-    patterns = (
-        (var('seed'), "name", "abki"),
-        (var('number'), "number", var("seed")),
-    )
+    patterns = ((var("seed"), "name", "abki"), (var("number"), "number", var("seed")))
     out = await yiwen.where(db, *patterns)
     # check
     assert ["zero", "one"] == [o["number"] for o in out]
@@ -118,9 +115,9 @@ async def test_yiwen_where_several_pattern():
     from socialiter.data.space.yiwen import var
 
     yiwen = Yiwen(b"test-yiwen")
-    yiwen.predicate('title', lambda x: True, None, True)
-    yiwen.predicate('description', lambda x: True, None, True)
-    yiwen.predicate('blog', lambda x: True, None, True)
+    yiwen.predicate("title", lambda x: True, None, True)
+    yiwen.predicate("description", lambda x: True, None, True)
+    yiwen.predicate("blog", lambda x: True, None, True)
     data = [
         ("uid1", "title", "yiwen"),
         ("uid1", "description", "rdf / sparql for humans"),
@@ -147,15 +144,15 @@ async def test_yiwen_stuff():
     from socialiter.data.space.yiwen import var
 
     yiwen = Yiwen(b"test-yiwen")
-    yiwen.predicate('is a', lambda x: True, None, True)
-    yiwen.predicate('name', lambda x: True, None, True)
-    yiwen.predicate('created-at', lambda x: True, None, True)
-    yiwen.predicate('expression', lambda x: True, None, True)
-    yiwen.predicate('modified-at', lambda x: True, None, True)
-    yiwen.predicate('html', lambda x: True, None, True)
-    yiwen.predicate('actor', lambda x: True, None, True)
-    yiwen.predicate('followee', lambda x: True, None, True)
-    yiwen.predicate('follower', lambda x: True, None, True)
+    yiwen.predicate("is a", lambda x: True, None, True)
+    yiwen.predicate("name", lambda x: True, None, True)
+    yiwen.predicate("created-at", lambda x: True, None, True)
+    yiwen.predicate("expression", lambda x: True, None, True)
+    yiwen.predicate("modified-at", lambda x: True, None, True)
+    yiwen.predicate("html", lambda x: True, None, True)
+    yiwen.predicate("actor", lambda x: True, None, True)
+    yiwen.predicate("followee", lambda x: True, None, True)
+    yiwen.predicate("follower", lambda x: True, None, True)
 
     tuples = [
         # abki

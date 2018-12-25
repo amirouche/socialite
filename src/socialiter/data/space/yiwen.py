@@ -29,7 +29,6 @@ PREFIX_POS = b"\x01"
 
 
 class var:
-
     def __init__(self, name):
         self.name = name
 
@@ -49,7 +48,6 @@ def pattern_bind(pattern, binding):
 
 
 class Predicate:
-
     def __init__(self, name, validator, packing=None, pos=False):
         self.name = name
         self.validator = validator
@@ -89,7 +87,7 @@ class Yiwen:
     async def uuid(self, tr):
         uid = uuid4()
         start = found.pack((self._prefix, PREFIX_SPO, uid))
-        end = b'\xFF'
+        end = b"\xFF"
         items = await tr.get_range(start, end, limit=1)
         if not items:
             return uid
@@ -143,11 +141,15 @@ class Yiwen:
             # might fail because of not the correct type
             object = predicate.pack(object)
             # remove from data
-            key = found.pack((self._prefix, PREFIX_SPO, subject, predicate.name, object))
+            key = found.pack(
+                (self._prefix, PREFIX_SPO, subject, predicate.name, object)
+            )
             tr.clear(key)
             if predicate.pos:
                 # remove from index
-                key = found.pack((self._prefix, PREFIX_POS, predicate.name, object, subject))
+                key = found.pack(
+                    (self._prefix, PREFIX_POS, predicate.name, object, subject)
+                )
                 tr.clear(key)
 
     @found.transactional
@@ -223,7 +225,7 @@ class Yiwen:
                 log.debug("bound pattern: %r", bound_pattern)
                 vars = tuple((isinstance(item, var) for item in bound_pattern))
                 if vars == (False, False, False):
-                    log.debug('clause: False, False, False')
+                    log.debug("clause: False, False, False")
                     ok = await self.exists(tr, *bound_pattern)
                     if ok:
                         # this binding is valid against this bound_pattern,
@@ -232,10 +234,12 @@ class Yiwen:
                         next_bindings.append(binding)
                 elif vars == (False, False, True):
                     # TODO: extract to a method
-                    log.debug('clause: False, False, True')
+                    log.debug("clause: False, False, True")
                     subject, predicate, object = bound_pattern
                     predicate = self._predicates[predicate]
-                    start = found.pack((self._prefix, PREFIX_SPO, subject, predicate.name))
+                    start = found.pack(
+                        (self._prefix, PREFIX_SPO, subject, predicate.name)
+                    )
                     end = found.strinc(start)
                     items = await tr.get_range(start, end)
                     for key, _ in items:
@@ -244,7 +248,7 @@ class Yiwen:
                         new = binding.set(object.name, value)
                         next_bindings.append(new)
                 elif vars == (True, False, False):
-                    log.debug('clause: True, False, False')
+                    log.debug("clause: True, False, False")
                     subject, predicate, object = bound_pattern
                     predicate = self._predicates[predicate]
                     object = predicate.pack(object)
