@@ -121,12 +121,17 @@ class Yiwen:
             predicate = self._predicates[predicate]
             assert predicate.valid(object), "Invalid object for predicate"
             object = predicate.pack(object)
+            # choose correct packer function
+            if found.has_incomplete_versionstamp((subject, object)):
+                pack = found.pack_with_versionstamp
+            else:
+                pack = found.pack
             # add data aka. spo
-            key = found.pack((self._prefix, PREFIX_SPO, subject, predicate.name, object))
+            key = pack((self._prefix, PREFIX_SPO, subject, predicate.name, object))
             tr.set(key, b"")
             if predicate.pos:
                 # index in 'pos'
-                key = found.pack((self._prefix, PREFIX_POS, predicate.name, object, subject))
+                key = pack((self._prefix, PREFIX_POS, predicate.name, object, subject))
                 tr.set(key, b"")
 
     @found.transactional
