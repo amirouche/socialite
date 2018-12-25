@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "fd2f900d352038357cb0464963e9e72086c332ceb1288f1531ddbf531ac8f1c4"
+            "sha256": "d83a63627489fb467e22c9e2c02c59c3b1c911dba60233525ea2b2a131c19d96"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -99,10 +99,10 @@
         },
         "asyncio-foundationdb": {
             "hashes": [
-                "sha256:7619f210ed84b8fd7ef85d62bd997959700e151bda8a6aa5f05ef5646aaccad7"
+                "sha256:da7ef33f170e972dc8edd5760730047712c4b201167841b1e5c2109c4f807186"
             ],
             "index": "pypi",
-            "version": "==0.5.0"
+            "version": "==0.6.0"
         },
         "asyncpg": {
             "hashes": [

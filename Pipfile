@@ -42,7 +42,7 @@ msgpack = "*"
 mistune = "*"
 immutables = "*"
 defusedxml = "*"
-asyncio-foundationdb = "*"
+asyncio-foundationdb = "==0.6.0"
 lxml = "*"
 bleach = "*"
 "foundationdb" = {file = "https://www.foundationdb.org/downloads/6.0.15/bindings/python/foundationdb-6.0.15.tar.gz"}
