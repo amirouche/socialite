@@ -1,4 +1,4 @@
-# socialiter - wanna be private-first social network
+# socialiter - wanna be something
 
 **step-by-step**
 
@@ -28,7 +28,7 @@ abstractions. That's why socialiter use
 If you are on ubuntu or other debian derivatives try the following:
 
 ```sh
-make install
+make init
 ```
 
 For other distribution it's recommended to use LXC and install Ubuntu
@@ -59,32 +59,40 @@ Thanks in advance!
 	- Example use of `sparky.py` see `stream.py`
 	- Basic Feed Reader
 
-- 2018/11/31 - Unfortunate Conflict Of Evidence
+- 2018/12/31 - Unfortunate Conflict Of Evidence
 
-	- Basic Task queue [TODO]
-	- Example Unit Test that mocks a coroutine [TODO]
-	- Basic TODO [TODO]
-	- Basic Wiki [TODO]
-	- Basic Forum [TODO]
-	- Basic Paste [TODO]
-	- CSRF Protection [TODO]
-	- Basic Search Engine with a crawler [TODO]
-	- Deploy [TODO]
+    - Fork sparky as `yiwen`:
 
-- 2018/12/XY - [Pick a Culture ship at random](http://bryanschuetz.github.io/culture-namer/)
+      - add validation based on predicate
+      - opt-in indexing
+      - packing machinery
 
-	- python-fu [TODO]
+    - Counter: small wrapper around FDB atomic operations
+
+    - Search [WIP]:
+
+      - only english is supported
+      - index
+      - search
+      - crawler for news.ycombinator.com
+
+- 2019/01/31 - [Pick a Culture ship at random](http://bryanschuetz.github.io/culture-namer/)
+
+	- Basic Task queue
+	- Example Unit Test that mocks a coroutine
+	- Basic TODO
+	- Basic Wiki
+	- Basic Forum
+	- Basic Paste
+	- CSRF Protection
+	- Deployment strategy
+
 
 ## Functions for the win
 
 socialiter use a lot of functions.  There is nothing wrong with
 classes.  In particular there is no Object Data Mapper (ODM) or Object
-Relational Mapper (ORM) abstraction, yet.
-
-That said, socialiter rely on
-[trafaret](https://github.com/Deepwalker/trafaret/) for data
-validation which is built using classes. Also socialiter make use of
-`SocialiterException` class that you can inherit.
+Relational Mapper (ORM) abstraction per se.
 
 ## Database
 
@@ -93,15 +101,15 @@ persist data to disk.  Becareful the default configuration use the
 in-memory backend.  The goal with this choice is double:
 
 - Experiment with higher level database abstractions (called layers
-  FDB jargon) on top the versatile ordered key-value store offered by
-  FDB.
+  FDB jargon) on top the versatile ordered / sorted key-value store
+  offered by FDB.
 
 - Experiment operations of FDB from development to deployement of
-  single machine cluster to multiple machine clusters.
+  single machine to multiple machine clusters.
 
-`src/socialiter/sparky.py` offers an abstraction similar to rdf /
-SPARQL. It implements a subset of the standard that should be very
-easy to pick.
+`src/socialiter/data/space/yiwen.py` offers an abstraction similar to
+RDF / SPARQL. It implements a subset of the standard that should be
+very easy to pick.
 
 To get started you can read [FDB's documentation about the Python
 client](https://apple.github.io/foundationdb/index.html). Mind the
@@ -116,15 +124,15 @@ use, gain knowledge, then build higher level abstractions.  When
 things seem blurry, do not over think it and try something simple to
 get started.
 
-### `sparky`
+### `yiwen`
 
-`sparky` is small RDF-like layer which support a subset of SPARQL.
+`yiwen` is small RDF-like layer which support a subset of SPARQL.
 
 Simply said, it's a triple-store.
 
 Let's try again.
 
-Simply said, sparky stores a **set** of 3-tuples of primitive
+Simply said, yiwen stores a **set** of 3-tuples of primitive
 datatypes (`int`, `float`, `tuples`, `str` and `bytes` (ie. `dict` is
 not supported as-is)) most commonly described as:
 
@@ -153,8 +161,9 @@ twice.
 
 Querying in RDF land happens via a language "similar" to SQL that is
 called SPARQL. Basically, it's pattern matching with bells and
-dragons... That being said, sparky implements only the pattern
-matching part which makes coding things like the following SQL query:
+dragons... That being said, yiwen implements only the pattern matching
+part which makes it possible to code things like the following SQL
+query:
 
 ```sql
 SELECT post.title
@@ -163,15 +172,15 @@ WHERE blog.title='hyperdev.fr'
     AND post.blog_id=blog.id
 ```
 
-Here is the equivalent using sparky:
+Here is the equivalent using yiwen:
 
 ```python
 patterns = [
-	(sparky.var('blog'), 'title', 'hyperdev.fr'),
-	(sparky.var('post'), 'blog', sparky.var('blog')),
-	(sparky.var('post'), 'title', sparky.var('title')),
+	(yiwen.var('blog'), 'title', 'hyperdev.fr'),
+	(yiwen.var('post'), 'blog', yiwen.var('blog')),
+	(yiwen.var('post'), 'title', yiwen.var('title')),
 ]
-out = await sparky.where(db, *patterns)
+out = await yiwen.where(db, *patterns)
 ```
 
 That is you can do regular `SELECT` without joins or a `SELECT` with
@@ -181,12 +190,9 @@ for examples](https://bit.ly/2oVz735).
 See this [superb tutorial on SPARQL at
 data.world](https://docs.data.world/tutorials/sparql/).
 
-The roadmap is to implement something like
-[datomic](https://www.datomic.com/) without versioning.
-
-Mind the fact, that since sparky use `fdb.pack` for serialiazing a
-tuple items, lexicographic ordering is preserved. That is, one can
-defer complex indexing to upper layer namely the application ;]
+Mind the fact, that since yiwen use `fdb.pack` for serialiazing a
+triple, lexicographic ordering is preserved. That is, one can defer
+complex indexing to upper layer namely the application ;]
 
 ## Styles Style Guide
 
