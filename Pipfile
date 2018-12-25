@@ -19,6 +19,7 @@ asyncpg = "*"
 requests = "*"
 bandit = "*"
 black = "*"
+pylama = "*"
 
 [packages]
 aiohttp = "*"
