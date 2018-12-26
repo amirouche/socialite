@@ -89,7 +89,7 @@ async def index(tr, app, uid, document, user_version=0):
         # link token to document
         await app["search"].add(tr, (token_uid, "token/document", uid))
         # increment token counter
-        Counter(Counter.KIND.TOKEN, token).increment()
+        await Counter(Counter.KIND.TOKEN, token).increment()
     return user_version
 
 
