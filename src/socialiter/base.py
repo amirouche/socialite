@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import IntEnum
 
 
 class SocialiterException(Exception):
@@ -13,7 +13,7 @@ class SocialiterBase:
     pass
 
 
-class SpacePrefix(Enum):
-    SPARKY = b"\x00"  # TODO: rename 'MAIN'
-    SEARCH = b"\x01"
-    COUNTERS = b"\x02"
+class SpacePrefix(IntEnum):
+    SPARKY = 0
+    SEARCH = 1
+    COUNTERS = 2
