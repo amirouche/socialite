@@ -28,7 +28,8 @@ def sane(word):
 def string2words(string):
     """Convert a string to a list of words.
 
-    Remove punctuation, words strictly smaller than 2 and strictly bigger than 64 characters
+    Remove punctuation, lowercase, words strictly smaller than 2 and strictly bigger than 64
+    characters
 
     """
     clean = string.translate(GARBAGE_TO_SPACE).lower()
@@ -71,7 +72,7 @@ async def index(tr, app, uid, document, user_version=0):
     words = string2words(document)
     await app["search"].add(tr, (uid, "document/words", words))
     for word in words:
-        await Counter("$" + word + "$").increment(tr)
+        await Counter(Counter.KIND.WORD, word).increment(tr)
     # compute tokens for seed result matching
     tokens = set(stem(word) for word in words if stem(word) not in STOP_WORDS)
     for token in tokens:
@@ -88,7 +89,7 @@ async def index(tr, app, uid, document, user_version=0):
         # link token to document
         await app["search"].add(tr, (token_uid, "token/document", uid))
         # increment token counter
-        Counter("%" + token + "%").increment()
+        Counter(Counter.KIND.TOKEN, token).increment()
     return user_version
 
 
