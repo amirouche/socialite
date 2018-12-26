@@ -12,7 +12,6 @@ MINUS_ONE = struct.pack(INTEGER_STRUCT, -11)
 
 
 class Counter:
-
     class KIND(IntEnum):
         TOKEN = 0
         WORD = 1
