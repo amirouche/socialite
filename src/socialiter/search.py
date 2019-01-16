@@ -102,7 +102,6 @@ async def index(tr, app, uid, document, user_version=0):
 
 
 class Query:
-
     def __init__(self, string):
         self._string = string
         # TODO: support booleans operators
@@ -151,7 +150,7 @@ async def search(tr, app, query):
     for token in query.positive_tokens:
         positive_tokens_counter[token] = await Counter(Counter.KIND.TOKEN, token).get()
         # reverse the count so that the Counter.most_common returns the least common
-        positive_tokens_counter[token] = - positive_tokens_counter[token]
+        positive_tokens_counter[token] = -positive_tokens_counter[token]
     seed_token = positive_tokens_counter.most_common(1)[0]
     if seed_token[1] == 0:
         # The most least token is not found in the database,
@@ -159,22 +158,22 @@ async def search(tr, app, query):
         return {}
     seed_token = seed_token[0]
     # fetch seed token's unique identifier
-    bindings = await app["search"].where(tr, (var('seed_token_uid'), 'token/value', seed_token))
+    bindings = await app["search"].where(
+        tr, (var("seed_token_uid"), "token/value", seed_token)
+    )
     binding = bindings[0]
-    seed_token_uid = binding['seed_token_uid']
+    seed_token_uid = binding["seed_token_uid"]
     # fetch all documents that contains this token (aka. candidates)
     bindings = await app["search"].where(
-        tr,
-        (seed_token_uid, 'token/document', var('candidate_document_uid'))
+        tr, (seed_token_uid, "token/document", var("candidate_document_uid"))
     )
     scores = {}
     for binding in bindings:  # TODO: async for?
-        candidate_document_uid = binding['candidate_document_uid']
+        candidate_document_uid = binding["candidate_document_uid"]
         words = await app["search"].where(
-            tr,
-            (candidate_document_uid, 'document/words', var('words'))
+            tr, (candidate_document_uid, "document/words", var("words"))
         )
-        words = set(words[0]['words'])
+        words = set(words[0]["words"])
         # score?!
         score = await compute_score(tr, query, words)
         if score > 0:
