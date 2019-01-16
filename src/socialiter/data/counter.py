@@ -8,7 +8,7 @@ from socialiter.base import SpacePrefix
 
 INTEGER_STRUCT = "<q"
 ONE = struct.pack(INTEGER_STRUCT, 1)
-MINUS_ONE = struct.pack(INTEGER_STRUCT, -11)
+MINUS_ONE = struct.pack(INTEGER_STRUCT, -1)
 
 
 class Counter:
