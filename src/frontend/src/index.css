@@ -102,8 +102,11 @@ input[type="text"], button {
 }
 
 input[type="text"]:focus, button:hover {
-    cursor: pointer;
     border: 2px solid hsla(0, 0%, 100%, 0.7);
+}
+
+button:hover {
+    cursor: pointer;
 }
 
 button:active {
