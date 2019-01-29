@@ -274,8 +274,11 @@ class Input extends React.Component {
 
     onChange(event) {
         event.persist();
-        // TODO: do something else when this.props.onChange is not set
-        this.setState({ value: event.target.value }, () => this.props.onChange(event));
+        if (this.props.onChange !== undefined) {
+            this.setState({ value: event.target.value }, () => this.props.onChange(event));
+        } else {
+            this.setState({ value: event.target.value });
+        }
     }
 
     render() {
