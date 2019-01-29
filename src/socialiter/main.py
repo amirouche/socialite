@@ -16,8 +16,6 @@ import found.sparky
 import uvloop
 from aiohttp import ClientSession
 from aiohttp import web
-from aiohttp_jinja2 import setup as setup_jinja2
-from aiohttp_jinja2 import render_template as render
 from argon2 import PasswordHasher
 
 from docopt import docopt
@@ -25,25 +23,18 @@ from itsdangerous import BadSignature
 from itsdangerous import SignatureExpired
 from itsdangerous import TimestampSigner
 
-from jinja2 import FileSystemLoader
-from pathlib import Path
 from setproctitle import setproctitle  # pylint: disable=no-name-in-module
 
 from socialiter import settings
-from socialiter import feed
-from socialiter import user
-from socialiter import stream
-from socialiter.base import SpacePrefix
+
 from socialiter.search import SearchSpace
-from socialiter.filters import FILTERS
 from socialiter.helpers import no_auth
-from socialiter.query import query
 
 
 log = daiquiri.getLogger(__name__)
 
 
-__version__ = (0, 0, 0)
+__version__ = (0, 2, 0)
 VERSION = "v" + ".".join([str(x) for x in __version__])
 HOMEPAGE = "https://bit.ly/2D2fT5Q"
 
@@ -62,12 +53,16 @@ async def middleware_check_auth(app, handler):
     """
 
     async def middleware_handler(request):
+        if request.method == 'POST':
+            if request.header.get('X-Requested-With') is None:
+                raise web.HTTPFound(location='/')
         if getattr(handler, "no_auth", False):
             response = await handler(request)
             return response
         else:
+            # then the route requires authentication
             try:
-                token = request.cookies["token"]
+                token = request.headers["X-AUTH-TOKEN"]
             except KeyError:
                 log.debug("No auth token found")
                 raise web.HTTPFound(location="/")
@@ -77,6 +72,7 @@ async def middleware_check_auth(app, handler):
                     uid = app["signer"].unsign(token, max_age=max_age)
                 except SignatureExpired:
                     log.debug("Token expired")
+                    # TODO: redirect to login page with a next parameter
                     raise web.HTTPFound(location="/")
                 except BadSignature:
                     log.debug("Bad signature")
@@ -84,31 +80,24 @@ async def middleware_check_auth(app, handler):
                 else:
                     uid = uid.decode("utf-8")
                     uid = UUID(hex=uid)
-                    actor = await user.user_by_uid(
-                        request.app["db"], request.app["sparky"], uid
-                    )
-                    if actor is None:
-                        redirect = web.HTTPSeeOther(location="/")
-                        redirect.del_cookie("token")
-                        return redirect
-                    log.debug("User authenticated as '%s'", actor["name"])
-                    request.user = actor
+                    request.user_uid = uid
+                    # TODO: fix this
+                    # actor = await user.user_by_uid(
+                    #     request.app["db"], request.app["sparky"], uid
+                    # )
+                    # if actor is None:
+                    #     redirect = web.HTTPSeeOther(location="/")
+                    #     redirect.del_cookie("token")
+                    #     return redirect
+                    # log.debug("User authenticated as '%s'", actor["name"])
+                    # request.user = actor
                     response = await handler(request)
                     return response
 
     return middleware_handler
 
 
-# home
-
-
-async def home(request):
-    context = {"settings": request.app["settings"]}
-    return request.app.render("home.jinja2", request, context)
-
-
 # status
-
 
 @no_auth
 async def status(request):
@@ -118,11 +107,9 @@ async def status(request):
 
 # boot the app
 
-
 async def init_database(app):
     log.debug("init database")
     app["db"] = await found.open()
-    app["sparky"] = found.sparky.Sparky(SpacePrefix.SPARKY.value)
     app["search"] = SearchSpace()
     return app
 
@@ -140,17 +127,9 @@ def create_app(loop):
 
     # init app
     app = web.Application()  # pylint: disable=invalid-name
-    # jinja2
-    templates = Path(__file__).parent / "templates"
-    setup_jinja2(
-        app,
-        loader=FileSystemLoader(str(templates)),
-        filters=FILTERS,  # TODO: improve that stuff
-    )
-    # others
-    app.render = render
     app.on_startup.append(init_database)
     app.middlewares.append(middleware_check_auth)
+    #
     app["settings"] = settings
     app["hasher"] = PasswordHasher()
     app["signer"] = TimestampSigner(settings.SECRET)
@@ -158,26 +137,8 @@ def create_app(loop):
     headers = {"User-Agent": user_agent}
     app["session"] = ClientSession(headers=headers)
 
-    # user routes
-    app.router.add_route("GET", "/", user.login_get)
-    app.router.add_route("POST", "/", user.login_post)
-    # register
-    app.router.add_route("GET", "/user/register", user.register_get)
-    app.router.add_route("POST", "/user/register", user.register_post)
-    # home route
-    app.router.add_route("GET", "/home", home)
-    app.router.add_route("GET", "/query", query)
-    # stream
-    app.router.add_route("GET", "/stream/", stream.stream_get)
-    app.router.add_route("POST", "/stream/", stream.stream_post)
-    # TODO: rename '{username}' to '{name}'
-    app.router.add_route("GET", "/stream/{username}", stream.expressions)
-    app.router.add_route("GET", "/stream/{username}/follow", stream.follow_get)
-    app.router.add_route("POST", "/stream/{username}/follow", stream.follow_post)
-    # feed
-    app.router.add_route("POST", "/feed/add", feed.add_post)
     # api route
-    app.router.add_route("GET", "/api/status", status)
+    app.router.add_route("GET", "/api/status/", status)
 
     return app
 
