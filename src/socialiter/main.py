@@ -53,9 +53,9 @@ async def middleware_check_auth(app, handler):
     """
 
     async def middleware_handler(request):
-        if request.method == 'POST':
-            if request.header.get('X-Requested-With') is None:
-                raise web.HTTPFound(location='/')
+        if request.method == "POST":
+            if request.header.get("X-Requested-With") is None:
+                raise web.HTTPFound(location="/")
         if getattr(handler, "no_auth", False):
             response = await handler(request)
             return response
@@ -99,6 +99,7 @@ async def middleware_check_auth(app, handler):
 
 # status
 
+
 @no_auth
 async def status(request):
     """Check that the app is properly working"""
@@ -106,6 +107,7 @@ async def status(request):
 
 
 # boot the app
+
 
 async def init_database(app):
     log.debug("init database")
