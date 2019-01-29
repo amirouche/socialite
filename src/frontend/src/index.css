@@ -94,11 +94,21 @@ a:hover {
 }
 
 input[type="text"], button {
-    background: hsla(0, 0%, 100%, 0.1);;
-    border: 2px solid white;
+    background: hsla(0, 0%, 100%, 0.1);
+    border: 2px solid hsla(0, 0%, 100%, 0.4);
     padding: 5px 10px;
     color: white;
     border-radius: 3px;
+}
+
+input[type="text"]:focus, button:hover {
+    cursor: pointer;
+    border: 2px solid hsla(0, 0%, 100%, 0.7);
+}
+
+button:active {
+    cursor: pointer;
+    border: 2px solid hsla(0, 0%, 100%, 1);
 }
 
 #root {
