@@ -22,7 +22,7 @@ async def query(request):
         raise web.HTTPBadRequest()
 
     #
-    log.debug('user query is: %r', user_query)
+    log.debug("user query is: %r", user_query)
     out = await bing(request.app, user_query)
     return web.json_response(out)
 

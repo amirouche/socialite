@@ -68,6 +68,7 @@ class Predicate:
     See socialiter/search.py:SearchSpace for an example use of `Yiwen`.
 
     """
+
     def __init__(self, name, validator, packing=None, pos=False):
         self.name = name
         self.valid = validator
