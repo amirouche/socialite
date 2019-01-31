@@ -37,7 +37,7 @@ let indexInit = async function(app, model) {
 
 let HitView = function({hit}) {
     return (
-        <a href={hit.url} className="hit">
+        <a href={hit.url} target="_blank" rel="noopener noreferrer" className="hit">
             <h2>{hit.title}</h2>
             <p className="url">{hit.url}</p>
             <p className="description">{hit.description}</p>
