@@ -33,20 +33,20 @@ async def query(request):
 
 async def bing(app, query):
     """Query bing.com for hits that match `query`"""
-    base = 'https://www.bing.com/search?q='
+    base = "https://www.bing.com/search?q="
     url = base + urlencode(query)
-    response = await app['session'].get(url)
+    response = await app["session"].get(url)
     if response.status == 200:
         string = await response.text()
         try:
             hits = _bing_parse(string)
         except Exception:
-            log.exception('Failed to parse bing results: %r', response)
+            log.exception("Failed to parse bing results: %r", response)
             return list()
         else:
             return hits
     else:
-        log.error('Bing search failed: %r', response)
+        log.error("Bing search failed: %r", response)
         return list()
 
 
@@ -61,7 +61,7 @@ def _bing_parse(string):
 
 
 def _bing_parse_one(result):
-    title = result.xpath('.//h2/a/text()')[0]
-    url = result.xpath('.//h2/a/@href')[0]
+    title = result.xpath(".//h2/a/text()")[0]
+    url = result.xpath(".//h2/a/@href")[0]
     description = result.xpath('.//*[@class="b_caption"]//p/text()')[0]
     return dict(title=title, url=url, description=description)
