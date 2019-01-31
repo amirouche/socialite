@@ -17,7 +17,7 @@ class PatternException(YiwenException):
     """Raised when the pattern can not be resolved by the query engine.
 
     .. warning:: It might be a bug. Try to re-order the pattern in the
-                 query to make it work before reporting bug.
+                 query to make it work before reporting a bug.
 
     """
 
@@ -48,16 +48,34 @@ def pattern_bind(pattern, binding):
 
 
 class Predicate:
+    """Declare predicate with `name`, `validator`, `packing` and `pos`.
+
+    - `name` is the predicate value as stored in the database.
+
+    - `validator` must be a callable that returns `True` when the passed `object` is considered
+      valid for the defined predicate `name`.
+
+    - `packing` must a be an object with a `pack` and `unpack` methods. It is called before
+      (respectivly after) `found.pack` (respectivly `found.unpack`) to transform the object into
+      something the `found` can pack (respectivly that found unpacked but client code expect another
+      type). For instance, for a given predicate, it possible to declare a JSON packing object that
+      will serialize and deserialize objects when required **without** having to do it in client
+      code.
+
+    - if `pos` is `True` then all triples with the defined predicate `name` is added to the `pos`
+      subspace aka. predicate-object-subject index.
+
+    See socialiter/search.py:SearchSpace for an example use of `Yiwen`.
+
+    """
     def __init__(self, name, validator, packing=None, pos=False):
         self.name = name
-        self.validator = validator
+        self.valid = validator
         self.packing = packing
         self.pos = pos
 
-    def valid(self, object):
-        return self.validator(object)
-
     def pack(self, object):
+        # XXX: pypy ftw
         if self.packing is not None:
             return self.packing.pack(object)
         else:
@@ -71,8 +89,12 @@ class Predicate:
 
 
 class Yiwen:
+    """This class is meant to subclassed.
 
-    var = var
+    You must pass a `prefix` bytes argument to the constructor. You must definne predicates with
+    `Yiwen.predicate` method.
+
+    """
 
     def __init__(self, prefix):
         self._prefix = prefix
@@ -85,6 +107,12 @@ class Yiwen:
 
     @found.transactional
     async def uuid(self, tr):
+        """Return an unique identifier that is guaranteed to be unique.
+
+        Raise an `AssertionError` otherwise. This method is provided for conveniance when you are
+        too lazy to use `Versionstamp`.
+
+        """
         uid = uuid4()
         start = found.pack((self._prefix, PREFIX_SPO, uid))
         end = b"\xFF"
@@ -93,7 +121,7 @@ class Yiwen:
             return uid
         key, _ = items[0]
         _, _, subject, _, _ = found.unpack(key)
-        assert subject != uid, "Unlikely Error!"
+        assert subject != uid, "uuid4 is not unique globally!"
         return uid
 
     @found.transactional
