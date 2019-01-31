@@ -16,6 +16,7 @@ import found.sparky
 import uvloop
 from aiohttp import ClientSession
 from aiohttp import web
+from aiohttp.web import normalize_path_middleware
 from argon2 import PasswordHasher
 
 from docopt import docopt
@@ -26,6 +27,7 @@ from itsdangerous import TimestampSigner
 from setproctitle import setproctitle  # pylint: disable=no-name-in-module
 
 from socialiter import settings
+from socialiter import query
 
 from socialiter.search import SearchSpace
 from socialiter.helpers import no_auth
@@ -130,6 +132,7 @@ def create_app(loop):
     # init app
     app = web.Application()  # pylint: disable=invalid-name
     app.on_startup.append(init_database)
+    app.middlewares.append(normalize_path_middleware())
     app.middlewares.append(middleware_check_auth)
     #
     app["settings"] = settings
@@ -141,6 +144,7 @@ def create_app(loop):
 
     # api route
     app.router.add_route("GET", "/api/status/", status)
+    app.router.add_route("GET", "/api/", query.query)
 
     return app
 

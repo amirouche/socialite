@@ -52,7 +52,7 @@ a:link,
 a:hover,
 a:visited,
 a:active {
-    color: rgba(41, 128, 185, 1.0);
+    color: hsla(200, 100%, 50%, 1);
     text-decoration: none;
 }
 
@@ -128,12 +128,45 @@ button:active {
     text-align: center;
 }
 
-#container.index > div {
+#container.index > div.searchbox {
     /* TODO: vertical align */
     display: flex;
     flex-direction: column;
 }
 
-#container.index > div > * {
+#container.index > div.searchbox > * {
     margin-bottom: 15px;
+}
+
+#container.index > div.hits > a.hit {
+    display: block;
+    text-decoration: none;
+    text-align: justify;
+    margin: 5px;
+    padding: 10px;
+}
+
+#container.index > div.hits > a.hit:hover {
+    border: 2px solid hsla(0, 0%, 100%, 0.3);
+    padding: 8px;
+    border-radius: 3px;
+}
+
+#container.index > div.hits > a.hit:active {
+    border: 1px solid hsla(0, 0%, 100%, 1);
+    padding: 8px;
+}
+
+#container.index > div.hits > a.hit > h2 {
+    margin: 0px;
+}
+
+#container.index > div.hits > a.hit > p.url {
+    margin: 0px;
+    color: hsla(100, 100%, 50%, 1);
+}
+
+#container.index > div.hits > a.hit > p.description {
+    margin: 0px;
+    color: white;
 }
